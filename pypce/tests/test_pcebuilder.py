@@ -35,6 +35,18 @@ class TestPCEBuilder(unittest.TestCase):
 		X = 2*self.rn.rand(10,self.dim)-1
 		Xhat = p.fit_transform(X)
 		assert Xhat.shape[1] == p.mindex.shape[0], "Mistmatch between number of columns of Xhat (Vandermonde) and terms in multiindex."
+	def test_fit_transform_w_normalized(self):
+		p = pypce.PCEBuilder(order=4,normalized=True)
+		X = 2*self.rn.rand(10,self.dim)-1
+		Xhat = p.fit_transform(X)
+		int_P0 = 2*np.mean(Xhat[:,0])
+		assert int_P0 == 1, "First term should integrate to 1"
+	def test_fit_transform_w_nonnormalized(self):
+		p = pypce.PCEBuilder(order=4,normalized=False)
+		X = 2*self.rn.rand(10,self.dim)-1
+		Xhat = p.fit_transform(X)
+		int_P0 = 2*np.mean(Xhat[:,0])
+		assert int_P0 == 2, "First term is not normalized and should integrate to 2"
 	def test_fit_transform_single_input(self):
 		p = pypce.PCEBuilder(order=4)
 		X = 2*self.rn.rand(1,self.dim)-1
@@ -81,6 +93,15 @@ class TestPCEBuilder(unittest.TestCase):
 		coef = np.array([3.,0.,0.,2.,0.,0.,0.,1.,0.,0.,])
 		s = p.computeSobol(c=coef)
 		assert mse(s,[1.0, 0.07692307692307691]) == 0, "sobol indices are not right."
+	# def test_sobol_sensitivity_customM_and_coef_constructor(self):
+	# 	p0 = pypce.PCEBuilder(order=3)
+	# 	p0.compile(dim=2)
+	# 	M = p0.mindex[[0,3,7]]
+	# 	coef = np.array([3.,2.,1.])
+	# 	p = pypce.PCEBuilder(customM=M,coef=coef)
+	# 	# p.compile(dim=2)
+	# 	s = p.computeSobol()
+	# 	assert mse(s,[1.0, 0.07692307692307691]) == 0, "sobol indices are not right."
 	def test_sobol_sensitivity_customM_and_coef_constructor(self):
 		p0 = pypce.PCEBuilder(order=3)
 		p0.compile(dim=2)
@@ -90,6 +111,16 @@ class TestPCEBuilder(unittest.TestCase):
 		# p.compile(dim=2)
 		s = p.computeSobol()
 		assert mse(s,[1.0, 0.07692307692307691]) == 0, "sobol indices are not right."
+	def test_sobol_sensitivity_w_normalization(self):
+		p0 = pypce.PCEBuilder(order=3)
+		p0.compile(dim=2)
+		M = p0.mindex[[0,3,7]]
+		coef = np.array([3.,2.,1.])
+		p = pypce.PCEBuilder(customM=M,coef=coef,normalized=True)
+		# p.compile(dim=2)
+		s = p.computeSobol()
+		print(s,p.mindex)
+		assert mse(s,[1.0, 0.2]) == 0, "sobol indices for normalized case is  not right."
 
 
 

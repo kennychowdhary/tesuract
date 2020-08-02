@@ -15,7 +15,7 @@ from sklearn import linear_model
 
 # Polynomials classes
 class PolyBase:
-	def __init__(self):
+	def __init__(self,K):
 		pass
 	def Eval1dBasis(self,x):
 		# virtual fun to compute basis values at x up to order K
@@ -34,7 +34,6 @@ class LegPoly(PolyBase):
 	'''
 	def __init__(self,domain=np.array([-1,1])):
 		self.domain = domain
-		super().__init__()
 	def Eval1dBasis(self,x,K):
 		# returns matrix where each column is Li(x)
 		self.K = K
@@ -91,10 +90,9 @@ class scale:
 			self.__scaled = 2*(self.X - self.a)/self.w - 1.0
 		# integration factor ([a,b] -> [-1,1])
 		# self.intf = np.prod(.5*(self.b - self.a))
-		# self.intf = np.prod(.5*(self.b - self.a)/(self.b - self.a)) # (b-a) canceled by prod prob weight
+		self.intf = np.prod(.5*(self.b - self.a)/(self.b - self.a)) # (b-a) canceled by prod prob weight
 	def __getitem__(self,key):
 		return self.__scaled[key]
-
 
 class DomainScaler:
 	def __init__(self,dim=None,a=None,b=None,domain_range=(-1,1)):
@@ -117,7 +115,7 @@ class DomainScaler:
 			self.w = self.b - self.a
 		# integration factor ([a,b] -> [-1,1])
 		# self.intf = np.prod(.5*(self.b - self.a))
-		# self.intf = np.prod((1./self.dr_w)*(self.b - self.a)/(self.b - self.a)) # (b-a) canceled by prod prob weight
+		self.intf = np.prod((1./self.dr_w)*(self.b - self.a)/(self.b - self.a)) # (b-a) canceled by prod prob weight
 	def fit(self,X):
 		self._compile() # get domain width
 		X = np.atleast_2d(X)
@@ -137,7 +135,7 @@ class DomainScaler:
 	def inverse_transform(self,Xhat):
 		Xhat = np.atleast_2d(Xhat)
 		assert self.dim == Xhat.shape[1], "Size of data matrix features does not match dimensions." 
-		X = (1./self.dr_w)*(Xhat - self.dr_a) 
+		X = (1./self.dr_w)*(Xhat - self.dr_a) # [-1,1] -> [0,1]
 		X = self.a + self.w*X
 		return X
 
@@ -170,7 +168,7 @@ class MinMaxTargetScaler:
 		return Y
 
 class PCEBuilder(BaseEstimator):
-	def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False):
+	def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre'):
 		# self.dim = dim # no need to initialize with dim
 		self.order = order
 		self.dim = None
@@ -184,7 +182,6 @@ class PCEBuilder(BaseEstimator):
 		self.normsq = np.array([])
 		self.compile_flag = False
 		self.mindex = None
-		self.normalized = normalized
 	def compile(self,dim=None):
 		self.dim = dim
 		#constructor for different multindices (None, object, and array)
@@ -228,11 +225,9 @@ class PCEBuilder(BaseEstimator):
 		for n in range(1,self.dim):
 			norms_new = NormSq[n][mindex[:,n]]
 			normsq = np.multiply(normsq,norms_new) # get norm squared of basis functions
-		self.normsq = normsq # norm squared * integration factor of 1/2 (since domain is [-1,1])
-		self.norm = np.sqrt(normsq)
+		self.normsq = .5*normsq # norm squared * integration factor of 1/2 (since domain is [-1,1])
 		return self.normsq
 	def fit_transform(self,X):
-		# only works for [-1,1] for far
 		# compute multindex
 		X = np.atleast_2d(X)
 		if self.mindex is None:
@@ -242,10 +237,10 @@ class PCEBuilder(BaseEstimator):
 		# basis is constructed based on multiindex
 		if self.a is not None or self.b is not None: 
 			assert len(self.a)==self.dim and len(self.b)==self.dim, "For user-specified bounds, they must be the same size as dimension."
-		# Xs = scale(X,a=self.a,b=self.b)  # scale to [-1,1]
-		# intf = Xs.intf
-		# self.intf = intf # save integration factor for ref
-		# X = np.atleast_2d(Xs[:]) # in case len(X) = 1
+		Xs = scale(X,a=self.a,b=self.b)  # scale to [-1,1]
+		intf = Xs.intf
+		self.intf = intf # save integration factor for ref
+		X = np.atleast_2d(Xs[:]) # in case len(X) = 1
 		Kmax = np.amax(self.mindex,0)
 		P = []
 		Px = []
@@ -280,11 +275,8 @@ class PCEBuilder(BaseEstimator):
 
 		# internally set Phi and norms for repeated use in eval
 		self.Phi = Phi
-		self.normsq = normsq # norm squared
-		if self.normalized:
-			return self.Phi/np.sqrt(normsq)
-		else:
-			return self.Phi
+		self.normsq = .5*normsq # norm squared
+		return self.Phi
 	def polyeval(self,X=None,c=None):
 		if c is not None: 
 			coef_ = c # use c in polyeval
@@ -308,13 +300,10 @@ class PCEBuilder(BaseEstimator):
 		if self.mindex is None:
 			self.compile(dim=self.dim)
 		# assert self.compile_flag == True, "Must compile to set mindex. Avoids having to recompute multiindex everytime we run SA."
-		if self.normalized:
-			normsq = np.ones(len(self.mindex))
+		if len(self.normsq) == 0: 
+			normsq = self.computeNormSq()
 		else:
-			if len(self.normsq) == 0: 
-				normsq = self.computeNormSq()
-			else:
-				normsq = self.normsq # from fit transform
+			normsq = self.normsq # from fit transform
 		# compute Sobol indices using coefficient vector
 		if c is None:
 			assert len(self.coef) != 0, "must specify coefficient array or feed it in the constructor."

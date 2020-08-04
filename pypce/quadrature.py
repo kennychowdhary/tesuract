@@ -6,20 +6,6 @@ from numpy.polynomial.hermite_e import hermegauss
 import itertools
 from scipy.special import comb
 
-class QuadScaler():
-	def __init__(self,target_range=(-1,1),a=None,b=None,scale=None):
-		self.target_range = (-1,1)
-		self.a = a
-		self.b = b
-		self.scale = scale
-	def fit(self,Q,w):
-		''' fit Quadrature and weights'''
-		pass
-	def _check(self):
-		if a is None and b is None:
-			self.target_range = (-1,1)
-
-
 class QuadBase:
 	def __init__(self,nquad):
 		self.nquad = nquad
@@ -46,7 +32,8 @@ class HermiteQuad(QuadBase):
 class ClenshawCurtis(QuadBase):
 	def __init__(self,nquad=2):
 		super().__init__(nquad)
-	def get1dQuad(self,nquad=None):
+	def _get1dQuad(self,nquad=None):
+		''' old '''
 		if nquad is not None: self.nquad = nquad
 		if self.nquad == 1:
 			return np.array([0.0]), np.array([2.0])
@@ -56,19 +43,18 @@ class ClenshawCurtis(QuadBase):
 			w = np.ones(len(x))
 			for i in range(n):
 				theta = i*np.pi/(n-1)
-				for j in range(1,int(.5*(n-1))+1):
+				for j in range(1,int(.5*(n-1)+1)):
 					if 2*j == n-1:
 						f = 1.0
 					else:
 						f = 2.0
 					# print(i,j,f)
-					w[i] -= f*np.cos(2.0*j*theta)/(4*j**2-1)
+					w[i] -= f*np.cos(2.0*j*theta)/(4.0*j**2-1)
 			w[0] /= n-1
 			w[1:-1] = 2*w[1:-1]/(n-1)
 			w[-1] *= 1.0/(n-1)
 			return x,w
-
-	def _get1dQuad(self):
+	def get1dQuad(self,nquad):
 		'''from chaospy'''
 		degree = self.nquad
 		n = self.nquad
@@ -366,20 +352,20 @@ def construct_lookup(
 		Q = QuadFactory.newQuad("Legendre")
 	if rules[0] == "clenshaw_curtis":
 		Q = QuadFactory.newQuad("ClenshawCurtis")
-	if rules[0] == 'hermite':
-		Q = QuadFactory.newQuad("Hermite")
+	# if rules[0] == 'hermite':
+		# Q = QuadFactory.newQuad("Hermite")
 	for max_order, dist, rule in zip(orders, dists, rules):
 		x_lookup.append([])
 		w_lookup.append([])
 		for order in range(max_order+1):
-			abscissas, weights = Q.get1dQuad(order+1)
-			# (abscissas,), weights = generate_quadrature(
-			# 	order,
-			# 	dist,
-			# 	accuracy=100,
-			# 	rule=rule,
-			# 	growth=growth
-			# )
+			# abscissas, weights = Q.get1dQuad(order+1)
+			(abscissas,), weights = generate_quadrature(
+				order,
+				dist,
+				accuracy=100,
+				rule=rule,
+				growth=None
+			)
 			# err1 = np.linalg.norm(abscissas - abscissas0)
 			# err2 = np.linalg.norm(weights - weights0)
 			# print(err1,err2)
@@ -425,10 +411,10 @@ from collections import defaultdict
 from itertools import product
 
 # dists = [chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1)]
-dists = [chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1)]
+dists = [chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1)]
 distribution = chaospy.J(*dists)
 # distribution = chaospy.J(chaospy.Normal(0, 1), chaospy.Normal(0, 1))    
-order = 4
+order = 5
 # rule = "gaussian"
 rule = "clenshaw_curtis"
 # rule = "gaussian"

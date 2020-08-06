@@ -373,11 +373,12 @@ class pcereg(PCEBuilder,RegressorMixin):
 		X,w = check_X_y(X,w) # make sure # quadrature points matces X
 		self._compile(X) # compute normalized or non-normalized Xhat
 		normsq = self.computeNormSq()
-		assert np.abs(np.sum(w) - 2**self._dim) <= 1e-15, "quadrature weights must be scaled to integrate over [-1,1]"
+		assert np.abs(np.sum(w) - 1) <= 1e-15, "quadrature weights must be scaled to integrate over [-1,1] with unit weight"
+		int_fact = 2**self._dim
 		if self.normalized == True:
-			self.coef = np.dot(w*y,self.Xhat)/np.sqrt(normsq)
+			self.coef = int_fact*np.dot(w*y,self.Xhat)/np.sqrt(normsq)
 		else:	
-			self.coef = np.dot(w*y,self.Xhat)/normsq
+			self.coef = int_fact*np.dot(w*y,self.Xhat)/normsq
 		return self
 	def _compile(self,X):
 		# build multindex and get Xhat

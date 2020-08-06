@@ -24,6 +24,15 @@ class TestPCERegression(unittest.TestCase):
 		p = pypce.pcereg(self.order)
 		p.fit(self.X,self.y)
 		assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-15, "Fit coefficient did not match truth."
+	def test_linear_fit_w_normalization(self):
+		p = pypce.pcereg(self.order,normalized=True)
+		p.fit(self.X,self.y)
+		normsq = p.computeNormSq()
+		assert mse(p.coef/np.sqrt(normsq),self.c_true) <= 5e-15, "Fit coefficient did not match truth."
+	def test_linear_fit_prediction_w_normalization(self):
+		p = pypce.pcereg(self.order,normalized=True)
+		p.fit(self.X,self.y)
+		assert mse(p.predict(self.X),self.y) <= 5e-15, "linear fit with normalization is broken."
 	def test_multindex(self):
 		p = pypce.pcereg(self.order)
 		p.fit(self.X,self.y)
@@ -49,8 +58,14 @@ class TestPCERegression(unittest.TestCase):
 		p = pypce.pcereg(self.order,fit_type='ElasticNetCV')
 		p.fit(self.X,self.y)
 		assert np.mean(np.abs(p.coef - self.c_true)) <= 2e-2, "ElasticNetCV error is not small enough."
-	def test_predict(self):
+	def test_predict_in_base_vs_child_class(self):
 		p = pypce.pcereg(self.order)
+		p.fit(self.X,self.y)
+		ypred1 = p.predict(self.X)
+		ypred2 = p.polyeval(self.X)
+		assert np.mean(np.abs(ypred1 - ypred2)) == 0, "Mismatch between eval and prediction."
+	def test_predict_in_base_vs_child_with_normalization(self):
+		p = pypce.pcereg(self.order,normalized=True)
 		p.fit(self.X,self.y)
 		ypred1 = p.predict(self.X)
 		ypred2 = p.polyeval(self.X)
@@ -79,5 +94,21 @@ class TestPCERegression(unittest.TestCase):
 		pceCV = GridSearchCV(pypce.pcereg(), param_grid, scoring='neg_root_mean_squared_error')
 		pceCV.fit(X,y)
 		assert mse(self.c_true,pceCV.best_estimator_.coef) <= 5e-15
+	def test_fit_with_2d_quadrature(self):
+		p = pypce.pcereg(order=3,normalized=False)
+		X = np.loadtxt(relpath + '/tests/data/X_2dquad_points.txt')
+		y = 3+2*.5*(3*X[:,0]**2-1)+X[:,1]*.5*(3*X[:,0]**2-1)
+		c0 = np.array([3.,0.,0.,2.,0.,0.,0.,1.,0.,0.,])
+		w = np.loadtxt(relpath + '/tests/data/w_2dquad_weights.txt')
+		p.fit(X,y,w)
+		assert mse(p.coef,c0) <= 1e-14, "quadratue with non normalized basis did not work. "
+	def test_fit_with_2d_quadrature_and_normalized_basis(self):
+		p = pypce.pcereg(order=3,normalized=True)
+		X = np.loadtxt(relpath + '/tests/data/X_2dquad_points.txt')
+		y = 3+2*.5*(3*X[:,0]**2-1)+X[:,1]*.5*(3*X[:,0]**2-1)
+		c0 = np.array([3.,0.,0.,2.,0.,0.,0.,1.,0.,0.,])
+		w = np.loadtxt(relpath + '/tests/data/w_2dquad_weights.txt')
+		p.fit(X,y,w)
+		assert mse(p.coef,c0) <= 1e-14, "quadratue with non normalized basis did not work. "
 
 

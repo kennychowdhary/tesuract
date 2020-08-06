@@ -95,8 +95,8 @@ class scale:
 	def __getitem__(self,key):
 		return self.__scaled[key]
 
-
 class DomainScaler:
+	# need to add checks and add functionality
 	def __init__(self,dim=None,a=None,b=None,domain_range=(-1,1)):
 		if a is None:
 			assert dim is not None, "Must defined dimension if a or b is None."
@@ -185,7 +185,7 @@ class PCEBuilder(BaseEstimator):
 		self.compile_flag = False
 		self.mindex = None
 		self.normalized = normalized
-	def compile(self,dim=None):
+	def compile(self,dim):
 		self.dim = dim
 		#constructor for different multindices (None, object, and array)
 		if self.customM is None:
@@ -208,17 +208,13 @@ class PCEBuilder(BaseEstimator):
 			assert len(self.coef) == self.mindex.shape[0], "coefficient array is not the same size as the multindex array."
 		self.compile_flag = True
 	def computeNormSq(self):
+		''' separate routine to compute norms, in order to bypass construct basis'''
 		mindex = self.mindex # use internal mindex array
 		# compute multindex
 		Kmax = np.amax(mindex,0)
 		NormSq = []
 		for d in range(self.dim):
 			# Compute Legendre objects and eval 1d basis
-			# Future work: replace this with Hermite
-			# 	and polybase/poly factory class in order to 
-			# 	generate mixed representations
-			# 	E.g.: L = PolyFactory(PolyObj) for each dim
-			#   will give a different poly object 
 			assert self.polytype == 'Legendre', "Only works with Legendre for now!"
 			L = PolyFactory.newPoly(self.polytype)
 			NormSq.append(L.normsq(Kmax[d])) # norms up to K order
@@ -234,6 +230,7 @@ class PCEBuilder(BaseEstimator):
 	def fit_transform(self,X):
 		# only works for [-1,1] for far
 		# compute multindex
+		assert np.amin(X) >= -1 and np.amax(X) <= 1, "range for X must be between -1 and 1 for now. scale inputs accordingly. "
 		X = np.atleast_2d(X)
 		if self.mindex is None:
 			self.compile(dim=X.shape[1]) # only compiles once
@@ -252,11 +249,6 @@ class PCEBuilder(BaseEstimator):
 		NormSq = []
 		for d in range(self.dim):
 			# Compute Legendre objects and eval 1d basis
-			# Future work: replace this with Hermite
-			# 	and polybase/poly factory class in order to 
-			# 	generate mixed representations
-			# 	E.g.: L = PolyFactory(PolyObj) for each dim
-			#   will give a different poly object 
 			assert self.polytype == 'Legendre', "Only works with Legendre for now!"
 			L = PolyFactory.newPoly(self.polytype)
 			P.append(L)
@@ -291,7 +283,7 @@ class PCEBuilder(BaseEstimator):
 			assert self.compile_flag == True, "Must compile to get multindex."
 			assert len(coef_) == self.mindex.shape[0], "c is not the right size."
 		elif c is None: 
-			assert self.coef is not None, "Must define coefficient in constructor or polyeval"
+			assert self.coef is not None, "Must define coefficient in constructor or polyeval or run the fit method"
 			coef_ = self.coef # use coefficient from constructor
 
 		if X is not None:
@@ -308,13 +300,10 @@ class PCEBuilder(BaseEstimator):
 		if self.mindex is None:
 			self.compile(dim=self.dim)
 		# assert self.compile_flag == True, "Must compile to set mindex. Avoids having to recompute multiindex everytime we run SA."
-		if self.normalized:
-			normsq = np.ones(len(self.mindex))
+		if len(self.normsq) == 0: 
+			normsq = self.computeNormSq() # if c and M specified in constructor
 		else:
-			if len(self.normsq) == 0: 
-				normsq = self.computeNormSq()
-			else:
-				normsq = self.normsq # from fit transform
+			normsq = self.normsq # from fit transform
 		# compute Sobol indices using coefficient vector
 		if c is None:
 			assert len(self.coef) != 0, "must specify coefficient array or feed it in the constructor."
@@ -324,7 +313,12 @@ class PCEBuilder(BaseEstimator):
 
 		assert len(coef_) == self.mindex.shape[0], "Coefficient vector must match the no of rows of the multiindex."
 
-		totvar_vec = normsq[1:]*coef_[1:]**2
+		if self.normalized:
+			totvar_vec = coef_[1:]**2
+			self.coefsq = coef_**2
+		else:
+			totvar_vec = normsq[1:]*coef_[1:]**2
+			self.coefsq = normsq*coef_**2
 		totvar = np.sum(totvar_vec)
 		# assert totvar > 0, "Coefficients are all zero!"
 		S = []
@@ -337,9 +331,28 @@ class PCEBuilder(BaseEstimator):
 			print("Returning equal weights!")
 			S = np.ones(self.dim)/self.dim # return equal weights
 		return S
+	def computeMoments(self,c=None):
+		if c is None:
+			assert self.coef is not None, "coef is not defined. Try running fit or input c"
+			coef_ = self.coef
+		else:
+			coef_ = c
+			assert len(c) == len(self.mindex), "coef is wrong size"
+		# normsq = self.computeNormSq()
+		normsq = self.normsq
+		prob_weight = .5**(self.dim)
+		if self.normalized is False:
+			self.mu = prob_weight * normsq[0]*coef_[0]
+			self.var = prob_weight * np.sum(normsq[1:]*coef_[1:]**2)
+		elif self.normalized is True:
+			self.mu = prob_weight * np.sqrt(normsq[0])*coef_[0]
+			self.var = prob_weight * np.sum(coef_[1:]**2)
+		return self.mu, self.var
+
+
 
 class pcereg(PCEBuilder,RegressorMixin):
-	def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2):
+	def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2,normalized=False,w=None):
 		self.order = order
 		self.mindex_type = mindex_type
 		self.customM = customM
@@ -352,22 +365,40 @@ class pcereg(PCEBuilder,RegressorMixin):
 		self.alphas = alphas # LassoCV default
 		self.l1_ratio = l1_ratio # ElasticNet default
 		self.lasso_tol = lasso_tol
-		super().__init__(order=order,customM=customM,mindex_type=mindex_type,coef=coef,a=a,b=b,polytype=polytype)
-	def compile(self,X):
-		# build multindex
+		self.w = w
+		self.normalized = normalized
+		super().__init__(order=self.order,customM=self.customM,mindex_type=self.mindex_type,coef=self.coef,a=self.a,b=self.b,polytype=self.polytype,normalized=self.normalized)
+	def _quad_fit(self,X,y,w):
+		# let us assume the weights are for [-1,1]
+		X,w = check_X_y(X,w) # make sure # quadrature points matces X
+		self._compile(X) # compute normalized or non-normalized Xhat
+		normsq = self.computeNormSq()
+		assert np.abs(np.sum(w) - 2**self._dim) <= 1e-15, "quadrature weights must be scaled to integrate over [-1,1]"
+		if self.normalized == True:
+			self.coef = np.dot(w*y,self.Xhat)/np.sqrt(normsq)
+		else:	
+			self.coef = np.dot(w*y,self.Xhat)/normsq
+		return self
+	def _compile(self,X):
+		# build multindex and get Xhat
 		self._dim = X.shape[1]
 		super().compile(dim=self._dim) # use parent compile to produce the multiindex
 		self._M = self.mindex
 		self.Xhat = self.fit_transform(X)
 		return self
-	def fit(self,X,y):
+	def fit(self,X,y,w=None):
 		X,y = check_X_y(X,y)
 		# get data attributes
 		self._n,self._dim = X.shape
-		self.compile(X) # build multindex and construct basis
+		self._compile(X) # build multindex and construct basis
 		# pypce.PCEBuilder(dim=self.dim,self.order)
+		# run quadrature fit if weights are specified:
 		if self.coef is not None:
 			assert len(self.coef) == self._M.shape[0],"length of coefficient vector is not the same shape as the multindex!"
+		elif w is not None:
+			self._quad_fit(X,y,w)
+		elif self.w is not None:
+			self._quad_fit(X,y,self.w)
 		else:
 			# LINEAR fit
 			Xhat,y = check_X_y(self.Xhat,y)
@@ -402,8 +433,6 @@ class pcereg(PCEBuilder,RegressorMixin):
 		# ypred = np.dot(Phi,self.coef_)
 		ypred = self.polyeval(X)
 		return ypred
-
-
 
 
 

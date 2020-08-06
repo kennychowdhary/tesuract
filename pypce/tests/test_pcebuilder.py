@@ -28,7 +28,7 @@ class TestPCEBuilder(unittest.TestCase):
 		M = M.astype('float')
 		p2 = pypce.PCEBuilder(customM=M)
 		with warnings.catch_warnings(record=True) as w:
-			p2.compile()
+			p2.compile(dim=self.dim)
 			assert p2.mindex.dtype == 'int', "Custom multiindex is not saved as an integer type."
 	def test_fit_transform(self):
 		p = pypce.PCEBuilder(order=4)

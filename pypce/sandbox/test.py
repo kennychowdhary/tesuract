@@ -7,7 +7,7 @@ from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 
 from sklearn.utils.estimator_checks import check_estimator
 from sklearn.utils.validation import check_X_y, check_array
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, cross_val_score, cross_validate
 
 from sklearn import linear_model
 import warnings
@@ -45,13 +45,14 @@ class MultiOutputCV(BaseEstimator, RegressorMixin):
         self.ntargets = Y.shape[1]
         self._setupCV()
         pceCV = GridSearchCV(self.regressor_model, self.regressor_param_grid, scoring=self.score_metric,
-            n_jobs=self.n_jobs_, cv=self.cv, verbose=1)
+            n_jobs=self.n_jobs_, cv=self.cv, 
+            verbose=1, return_train_score=True)
         self.best_estimators_ = []
         self.best_params_ = []
-        t = tqdm(range(self.ntargets), desc='target #', leave=True)
-        for i in t:
-            # for i in range(self.ntargets):
-            t.set_description("target #%i" % (i + 1))
+        # t = tqdm(range(self.ntargets), desc='target #', leave=True)
+        # for i in t:
+        for i in range(self.ntargets):
+            # t.set_description("target #%i" % (i + 1))
             pceCV.fit(X, Y[:, i])
             self.best_estimators_.append(pceCV.best_estimator_)
             self.best_params_.append(pceCV.best_params_)
@@ -126,7 +127,7 @@ def plot_feature_importance(S,feature_labels,extra_line_plot=None):
         S = np.atleast_2d(S)
 
     ntargets, ndim = S.shape
-    # normalize across columns
+    # normalize across columns (if not already)
     S = S / np.atleast_2d(S.sum(axis=1)).T
 
     # plot sobol indices as stacked bar charts
@@ -218,12 +219,17 @@ Yhat_scaled = pca.transform(Y_scaled)
 
 from sklearn.metrics import make_scorer
 from collections import defaultdict
-cv_scores = defaultdict(list)
+cv_test_scores = defaultdict(list)
+cv_train_scores = defaultdict(list)
 def custom_metric(y_true,y_pred,**kwargs):
     return np.linalg.norm(y_true - y_pred)/np.linalg.norm(y_true)
-# scorer = make_scorer(custom_metric,greater_is_better=False) 
-scorer = 'neg_root_mean_squared_error'
-for nn in tqdm(range(Yhat_scaled.shape[1])):
+scorer = make_scorer(custom_metric,greater_is_better=False) 
+# scorer = 'neg_root_mean_squared_error'
+nprocs = 1
+S_pce, S_rf, S_ab, S_gb = [], [], [], []
+S_mlp, S_knn = [], []
+for nn in range(Yhat_scaled.shape[1]):
+    print("\nWorking on mode %i ...\n" %(nn+1))
     y = Yhat_scaled[:,nn]
     ################################################################
     # PCE Fit
@@ -234,42 +240,200 @@ for nn in tqdm(range(Yhat_scaled.shape[1])):
                      ]
     model = pypce.pcereg()
 
-    pceMCV = MultiOutputCV(regressor_model=model, regressor_param_grid=pce_param_grid,n_jobs=8,score_metric=scorer)
+    pceMCV = MultiOutputCV(regressor_model=model, regressor_param_grid=pce_param_grid,n_jobs=nprocs,score_metric=scorer)
 
 
-    print("Fitting with PCEs...")
+    print("\n" + "*"*80 + "\nFitting with PCEs...\n" + "*"*80 + "\n")
     pceMCV.fit(X_scaled, y)
     S = pceMCV.feature_importance()
+    S_pce.append(S)
     # plt = plot_feature_importance(S,X_col_names,pca.cumulative_error)
     print("Best PCE fit score: ", pceMCV.pceCV.best_score_)
-    cv_scores['pce'].append(pceMCV.pceCV.best_score_)
+    cv_test_scores['pce'].append(pceMCV.pceCV.best_score_)
+    cv_score_argmin = pceMCV.pceCV.best_index_
+    cv_train_scores['pce'].append(pceMCV.pceCV.cv_results_['mean_train_score'][cv_score_argmin])
 
     ################################################################
     # random forest regressor test
     ################################################################ 
-    print("Fitting with Random Forests...")
+    print("\n" + "*"*80 + "\nFitting with Random Forests...\n" + "*"*80 + "\n")
     from sklearn.ensemble import RandomForestRegressor
 
     # get cv from above
     cv = pceMCV.pceCV.cv
 
     # Create the random grid
-    rf_param_grid = {'n_estimators': [200,800],
-                     'min_samples_leaf': [2,.01,.05],
+    # 'min_samples_leaf': [2,.01,.05]
+    # 'max_depth': [2,4,8,16] 
+    # 'max_samples': [.5,.99],
+    rf_param_grid = {'n_estimators': [200,500,1000],
                      'max_features': ['auto','sqrt']}
-    scorer_rf = scorer
     # scorer = 'r2'
-    rfreg = RandomForestRegressor(warm_start=True)
-    rfregCV = GridSearchCV(rfreg,rf_param_grid,scoring=scorer_rf,cv=cv,verbose=1,n_jobs=8)
-
-    X_original = X_scaled
-    X_transformed = pceMCV.pceCV.best_estimator_.fit_transform(X_scaled)
+    rfreg = RandomForestRegressor(warm_start=False)
+    rfregCV = GridSearchCV(rfreg,rf_param_grid,scoring=scorer,cv=cv,verbose=1,n_jobs=nprocs,return_train_score=True)
 
     rfregCV.fit(X_scaled,y)
     best_rf_estimator = rfregCV.best_estimator_
+
+    S_rf.append(best_rf_estimator.feature_importances_)
     print("Best RF fit score: ", rfregCV.best_score_)
-    cv_scores['rf'].append(rfregCV.best_score_)
+    cv_test_scores['rf'].append(rfregCV.best_score_)
+    cv_score_argmin = rfregCV.best_index_
+    cv_train_scores['rf'].append(rfregCV.cv_results_['mean_train_score'][cv_score_argmin])
     depths = [estimator.tree_.max_depth for estimator in best_rf_estimator.estimators_]
+
+    ################################################################
+    # adaboost
+    ################################################################ 
+    print("\n" + "*"*80 + "\nFitting with AdaBoost...\n" + "*"*80 + "\n")
+    from sklearn.ensemble import AdaBoostRegressor
+
+    # get cv from above
+    cv = pceMCV.pceCV.cv
+    scorer_ab = scorer
+    # scorer = 'r2'
+
+    ab_param_grid = {'n_estimators': [100,500],
+                     'loss': ['linear','square']}
+    ABreg = AdaBoostRegressor()
+    ABregCV = GridSearchCV(ABreg,ab_param_grid,scoring=scorer,cv=cv,verbose=1,n_jobs=nprocs,return_train_score=True)
+
+    ABregCV.fit(X_scaled,y)
+    best_ab_estimator = ABregCV.best_estimator_
+
+    S_ab.append(best_ab_estimator.feature_importances_)
+    print("Best AdaBoost fit score: ", ABregCV.best_score_)
+    cv_test_scores['ab'].append(ABregCV.best_score_)
+    cv_score_argmin = ABregCV.best_index_
+    cv_train_scores['ab'].append(ABregCV.cv_results_['mean_train_score'][cv_score_argmin])
+
+    ################################################################
+    # gradient boosting regressor
+    ################################################################ 
+    print("\n" + "*"*80 + "\nFitting with GradientBoost...\n" + "*"*80 + "\n")
+    from sklearn.ensemble import GradientBoostingRegressor
+
+    # get cv from above
+    cv = pceMCV.pceCV.cv
+
+    gb_param_grid = {'n_estimators': [500],
+                     'learning_rate': [.1,.5],
+                     'max_depth': [1,2],
+                     'loss': ['ls','huber']
+                     }
+    GBreg = GradientBoostingRegressor()
+    GBregCV = GridSearchCV(GBreg,gb_param_grid,scoring=scorer,cv=cv,verbose=1,n_jobs=nprocs,return_train_score=True)
+
+    # X_transformed = pceMCV.pceCV.best_estimator_.fit_transform(X_scaled)
+
+    GBregCV.fit(X_scaled,y)
+    best_gb_estimator = GBregCV.best_estimator_
+
+    S_gb.append(best_gb_estimator.feature_importances_)
+    print("Best GradBoost fit score: ", GBregCV.best_score_)
+    cv_test_scores['gb'].append(GBregCV.best_score_)
+    cv_score_argmin = GBregCV.best_index_
+    cv_train_scores['gb'].append(GBregCV.cv_results_['mean_train_score'][cv_score_argmin])
+
+    ################################################################
+    # MLP regressor
+    ################################################################ 
+    print("\n" + "*"*80 + "\nFitting with MLP...\n" + "*"*80 + "\n")
+    from sklearn.neural_network import MLPRegressor
+
+    # get cv from above
+    cv = pceMCV.pceCV.cv
+
+    mlp_param_grid = {'hidden_layer_sizes': [(1000)],
+                     'solver': ['lbfgs','adam'],
+                     'activation': ['relu'],
+                     'max_iter': [1000],
+                     'batch_size': ['auto'],
+                     'learning_rate': ['constant','adaptive'],
+                     'alpha': [.0001],
+                     'tol': [1e-5]
+                     }
+    MLPreg = MLPRegressor()
+    MLPregCV = GridSearchCV(MLPreg,mlp_param_grid,scoring=scorer,cv=cv,verbose=1,n_jobs=nprocs,return_train_score=True)
+
+    X_transformed = pceMCV.pceCV.best_estimator_.fit_transform(X_scaled)
+    # MLPregCV.fit(X_transformed,y) # exclude bias
+    MLPregCV.fit(X_scaled,y)
+    best_mlp_estimator = MLPregCV.best_estimator_
+
+    # S_mlp.append(best_mlp_estimator.feature_importances_)
+    print("Best MLP fit score: ", MLPregCV.best_score_)
+    cv_test_scores['mlp'].append(MLPregCV.best_score_)
+    cv_score_argmin = MLPregCV.best_index_
+    cv_train_scores['mlp'].append(MLPregCV.cv_results_['mean_train_score'][cv_score_argmin])
+
+    ################################################################
+    # Nearest neighbor regressor
+    ################################################################ 
+    print("\n" + "*"*80 + "\nFitting with MLP...\n" + "*"*80 + "\n")
+    from sklearn.neighbors import KNeighborsRegressor
+
+    # get cv from above
+    cv = pceMCV.pceCV.cv
+
+    knn_param_grid = {'n_neighbors': [2,5,8,10],
+                      'weights': ['uniform','distance'],
+                      'algorithm': ['auto','brute'],
+                      'leaf_size': [1,2,3,4],
+                      'p': [2]
+                     }
+    kNNreg = KNeighborsRegressor()
+    kNNregCV = GridSearchCV(kNNreg,knn_param_grid,scoring=scorer,cv=cv,verbose=1,n_jobs=nprocs,return_train_score=True)
+
+    # X_transformed = pceMCV.pceCV.best_estimator_.fit_transform(X_scaled)
+    # kNNregCV.fit(X_transformed,y) # exclude bias
+    kNNregCV.fit(X_scaled,y)
+    best_knn_estimator = kNNregCV.best_estimator_
+
+    # S_knn.append(best_knn_estimator.feature_importances_)
+    print("Best kNN fit score: ", kNNregCV.best_score_)
+    cv_test_scores['knn'].append(kNNregCV.best_score_)
+    cv_score_argmin = kNNregCV.best_index_
+    cv_train_scores['knn'].append(kNNregCV.cv_results_['mean_train_score'][cv_score_argmin])
+
+################################################################
+# plot validation scores
+################################################################
+import plotly.graph_objects as go
+
+def plot_multiple_scatter(x,Y,Y_col_labels=None,ms=20,alpha=1,scale=1.0):
+    # x can be a list of strings or a 1d array
+    # Y can be a dictionary or a ndarray
+    if isinstance(Y,np.ndarray):
+        assert len(x) ==  Y.shape[1]
+        assert len(Y_col_labels) == Y.shape[0]
+        n_scatter = Y.shape[0]
+    if isinstance(Y,dict):
+        if Y_col_labels is None:
+            Y_col_labels = list(Y.keys())
+        n_scatter = len(Y_col_labels)
+        Y = np.array([Y[k] for k in Y.keys()])
+    fig = go.Figure()
+    for i,y in enumerate(Y):
+        fig.add_trace(go.Scatter(x=x, y=scale*y,
+                                mode='lines+markers',
+                                marker=dict(size=ms,opacity=alpha),
+                                line=dict(width=2,dash='dash'),
+                                name=Y_col_labels[i]))
+    fig.update_layout(font=dict(size=18))
+    return fig
+
+
+
+x_labels = ["PCA mode %i" %(n+1) for n in range(len(cv_test_scores['pce']))]
+col_labels_custom = ['PCE', 'RandForests', 'AdaBoost', 'GradBoost', 'MLP', 'kNN']
+fig1 = plot_multiple_scatter(x_labels,cv_test_scores,Y_col_labels=col_labels_custom,alpha=.7,scale=-1.0)  
+fig1.write_image("cv_test_scores.png",width=2000,height=1000)
+
+cv_diff = np.array([np.array(cv_test_scores[k])-np.array(cv_train_scores[k]) for k in cv_train_scores.keys()])
+col_labels = [k for k in cv_train_scores.keys()]
+fig2 = plot_multiple_scatter(x_labels,cv_diff,Y_col_labels=col_labels_custom,alpha=.7,scale=-1.0)  
+fig2.write_image("cv_diff_scores.png",width=2000,height=1000)
 
 ################################################################
 # use plotly to plot interactive plots

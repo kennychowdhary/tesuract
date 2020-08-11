@@ -12,6 +12,7 @@ from sklearn.model_selection import KFold
 from sklearn import linear_model
 import warnings
 from sklearn.decomposition import PCA
+from sklearn.preprocessing import FunctionTransformer
 
 import pandas as pd
 import ipdb
@@ -173,7 +174,7 @@ pce_param_grid = [
 ]
 model = pypce.pcereg()
 
-pceMCV = MultiOutputCV(regressor_model=model, regressor_param_grid=pce_param_grid)
+pceMCV = MultiOutputCV(regressor_model=model, regressor_param_grid=pce_param_grid,n_jobs=8)
 
 
 # # test fit with one target
@@ -184,38 +185,10 @@ pceMCV = MultiOutputCV(regressor_model=model, regressor_param_grid=pce_param_gri
 
 # ipdb.set_trace()
 
-##########################
-# Test Estimator
-#########################
-class TestEstimator(BaseEstimator):
-    def __init__(self, a=0.0, coef=None):
-        self.a = a
-        self.coef = coef
-
-    @classmethod
-    def customcoef(cls, coef=None):
-        return cls(coef=coef)
-
-    @classmethod
-    def addscale(cls, a=0.0, scale=1.0):
-        instance = cls(a=a)
-        instance.scale = scale
-        return instance
-
-    def fit(self, X, y):
-        X, y = check_X_y(X, y)
-        if self.coef is not None:
-            res = np.linalg.lstsq(X.astype(np.float64), y.astype(np.float64), rcond=None)
-            self.coef = res[0]
-        else:
-            pass
-        return self
-
-    def predict(self, X):
-        X = check_array(X)
-        return np.dot(X, self.coef_) + self.a
-
-
+################################################################
+# PCA Target Transform
+################################################################
+print("Performing PCA transform...")
 # test target transform
 # Load the data
 datadir = '/Users/kchowdh/Research/sparc_tests/'
@@ -243,258 +216,212 @@ pca = PCATargetTransform(n_components='auto', cutoff=1e-3)
 pca.fit(Y_scaled)
 Yhat_scaled = pca.transform(Y_scaled)
 
-# fit all
-pceMCV.fit(X_scaled, Yhat_scaled[:,:1])
-S = pceMCV.feature_importance()
-plt = plot_feature_importance(S,X_col_names,pca.cumulative_error)
-print(pceMCV.pceCV.best_score_)
-
-################################################################
-# random forest regressor test
-################################################################ 
-from sklearn.ensemble import RandomForestRegressor
-
-# get cv from above
-cv = pceMCV.pceCV.cv
-
-# Create the random grid
-rf_param_grid = {'n_estimators': [100,200,400,800],
-                 'max_features': ['auto','sqrt','log2']}
+from sklearn.metrics import make_scorer
+from collections import defaultdict
+cv_scores = defaultdict(list)
+def custom_metric(y_true,y_pred,**kwargs):
+    return np.linalg.norm(y_true - y_pred)/np.linalg.norm(y_true)
+# scorer = make_scorer(custom_metric,greater_is_better=False) 
 scorer = 'neg_root_mean_squared_error'
-# scorer = 'r2'
-rfreg = RandomForestRegressor()
-rfregCV = GridSearchCV(rfreg,rf_param_grid,scoring=scorer,cv=cv,verbose=1,n_jobs=4)
+for nn in tqdm(range(Yhat_scaled.shape[1])):
+    y = Yhat_scaled[:,nn]
+    ################################################################
+    # PCE Fit
+    ################################################################
+    pce_param_grid = [{'order': [1, 2, 3],
+                       'mindex_type': ['total_order', 'hyperbolic', ],
+                       'fit_type': ['LassoCV', 'linear', 'ElasticNetCV']}
+                     ]
+    model = pypce.pcereg()
 
-X_original = X_scaled
-X_transformed = pceMCV.pceCV.best_estimator_.fit_transform(X_scaled)
+    pceMCV = MultiOutputCV(regressor_model=model, regressor_param_grid=pce_param_grid,n_jobs=8,score_metric=scorer)
 
-rfregCV.fit(X_scaled,np.squeeze(Yhat_scaled[:,0]))
-best_rf_estimator = rfregCV.best_estimator_
-print(rfregCV.best_score_)
-depths = [estimator.tree_.max_depth for estimator in best_rf_estimator.estimators_]
+
+    print("Fitting with PCEs...")
+    pceMCV.fit(X_scaled, y)
+    S = pceMCV.feature_importance()
+    # plt = plot_feature_importance(S,X_col_names,pca.cumulative_error)
+    print("Best PCE fit score: ", pceMCV.pceCV.best_score_)
+    cv_scores['pce'].append(pceMCV.pceCV.best_score_)
+
+    ################################################################
+    # random forest regressor test
+    ################################################################ 
+    print("Fitting with Random Forests...")
+    from sklearn.ensemble import RandomForestRegressor
+
+    # get cv from above
+    cv = pceMCV.pceCV.cv
+
+    # Create the random grid
+    rf_param_grid = {'n_estimators': [200,800],
+                     'min_samples_leaf': [2,.01,.05],
+                     'max_features': ['auto','sqrt']}
+    scorer_rf = scorer
+    # scorer = 'r2'
+    rfreg = RandomForestRegressor(warm_start=True)
+    rfregCV = GridSearchCV(rfreg,rf_param_grid,scoring=scorer_rf,cv=cv,verbose=1,n_jobs=8)
+
+    X_original = X_scaled
+    X_transformed = pceMCV.pceCV.best_estimator_.fit_transform(X_scaled)
+
+    rfregCV.fit(X_scaled,y)
+    best_rf_estimator = rfregCV.best_estimator_
+    print("Best RF fit score: ", rfregCV.best_score_)
+    cv_scores['rf'].append(rfregCV.best_score_)
+    depths = [estimator.tree_.max_depth for estimator in best_rf_estimator.estimators_]
 
 ################################################################
 # use plotly to plot interactive plots
 ################################################################
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import pandas as pd
-import numpy as np
+# print("Graphing...")
+# # Need plotly, psutil, orca*, and pandas
+# # * orca is a pain to install (easiest is to go to github and follow dmg installation guide)
+# import plotly.express as px
+# import plotly.graph_objects as go
+# from plotly.subplots import make_subplots
+# import pandas as pd
+# import numpy as np
 
 
-class HiDFuncVisualizer():
-    def __init__(self, X, Y, feature_labels=None, target_labels=None, thin=None):
-        self.X = X
-        self.Y = Y
-        self.feature_labels = feature_labels
-        self.target_labels = target_labels
-        self.thin = thin
+# class HiDFuncVisualizer():
+#     def __init__(self, X, Y, feature_labels=None, target_labels=None, thin=None):
+#         self.X = X
+#         self.Y = Y
+#         self.feature_labels = feature_labels
+#         self.target_labels = target_labels
+#         self.thin = thin
 
-    def _precompile(self):
-        # get dimensiona and shapes
-        self.nx, self.d = X.shape
-        if self.Y.ndim == 1:
-            self.Y = np.atleast_2d(self.Y).T
-        self.ny, self.ntargets = self.Y.shape
-        assert self.nx == self.ny, "X and Y have to have the same number of samples."
-        # check column names
-        if self.feature_labels is None:
-            self.feature_labels = ['x_s' + str(i + 1) for i in range(self.d)]
-        else:
-            assert len(self.feature_labels) == self.d, "feature labels need to be size " + self.d
-        if self.target_labels is None:
-            self.target_labels = ['y_' + str(i + 1) for i in range(self.ntargets)]
-        else:
-            assert len(self.target_labels) == self.ntargets, "target labels are not the right size. "
-        # size of plots
-        self.nrows = int(round(np.sqrt(self.d)))
-        self.ncols = round(self.d / self.nrows)
+#     def _precompile(self):
+#         # get dimensiona and shapes
+#         self.nx, self.d = X.shape
+#         if self.Y.ndim == 1:
+#             self.Y = np.atleast_2d(self.Y).T
+#         self.ny, self.ntargets = self.Y.shape
+#         assert self.nx == self.ny, "X and Y have to have the same number of samples."
+#         # check column names
+#         if self.feature_labels is None:
+#             self.feature_labels = ['x_s' + str(i + 1) for i in range(self.d)]
+#         else:
+#             assert len(self.feature_labels) == self.d, "feature labels need to be size " + self.d
+#         if self.target_labels is None:
+#             self.target_labels = ['y_' + str(i + 1) for i in range(self.ntargets)]
+#         else:
+#             assert len(self.target_labels) == self.ntargets, "target labels are not the right size. "
+#         # size of plots
+#         self.nrows = int(round(np.sqrt(self.d)))
+#         self.ncols = round(self.d / self.nrows)
 
-    def compile(self):
-        # convert data to pandas dataframe
-        self._precompile()
-        if self.thin == None:
-            self.X_df = pd.DataFrame(data=self.X, columns=self.feature_labels)
-            self.Y_df = pd.DataFrame(data=self.Y, columns=self.target_labels)
-        elif isinstance(self.thin, int):
-            self.X_df = pd.DataFrame(data=self.X[::self.thin, :], columns=self.feature_labels)
-            self.Y_df = pd.DataFrame(data=self.Y[::self.thin, :], columns=self.target_labels)
+#     def compile(self):
+#         # convert data to pandas dataframe
+#         self._precompile()
+#         if self.thin == None:
+#             self.X_df = pd.DataFrame(data=self.X, columns=self.feature_labels)
+#             self.Y_df = pd.DataFrame(data=self.Y, columns=self.target_labels)
+#         elif isinstance(self.thin, int):
+#             self.X_df = pd.DataFrame(data=self.X[::self.thin, :], columns=self.feature_labels)
+#             self.Y_df = pd.DataFrame(data=self.Y[::self.thin, :], columns=self.target_labels)
 
-    def render(self, target=1, nrows=None, ncols=None):
-        # plot univariate, select which target you want to plot
-        if nrows is None and ncols is None:
-            nrows = self.nrows
-            ncols = self.ncols
-        assert nrows * ncols >= self.ntargets, "rows and cols must be bigger"
-        fig = make_subplots(rows=nrows, cols=ncols)
-        ycol = self.target_labels[target - 1]
-        for r in range(nrows):
-            for c in range(ncols):
-                if r * ncols + c >= self.d:
-                    break
-                else:
-                    xcol = self.feature_labels[r * ncols + c]
-                    fig.add_trace(
-                        go.Scatter(x=self.X_df[xcol],
-                                   y=self.Y_df[ycol],
-                                   mode='markers',
-                                   name=xcol + ' vs. ' + ycol),
-                        row=r + 1, col=c + 1
-                    )
-                fig.update_xaxes(title_text=xcol, row=r + 1, col=c + 1)
-        fig.update_layout(title_text=ycol)
-        return fig
+#     def render(self, target_number=1, nrows=None, ncols=None, title=None):
+#         # plot univariate, select which target_number you want to plot
+#         if nrows is None and ncols is None:
+#             nrows = self.nrows
+#             ncols = self.ncols
+#         assert nrows * ncols >= self.ntargets, "rows and cols must be bigger"
+#         fig = make_subplots(rows=nrows, cols=ncols)
+#         ycol = self.target_labels[target_number - 1]
+#         for r in range(nrows):
+#             for c in range(ncols):
+#                 if r * ncols + c >= self.d:
+#                     break
+#                 else:
+#                     xcol = self.feature_labels[r * ncols + c]
+#                     fig.add_trace(
+#                         go.Scatter(x=self.X_df[xcol],
+#                                    y=self.Y_df[ycol],
+#                                    mode='markers',
+#                                    name=xcol + ' vs. ' + ycol),
+#                         row=r + 1, col=c + 1
+#                     )
+#                 fig.update_xaxes(title_text=xcol, row=r + 1, col=c + 1)
+#         fig.update_layout(title_text=ycol)
+#         return fig
 
-    def render_corner(self, target=1, n_features=None):
-        # n_features = min(n_features,6)
-        if n_features is None:
-            self.mtx_nrows = len(self.feature_labels)
-            self.mtx_ncols = self.mtx_nrows
-        else:
-            self.mtx_nrows = len(self.feature_labels[:n_features])
-            self.mtx_ncols = self.mtx_nrows
-        if self.mtx_nrows > 6: warnings.warn("n_features > 6 does not render when using fig.show()")
-        # subplots
-        nrows, ncols = self.mtx_nrows, self.mtx_ncols
-        # spec = {'is_3d':True}
-        spec = {'type': 'Surface'}
-        specs = [[spec for j in range(ncols)] for i in range(nrows)]
-        # make diagonal univariate
-        for i in range(nrows):
-            specs[i][i] = {'type': 'Scatter'}
-        # fig = make_subplots(rows=nrows, cols=ncols,specs=specs)
+#     def render_corner(self, target_number=1, n_features=None):
+#         # n_features = min(n_features,6)
+#         if n_features is None:
+#             self.mtx_nrows = len(self.feature_labels)
+#             self.mtx_ncols = self.mtx_nrows
+#         else:
+#             self.mtx_nrows = len(self.feature_labels[:n_features])
+#             self.mtx_ncols = self.mtx_nrows
+#         if self.mtx_nrows > 6: warnings.warn("n_features > 6 does not render when using fig.show()")
+#         # subplots
+#         nrows, ncols = self.mtx_nrows, self.mtx_ncols
+#         # spec = {'is_3d':True}
+#         spec = {'type': 'Surface'}
+#         specs = [[spec for j in range(ncols)] for i in range(nrows)]
+#         # make diagonal univariate
+#         for i in range(nrows):
+#             specs[i][i] = {'type': 'Scatter'}
+#         # fig = make_subplots(rows=nrows, cols=ncols,specs=specs)
 
-        fig = make_subplots(rows=nrows, cols=ncols, specs=specs, vertical_spacing=0.01, horizontal_spacing=.01,
-                            row_titles=self.feature_labels[:n], column_titles=self.feature_labels[:n_features])
+#         fig = make_subplots(rows=nrows, cols=ncols, specs=specs, vertical_spacing=0.01, horizontal_spacing=.01,
+#                             row_titles=self.feature_labels[:n], column_titles=self.feature_labels[:n_features])
 
-        zcol = str(target)
-        for r in range(1, nrows):
-            count = 0
-            for c in range(min(r, ncols)):
-                # ix, iy = pairs[count]
-                xcol1 = self.feature_labels[:n_features][r]
-                xcol2 = self.feature_labels[:n_features][c]
-                fig.add_trace(
-                    go.Scatter3d(x=self.X_df[xcol1],
-                                 y=self.X_df[xcol2],
-                                 z=self.Y_df[zcol],
-                                 name=xcol1 + ', ' + xcol2 + ' vs. ' + zcol,
-                                 mode='markers',
-                                 marker=dict(size=4),
-                                 opacity=.65),
-                    row=r + 1, col=c + 1
-                )
-        for r in range(nrows):
-            c = r
-            xcol1 = self.feature_labels[:n_features][r]
-            xcol2 = self.feature_labels[:n_features][c]
-            fig.add_trace(
-                go.Scatter(x=self.X_df[xcol1],
-                           y=self.Y_df[zcol],
-                           name=xcol1 + ' vs. ' + zcol,
-                           mode='markers',
-                           opacity=.65),
-                row=r + 1, col=c + 1
-            )
-        return fig
+#         zcol = self.target_labels[target_number - 1]
+#         for r in range(1, nrows):
+#             count = 0
+#             for c in range(min(r, ncols)):
+#                 # ix, iy = pairs[count]
+#                 xcol1 = self.feature_labels[:n_features][r]
+#                 xcol2 = self.feature_labels[:n_features][c]
+#                 fig.add_trace(
+#                     go.Scatter3d(x=self.X_df[xcol1],
+#                                  y=self.X_df[xcol2],
+#                                  z=self.Y_df[zcol],
+#                                  name=xcol1 + ', ' + xcol2 + ' vs. ' + zcol,
+#                                  mode='markers',
+#                                  marker=dict(size=4),
+#                                  opacity=.65),
+#                     row=r + 1, col=c + 1
+#                 )
+#         for r in range(nrows):
+#             c = r
+#             xcol1 = self.feature_labels[:n_features][r]
+#             xcol2 = self.feature_labels[:n_features][c]
+#             fig.add_trace(
+#                 go.Scatter(x=self.X_df[xcol1],
+#                            y=self.Y_df[zcol],
+#                            name=xcol1 + ' vs. ' + zcol,
+#                            mode='markers',
+#                            opacity=.65),
+#                 row=r + 1, col=c + 1
+#             )
+#         fig.update_layout(title_text=zcol)
+#         return fig
 
 
-# visualization
-# create a pandas data frame
-X_col_names = ['dens_sc', 'vel_sc', 'temp_sc',
-               'sigk1', 'sigk2', 'sigw1', 'sigw2',
-               'beta_s', 'kap', 'a1', 'beta1r', 'beta2r']
-Yhat_col_names = [str(i) for i in range(1, 1 + Yhat_scaled.shape[1])]
-# XY_col_names = np.concatenate((X_col_names, Yhat_col_names))
+# # visualization
+# # create a pandas data frame
+# X_col_names = ['dens_sc', 'vel_sc', 'temp_sc',
+#                'sigk1', 'sigk2', 'sigw1', 'sigw2',
+#                'beta_s', 'kap', 'a1', 'beta1r', 'beta2r']
+# Yhat_col_names = ['PCA mode #' + str(i) + ' for heat flux' for i in range(1, 1 + Yhat_scaled.shape[1])]
 
-# XY = np.hstack([X_scaled, Yhat_scaled])
-X_scaled_df = pd.DataFrame(data=X_scaled, columns=X_col_names)
-Yhat_scaled_df = pd.DataFrame(data=Yhat_scaled, columns=Yhat_col_names)
-# XY_scaled_df = pd.DataFrame(data=XY, columns=XY_col_names)
+# # convert data to pandas data frame
+# X_scaled_df = pd.DataFrame(data=X_scaled, columns=X_col_names)
+# Yhat_scaled_df = pd.DataFrame(data=Yhat_scaled, columns=Yhat_col_names)
 
-# use plotly to plot interactive plots
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+# # use plotly to plot interactive plots
+# import plotly.express as px
+# import plotly.graph_objects as go
+# from plotly.subplots import make_subplots
 
-# fig = px.scatter_3d(XY_scaled_df,x='dens_sc',y='vel_sc',z='1')
-# fig = px.scatter(XY_scaled_df,x='dens_sc',y='1')
-
-F = HiDFuncVisualizer(X_scaled, Yhat_scaled, feature_labels=X_col_names, target_labels=Yhat_col_names, thin=3)
-F.compile()
-# fig1 = F.render(target=1)
+# F = HiDFuncVisualizer(X_scaled, Yhat_scaled, feature_labels=X_col_names, target_labels=Yhat_col_names, thin=3)
+# F.compile()
+# print('saving figures...')
+# fig1 = F.render(target_number=1)
 # fig1.write_image("univariate.png",width=1200,height=1000)
-# fig2 = F.render_corner(target=1)
+# fig2 = F.render_corner(target_number=1)
 # fig2.write_image("corner.png",width=1800,height=1600)
-
-
-# # subplots
-# nrows, ncols = 4, 4
-# # spec = {'is_3d':True}
-# spec = {'type': 'Surface'}
-# specs = [[spec for j in range(ncols)] for i in range(nrows)]
-# # make diagonal univariate
-# for i in range(nrows):
-#     specs[i][i] = {'type': 'Scatter'}
-# # fig = make_subplots(rows=nrows, cols=ncols,specs=specs)
-
-# fig = make_subplots(rows=nrows, cols=ncols, specs=specs, vertical_spacing=0.01, horizontal_spacing=.01,row_titles=X_col_names[:nrows],column_titles=X_col_names[:ncols])
-# # subplot_titles=("Plot 1", "Plot 2", "Plot 3", "Plot 4"))
-# zcol = '1'
-# for r in range(1,nrows):
-#     count = 0
-#     for c in range(min(r,ncols)):
-#         # ix, iy = pairs[count]
-#         xcol1 = X_col_names[r]
-#         xcol2 = X_col_names[c]
-#         fig.add_trace(
-#             go.Scatter3d(x=X_scaled_df[xcol1],
-#                          y=X_scaled_df[xcol2],
-#                          z=Yhat_scaled_df[zcol],
-#                          name=xcol1 + ', ' + xcol2 + ' vs. ' + zcol,
-#                          mode='markers',
-#                          marker=dict(size=4),
-#                          opacity=.65), \
-#             row=r + 1, col=c + 1
-#         )
-# for r in range(nrows):
-#     c = r
-#     xcol1 = X_col_names[r]
-#     xcol2 = X_col_names[c]
-#     fig.add_trace(
-#         go.Scatter(  x=X_scaled_df[xcol1],
-#                      y=Yhat_scaled_df[zcol],
-#                      name=xcol1 + ' vs. ' + zcol,
-#                      mode='markers',
-#                      opacity=.65), \
-#         row=r + 1, col=c + 1
-#     ) 
-# fig.update_layout(scene=dict(xaxis_title=xcol1,yaxis_title=xcol2))
-# fig.update_layout(scene2=dict(xaxis_title=xcol1,yaxis_title=xcol2))
-
-# fig.update_xaxes(title_text='test',row=r+1, col=c+1)
-# fig.update_yaxes(title_text=xcol2, row=r+1, col=c+1)
-# count += 1
-
-# scenes = ['scene' + str(si) for si in range(nrows * ncols)]
-# scenes[0] = 'scene'
-# for r in range(1,nrows):
-#     count = 0
-#     for c in range(min(r,ncols)):
-#         index = r*ncols + c + 1
-#         s = scenes[index]
-#         print(index)
-#         xlabel = X_col_names[r]
-#         ylabel = X_col_names[c]
-#         fig.update_layout({s: dict(xaxis_title=xlabel, yaxis_title=ylabel)})
-# for iis, s in enumerate(scenes):
-#     fig.update_layout({s: dict(xaxis_title=str(iis), yaxis_title=str(iis + 5))})
-# numbers = np.arange(100)
-# for r in range(nrows):
-# 	for c in range(ncols):
-# 		fig.update_scenes(dict(xaxis=dict(title=str(numbers[r] + c))),row=r,col=c)
-# fig.update_layout(scene=dict(xaxis_title=xcol1))
-
-# layout=go.Layout(title="First Plot", xaxis={'title':'x1'}, yaxis={'title':'x2'})
-# fig = go.Figure(data=go.Scatter(x=XY_scaled_df[xcol],y=XY_scaled_df[ycol],mode='markers'))

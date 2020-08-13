@@ -1,6 +1,7 @@
 import pypce
 import unittest
 import numpy as np
+import warnings
 from sklearn.metrics import mean_squared_error
 
 relpath = pypce.__file__[:-11] # ignore the __init__.py specification
@@ -95,20 +96,28 @@ class TestPCERegression(unittest.TestCase):
 		pceCV.fit(X,y)
 		assert mse(self.c_true,pceCV.best_estimator_.coef) <= 5e-15
 	def test_fit_with_2d_quadrature(self):
-		p = pypce.pcereg(order=3,normalized=False)
 		X = np.loadtxt(relpath + '/tests/data/X_2dquad_points.txt')
 		y = 3+2*.5*(3*X[:,0]**2-1)+X[:,1]*.5*(3*X[:,0]**2-1)
 		c0 = np.array([3.,0.,0.,2.,0.,0.,0.,1.,0.,0.,])
 		w = np.loadtxt(relpath + '/tests/data/w_2dquad_weights.txt')
-		p.fit(X,y,w)
+		p = pypce.pcereg(order=3,normalized=False,fit_type='quadrature',fit_params={'w':w})
+		p.fit(X,y)
 		assert mse(p.coef,c0) <= 1e-14, "quadratue with non normalized basis did not work. "
 	def test_fit_with_2d_quadrature_and_normalized_basis(self):
-		p = pypce.pcereg(order=3,normalized=True)
 		X = np.loadtxt(relpath + '/tests/data/X_2dquad_points.txt')
 		y = 3+2*.5*(3*X[:,0]**2-1)+X[:,1]*.5*(3*X[:,0]**2-1)
 		c0 = np.array([3.,0.,0.,2.,0.,0.,0.,1.,0.,0.,])
 		w = np.loadtxt(relpath + '/tests/data/w_2dquad_weights.txt')
-		p.fit(X,y,w)
+		p = pypce.pcereg(order=3,normalized=False,fit_type='quadrature',fit_params={'w':w})
+		p.fit(X,y)
 		assert mse(p.coef,c0) <= 1e-14, "quadratue with non normalized basis did not work. "
+	def test_quadrature_assert_error_wo_no_weights(self):
+		X = np.loadtxt(relpath + '/tests/data/X_2dquad_points.txt')
+		y = 3+2*.5*(3*X[:,0]**2-1)+X[:,1]*.5*(3*X[:,0]**2-1)
+		c0 = np.array([3.,0.,0.,2.,0.,0.,0.,1.,0.,0.,])
+		w = np.loadtxt(relpath + '/tests/data/w_2dquad_weights.txt')
+		p = pypce.pcereg(order=3,normalized=False,fit_type='quadrature')
+		with self.assertRaises(AssertionError):
+			p.fit(X,y)
 
 

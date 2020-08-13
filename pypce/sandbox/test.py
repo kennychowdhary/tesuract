@@ -225,10 +225,13 @@ def custom_metric(y_true,y_pred,**kwargs):
     return np.linalg.norm(y_true - y_pred)/np.linalg.norm(y_true)
 scorer = make_scorer(custom_metric,greater_is_better=False) 
 # scorer = 'neg_root_mean_squared_error'
-nprocs = 1
+nprocs = 8
 S_pce, S_rf, S_ab, S_gb = [], [], [], []
 S_mlp, S_knn = [], []
-for nn in range(Yhat_scaled.shape[1]):
+
+import time as T
+start = T.time()
+for nn in range(Yhat_scaled.shape[1]-7):
     print("\nWorking on mode %i ...\n" %(nn+1))
     y = Yhat_scaled[:,nn]
     ################################################################
@@ -266,8 +269,10 @@ for nn in range(Yhat_scaled.shape[1]):
     # 'min_samples_leaf': [2,.01,.05]
     # 'max_depth': [2,4,8,16] 
     # 'max_samples': [.5,.99],
-    rf_param_grid = {'n_estimators': [200,500,1000],
-                     'max_features': ['auto','sqrt']}
+    rf_param_grid = {'n_estimators': [10000,20000],
+                     'max_features': ['log2'],
+                     'max_depth': [4,5,6]
+                     }
     # scorer = 'r2'
     rfreg = RandomForestRegressor(warm_start=False)
     rfregCV = GridSearchCV(rfreg,rf_param_grid,scoring=scorer,cv=cv,verbose=1,n_jobs=nprocs,return_train_score=True)
@@ -395,7 +400,7 @@ for nn in range(Yhat_scaled.shape[1]):
     cv_test_scores['knn'].append(kNNregCV.best_score_)
     cv_score_argmin = kNNregCV.best_index_
     cv_train_scores['knn'].append(kNNregCV.cv_results_['mean_train_score'][cv_score_argmin])
-
+print("Total time is %.5f" %(T.time() - start))
 ################################################################
 # plot validation scores
 ################################################################
@@ -422,7 +427,6 @@ def plot_multiple_scatter(x,Y,Y_col_labels=None,ms=20,alpha=1,scale=1.0):
                                 name=Y_col_labels[i]))
     fig.update_layout(font=dict(size=18))
     return fig
-
 
 
 x_labels = ["PCA mode %i" %(n+1) for n in range(len(cv_test_scores['pce']))]

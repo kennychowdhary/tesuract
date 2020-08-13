@@ -1,7 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as mpl
 import pdb, warnings, pickle
-from tqdm import tqdm
+# from tqdm import tqdm
 from sklearn.decomposition import PCA
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.preprocessing import MinMaxScaler
@@ -66,109 +65,6 @@ class PolyFactory:
 		L = LegPoly()
 		return L
 
-class scale:
-	def __init__(self,X,a=None,b=None):
-		self.X = np.atleast_2d(X)
-		self.dim = self.X.shape[1] # each column is a dimension or feature
-		if a is None and b is None:
-			# default bounds
-			self.a = -1*np.ones(self.dim)
-			self.b =  1*np.ones(self.dim)
-			self.__scaled = self.X # already scaled
-		elif len(a)==0 and len(b)==0:
-			self.a = -1*np.ones(self.dim)
-			self.b =  1*np.ones(self.dim)
-			self.__scaled = self.X # already scaled
-		else:
-			self.a = a
-			self.b = b
-			assert self.dim == len(a), "dim mismatch in a!"
-			assert self.dim == len(b), "dim mismatch in b!"
-			
-			self.w = self.b - self.a
-			assert self.X.shape[1] == len(self.w),"X and a,b mismatch!"
-			# scale to -1 -> 1
-			self.__scaled = 2*(self.X - self.a)/self.w - 1.0
-		# integration factor ([a,b] -> [-1,1])
-		# self.intf = np.prod(.5*(self.b - self.a))
-		# self.intf = np.prod(.5*(self.b - self.a)/(self.b - self.a)) # (b-a) canceled by prod prob weight
-	def __getitem__(self,key):
-		return self.__scaled[key]
-
-class DomainScaler:
-	# need to add checks and add functionality
-	def __init__(self,dim=None,a=None,b=None,domain_range=(-1,1)):
-		if a is None:
-			assert dim is not None, "Must defined dimension if a or b is None."
-			self.dim = dim
-		else:
-			self.dim = len(a)
-			assert len(a) == len(b), "Mismatch between a and b"
-		self.a = a
-		self.b = b
-		self.dr_a,self.dr_b = domain_range
-	def _compile(self):
-		self.dr_w = self.dr_b - self.dr_a
-		if self.a is None and self.b is None:
-			# default bounds
-			self.a = self.dr_a*np.ones(self.dim)
-			self.b = self.dr_b*np.ones(self.dim)
-		else:
-			self.w = self.b - self.a
-		# integration factor ([a,b] -> [-1,1])
-		# self.intf = np.prod(.5*(self.b - self.a))
-		# self.intf = np.prod((1./self.dr_w)*(self.b - self.a)/(self.b - self.a)) # (b-a) canceled by prod prob weight
-	def fit(self,X):
-		self._compile() # get domain width
-		X = np.atleast_2d(X)
-		assert self.dim == X.shape[1], "Size of data matrix features does not match dimensions." 
-		# scale to -1 -> 1
-		# self.X_scaled_ = 2*(self.X - self.a)/self.w - 1.0
-		return self
-	def transform(self,X):
-		X = np.atleast_2d(X)
-		assert self.dim == X.shape[1], "Size of data matrix features does not match dimensions." 
-		# scale to -1 -> 1
-		X_scaled_ = self.dr_w*(X - self.a)/self.w + self.dr_a
-		return X_scaled_
-	def fit_transform(self,X):
-		self.fit(X)
-		return self.transform(X)
-	def inverse_transform(self,Xhat):
-		Xhat = np.atleast_2d(Xhat)
-		assert self.dim == Xhat.shape[1], "Size of data matrix features does not match dimensions." 
-		X = (1./self.dr_w)*(Xhat - self.dr_a) 
-		X = self.a + self.w*X
-		return X
-
-class MinMaxTargetScaler:
-	'''
-	Scales the entire target matrix with single scalar min and max. This way it is easy to invert for new predicted values.
-	'''
-	def __init__(self,target_range=(0,1)):
-		self.a,self.b = target_range
-	def fit(self,Y):
-		self.min_ = np.amin(Y)
-		self.max_ = np.amax(Y)
-		self.w_ = self.max_ - self.min_
-		self.ab_w_ = self.b - self.a
-	def transform(self,Y):
-		assert self.min_ is not None and self.max_ is not None, "Need to fit first."
-		# scale to 0 -> 1 first
-		Yhat = (Y - self.min_)/self.w_
-		# scale to target_range
-		Yhat = (Yhat - self.a)/self.ab_w_ 
-		return Yhat
-	def fit_transform(self,Y):
-		self.fit(Y)
-		return self.transform(Y)
-	def inverse_transform(self,Yhat):
-		# first transform back to [0,1]
-		Y = Yhat*self.ab_w_ + self.a
-		# back to true range
-		Y = self.w_*Y  + self.min_
-		return Y
-
 class PCEBuilder(BaseEstimator):
 	def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False):
 		# self.dim = dim # no need to initialize with dim
@@ -200,6 +96,7 @@ class PCEBuilder(BaseEstimator):
 			self.M.setIndex(self.customM)
 			self.order = None # leave blank to indicate custom order
 		self.mindex = self.M.index
+		self.multiindex = self.mindex
 		if self.mindex.dtype != 'int':
 			warnings.warn("Converting multindex array to integer array.")
 			self.mindex = self.mindex.astype('int')
@@ -350,8 +247,7 @@ class PCEBuilder(BaseEstimator):
 		return self.mu, self.var
 
 
-
-class pcereg(PCEBuilder,RegressorMixin):
+class pcereg_old(PCEBuilder,RegressorMixin):
 	def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2,normalized=False,w=None):
 		self.order = order
 		self.mindex_type = mindex_type
@@ -435,7 +331,99 @@ class pcereg(PCEBuilder,RegressorMixin):
 		ypred = self.polyeval(X)
 		return ypred
 
-
+class pcereg(PCEBuilder,RegressorMixin):
+	def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',fit_params={},normalized=False):
+		# alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2
+		self.order = order
+		self.mindex_type = mindex_type
+		self.customM = customM
+		self.a = a
+		self.b = b
+		self.coef = coef
+		# self.c = self.coef # need to remove eventually
+		self.polytype = 'Legendre'
+		self.fit_type = fit_type
+		self.fit_params = fit_params
+		# self.alphas = alphas # LassoCV default
+		# self.l1_ratio = l1_ratio # ElasticNet default
+		# self.lasso_tol = lasso_tol
+		# self.w = w
+		self.normalized = normalized
+		super().__init__(order=self.order,customM=self.customM,mindex_type=self.mindex_type,coef=self.coef,a=self.a,b=self.b,polytype=self.polytype,normalized=self.normalized)
+	def _compile(self,X):
+		# build multindex and get Xhat
+		self._dim = X.shape[1]
+		super().compile(dim=self._dim) # use parent compile to produce the multiindex
+		self._M = self.multiindex
+		self.Xhat = self.fit_transform(X)
+		return self
+	def _quad_fit(self,X,y):
+		# let us assume the weights are for [-1,1]
+		self._compile(X) # compute normalized or non-normalized Xhat
+		normsq = self.computeNormSq()
+		assert 'w' in self.fit_params.keys(), "quadrature weights must be given in dictionary fit_params."
+		w = self.fit_params['w']
+		X,w = check_X_y(X,w) # make sure # quadrature points matces X
+		assert np.abs(np.sum(w) - 1) <= 1e-15, "quadrature weights must be scaled to integrate over [-1,1] with unit weight"
+		int_fact = 2**self._dim
+		if self.normalized == True:
+			self.coef = int_fact*np.dot(w*y,self.Xhat)/np.sqrt(normsq)
+		else:	
+			self.coef = int_fact*np.dot(w*y,self.Xhat)/normsq
+		return self
+	def fit(self,X,y):
+		X,y = check_X_y(X,y)
+		# get data attributes
+		self._n,self._dim = X.shape
+		self._compile(X) # build multindex and construct basis
+		Xhat,y = check_X_y(self.Xhat,y)
+		# pypce.PCEBuilder(dim=self.dim,self.order)
+		# run quadrature fit if weights are specified:
+		if self.coef is not None:
+			assert len(self.coef) == self.multiindex.shape[0],"length of coefficient vector is not the same shape as the multindex!"
+		if self.fit_type == "quadrature":
+			self._quad_fit(X,y)
+		if self.fit_type == 'linear':
+			regmodel = linear_model.LinearRegression(fit_intercept=False)
+			regmodel.fit(Xhat,y)
+		if self.fit_type == 'LassoCV':
+			if not self.fit_params: # if empty dictionary
+				self.fit_params={'alphas':np.logspace(-12,1,20),'max_iter':1000,'tol':1e-2}
+			regmodel = linear_model.LassoCV(fit_intercept=False,**self.fit_params)
+			regmodel.fit(Xhat,y)
+			self.alpha_ = regmodel.alpha_
+		if self.fit_type == 'ElasticNetCV':
+			if not self.fit_params: # if empty dictionary
+				self.fit_params={'l1_ratio':[.001,.5,.75,.95,.999,1],'n_alphas':25,'tol':1e-2}
+			regmodel = linear_model.ElasticNetCV(fit_intercept=False,**self.fit_params)
+			regmodel.fit(Xhat,y)
+		elif self.fit_type == 'OmpCV':
+			if not self.fit_params: # if empty dictionary
+				pass
+			regmodel = linear_model.OrthogonalMatchingPursuitCV(fit_intercept=False,**self.fit_params)
+			regmodel.fit(Xhat,y)
+		if self.fit_type != "quadrature":
+			self.coef = regmodel.coef_
+		self.coef_ = self.coef # backwards comaptible with sklearn API
+		return self
+	def sensitivity_indices(self):
+		assert self.coef is not None, "Must run fit or feed in coef array."
+		return self.computeSobol()
+	def feature_importances(self):
+		S = self.computeSobol()
+		return S/S.sum()
+	def multiindex(self):
+		assert self._M is not None, "Must run fit or feed in mindex array."
+		return self._M
+	def predict(self,X):
+		# check_is_fitted(self)
+		X = np.atleast_2d(X)
+		X = check_array(X)
+		# self._fit_transform(X)
+		# Phi = check_array(self._Phi)
+		# ypred = np.dot(Phi,self.coef)
+		ypred = self.polyeval(X)
+		return ypred
 
 # In development
 class pceseries():

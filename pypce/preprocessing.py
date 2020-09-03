@@ -30,7 +30,7 @@ class scale:
 	def __getitem__(self,key):
 		return self.__scaled[key]
 
-class DomainScaler:
+class DomainScaler_old:
 	# need to add checks and add functionality
 	def __init__(self,dim=None,a=None,b=None,domain_range=(-1,1)):
 		if a is None:
@@ -76,13 +76,84 @@ class DomainScaler:
 		X = self.a + self.w*X
 		return X
 
+# domain test
+class DomainScaler:
+	def __init__(self,dim,input_range,output_range=(-1,1)):
+		self.dim = dim
+		self.input_range = input_range
+		self.output_range = output_range
+	def _get_bound_list(self,input_range):
+		if isinstance(input_range,list):
+			assert len(input_range) == self.dim, "input range must be a list of tuples"
+			input_bounds = input_range
+		if isinstance(input_range,tuple):
+			input_bounds = [(input_range[0],input_range[1]) for i in range(self.dim)]
+		a = np.array([ab[0] for ab in input_bounds]) # lower bounds
+		b = np.array([ab[1] for ab in input_bounds]) # upper bounds
+		return input_bounds,a,b
+	def _range_check(self,X,B):
+		n,d = X.shape
+		assert d == self.dim, "columns of X must be the same as dimensions"
+		assert len(B) == self.dim, "length of bounds list must be same as dimensions"
+		dim_check = [(X[:,i] >= B[i][0]).all() and (X[:,i] <= B[i][1]).all() for i in range(d)]
+		assert all(dim_check), "X is not in the range of the input range."
+		return X
+	def fit_transform(self,X):
+		self.input_bounds,a,b = self._get_bound_list(self.input_range)
+		self.output_bounds,c,d = self._get_bound_list(self.output_range)
+		X = self._range_check(X,self.input_bounds)
+		# transform to [0,1] first for ease
+		X_unit_scaled = (X - a)/(b-a)
+		# transform to output bounds
+		X_scaled = (d-c)*X_unit_scaled + c
+		X_scaled = self._range_check(X_scaled,self.output_bounds)
+		return X_scaled
+	def inverse_transform(self,Xhat):
+		self.input_bounds,a,b = self._get_bound_list(self.input_range)
+		self.output_bounds,c,d = self._get_bound_list(self.output_range)
+		Xhat = self._range_check(Xhat,self.output_bounds)
+		Xhat_unit_scaled = (Xhat - c)/(d-c)
+		X_inv = (b-a)*Xhat_unit_scaled + a
+		X_inv = self._range_check(X_inv,self.input_bounds)
+		return X_inv 
+
 class MinMaxTargetScaler:
-	'''
-	Scales the entire target matrix with single scalar min and max. This way it is easy to invert for new predicted values.
-	'''
+	"""A Transformer class that scales and shifts by the min/max
+
+	This transformer transforms the target Y by the absolute max and minimum to
+	the unit hypercube, i.e., [0,1]^dim.  It does not scale each target column
+	differently as in sklearn's preprocessing toolbox. The transform is simply 
+
+	Yhat = (Y-min(Y))/(max(Y)-min(Y))
+
+	and the inverse is
+
+	Y = (max(Y)-min(Y))*Yhat + min(Y)
+
+	Parameters
+    ----------
+    
+    eps : float, default=1e-3
+        Length of the path. ``eps=1e-3`` means that
+        ``alpha_min / alpha_max = 1e-3``.
+
+	"""
 	def __init__(self,target_range=(0,1)):
 		self.a,self.b = target_range
 	def fit(self,Y):
+		"""
+		Fit method
+
+		This function compute the min, max and width, which are used in the above
+		transform and inverse transform formulas.  
+
+		Parameters
+		----------
+		Y : numpy.ndarray, required	
+			ndarray of shape (n_samples ,n_features)
+			This is the (possibly multi) target output. 
+			
+		"""
 		self.min_ = np.amin(Y)
 		self.max_ = np.amax(Y)
 		self.w_ = self.max_ - self.min_

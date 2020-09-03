@@ -219,14 +219,15 @@ class PCEBuilder(BaseEstimator):
 		totvar = np.sum(totvar_vec)
 		# assert totvar > 0, "Coefficients are all zero!"
 		S = []
-		for i in range(self.dim):
-			si = self.mindex[:,i] > 0 # boolean
-			s = np.sum(totvar_vec[si[1:]])/totvar
-			S.append(s)
 		# in case elements have nan in them
 		if np.all(coef_[1:] == 0): # ignore the mean
 			print("Returning equal weights!")
 			S = np.ones(self.dim)/self.dim # return equal weights
+		else:
+			for i in range(self.dim):
+				si = self.mindex[:,i] > 0 # boolean
+				s = np.sum(totvar_vec[si[1:]])/totvar
+				S.append(s)
 		return S
 	def computeMoments(self,c=None):
 		if c is None:
@@ -405,13 +406,16 @@ class pcereg(PCEBuilder,RegressorMixin):
 		if self.fit_type != "quadrature":
 			self.coef = regmodel.coef_
 		self.coef_ = self.coef # backwards comaptible with sklearn API
+		self.feature_importances()
 		return self
 	def sensitivity_indices(self):
 		assert self.coef is not None, "Must run fit or feed in coef array."
 		return self.computeSobol()
 	def feature_importances(self):
-		S = self.computeSobol()
-		return S/S.sum()
+		S = np.array(self.computeSobol())
+		S = S/S.sum()
+		self.feature_importances_ = S
+		return self.feature_importances_
 	def multiindex(self):
 		assert self._M is not None, "Must run fit or feed in mindex array."
 		return self._M

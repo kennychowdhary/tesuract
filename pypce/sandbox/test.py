@@ -29,15 +29,15 @@ c_true = np.array([3., 0., 0., 2., 0., 0., 0., 1., 0., 0., ])
 class MultiOutputCV(BaseEstimator, RegressorMixin):
     def __init__(self, regressor_model, regressor_param_grid,
                  score_metric='neg_root_mean_squared_error',
-                 n_jobs=4):
+                 n_jobs=4,cv=None):
         self.regressor_model = regressor_model
         self.regressor_param_grid = regressor_param_grid
         self.score_metric = score_metric
         self.n_jobs_ = n_jobs
-
+        self.cv = cv
     def _setupCV(self, shuffle=False, randstate=13):
-        self.cv = KFold(n_splits=5)  # ,shuffle=True,random_state=13)
-
+        if self.cv == None:
+            self.cv = KFold(n_splits=5)  # ,shuffle=True,random_state=13)
     def fit(self, X, Y):
         self.n, self.dim = X.shape
         if Y.ndim == 1: Y = np.atleast_2d(Y).T
@@ -69,16 +69,16 @@ class MultiOutputCV(BaseEstimator, RegressorMixin):
             y = np.vstack(y).T
         return y
 
-    def feature_importance(self):
+    def feature_importances(self):
         S = []
         for estimator_ in self.best_estimators_:
+            assert hasattr(estimator_,'feature_importances_')
             S.append(estimator_.sensitivity_indices())
         if self.ntargets == 1:
             S = np.array(S[0])
         else:
             S = np.vstack(S)
         return S
-
 
 class PCATargetTransform(BaseEstimator, TransformerMixin):
     def __init__(self, n_components=2, cutoff=1e-2, svd_solver='arpack'):

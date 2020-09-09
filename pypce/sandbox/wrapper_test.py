@@ -3,6 +3,8 @@ import pypce
 from collections import defaultdict
 import time as T
 import matplotlib.pyplot as mpl
+
+import warnings
  
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.utils.estimator_checks import check_estimator 
@@ -11,7 +13,6 @@ from sklearn.model_selection import GridSearchCV, ParameterGrid, KFold, cross_va
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.metrics import make_scorer
-
 from sklearn.decomposition import PCA
    
 class RegressionWrapperCV(BaseEstimator):
@@ -96,6 +97,7 @@ class RegressionWrapperCV(BaseEstimator):
 		mean_test_score = GridSCV.cv_results_['mean_test_score']
 		return mean_train_score[best_index_] - mean_test_score[best_index_]
 
+from tqdm import tqdm
 class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 	def __init__(self, 
 				regressor='pce', reg_params={'order':2},
@@ -121,7 +123,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		if self.target_transform is None:
 			self.TT = FunctionTransformer(lambda Y: Y)
 		else:
-			self.TT = self.target_transform(**target_transform_params)
+			self.TT = self.target_transform(**self.target_transform_params)
 		self.TT.fit(Y)
 		return self
 	def fit(self,X,Y):
@@ -145,7 +147,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			regressor = self.regressor
 			reg_params = self.reg_params
 		res = defaultdict(list)
-		for i in range(self.ntargets):
+		for i in tqdm(range(self.ntargets)):
 			reg = RegressionWrapperCV(
 				regressor=regressor,reg_params=reg_params,
 				n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
@@ -168,15 +170,13 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		return mres
 	def predict(self,X):
 		assert hasattr(self,'res'), "Must run fit."
-		res = self.res
-		if isinstance(res,dict):
-			return self._predict_single(X,res)
-		elif isinstance(res,list):
-			return self._predict_multiple
+		if isinstance(self.res,dict):
+			Ypred = self._predict_single(X,res=self.res)
+		elif isinstance(self.res,list):
+			Ypred = self._predict_multiple(X,res=self.res)
+		return Ypred
 	def _predict_single(self,X,res=None):
 		# assert isinstance(self.res,dict), "Must pass string as regressor OR list with mixed=True, otherwise, predict is ambiguous"
-		if res is None: 
-			res = self.res
 		assert isinstance(res,dict), "for single prediction, results must be a dictionary."
 		Yhatpred_list = []
 		for estimator in self.best_estimators_:
@@ -187,12 +187,17 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 	def _predict_multiple(self,X,res=None):
 		# assert isinstance(self.res,dict), "Must pass string as regressor OR list with mixed=True, otherwise, predict is ambiguous"
 		assert isinstance(res,list), "for multiple predictions, results must be a list of dictionaries."
-		if res is None:
-			res = self.res
 		predictions = []
 		for r in res:
 			predictions.append(self._predict_single(X,r))
-		return predictions
+		return np.squeeze(np.array(predictions))
+	def feature_importances_(self):
+		assert hasattr(self,'res'), "Must run .fit() first!"
+		FI_ = []
+		for estimator in self.best_estimators_:
+			fi = estimator.feature_importances_
+			FI_.append(fi)
+		return np.array(FI_)
 
 class PCATargetTransform(BaseEstimator, TransformerMixin):
     def __init__(self, n_components=2, cutoff=1e-2, svd_solver='arpack'):
@@ -212,6 +217,7 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         assert self.K is not None, "K components is not defined or being set properly."
         self.pca = PCA(n_components=self.K, svd_solver=self.svd_solver)
         self.pca.fit(Y)
+        self.cumulative_error = np.cumsum(self.pca.explained_variance_ratio_)
         return self
     def fit_transform(self, Y):
         self.fit(Y)
@@ -223,10 +229,16 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         return self.pca.inverse_transform(Yhat)
     def _compute_K(self, Y, max_n_components=50):
         ''' automatically compute number of PCA terms '''
-        self.pca = PCA(n_components=min(max_n_components, self.d), svd_solver=self.svd_solver)
-        self.pca.fit(Y)
-        self.cumulative_error = np.cumsum(self.pca.explained_variance_ratio_)
-        self.K = np.where(1 - self.cumulative_error <= self.cutoff)[0][0]
+        pca = PCA(n_components=min(max_n_components, self.d), svd_solver=self.svd_solver)
+        pca.fit(Y)
+        cumulative_error = np.cumsum(pca.explained_variance_ratio_)
+        print(cumulative_error)
+        loc = np.where(1 - cumulative_error <= self.cutoff)[0]
+        if loc.size == 0:
+        	warnings.warn("Cutoff may be too big. Setting K = 16")
+        	self.K = 16
+        elif loc.size > 0:
+	        self.K = loc[0]
 
 
 # data
@@ -245,25 +257,23 @@ RW = RegressionWrapperCV(regressor='pce',reg_params=reg_params)
 # RW.fit(X,y)
 
 # pce grid search cv test
-pce_param_grid = [
-	{'order': [1, 2, 3],
+pce_param_grid = [{'order': [1, 2, 3, 4],
 	 'mindex_type': ['total_order', 'hyperbolic', ],
-	 'fit_type': ['LassoCV', 'linear', 'ElasticNetCV']}
-]
+	 'fit_type': ['LassoCV', 'linear', 'ElasticNetCV']}]
 RW2 = RegressionWrapperCV(regressor='pce',reg_params=pce_param_grid,n_jobs=6)
 
 
 # random forest fit
-rf_param_grid = {'n_estimators': [100],
+rf_param_grid = {'n_estimators': [500,1000],
 				 'max_features': ['auto'],
-				 'max_depth': [10,15]
+				 'max_depth': [5,10,15]
 				 }
 RW3 = RegressionWrapperCV(regressor='randforests', reg_params=rf_param_grid,n_jobs=8)
 
 # random forest fit
-rf_param_grid2 = {'n_estimators': 10000,
-				 'max_features': 'log2',
-				 'max_depth': 5
+rf_param_grid2 = {'n_estimators': [1000],
+				 'max_features': ['log2'],
+				 'max_depth': [5]
 				 }
 RW4 = RegressionWrapperCV(regressor='randforests',reg_params=rf_param_grid2,n_jobs=8)
 
@@ -305,7 +315,7 @@ mtarg3 = MRegressionWrapperCV(
 mtarg4 = MRegressionWrapperCV(
 			regressor=['pce','randforests'],
 			reg_params=[pce_param_grid,rf_param_grid],
-			n_jobs=8,
+			n_jobs=4,
 			mixed=False)
 
 # cross validation test
@@ -338,9 +348,19 @@ print("Total time is %.5f seconds" %(end-start))
 print("Performing PCA transform...")
 # test target transform
 # Load the data
+data_fields = ['heat_flux_wall','df_pressure','df_wall-heat-flux',
+			   'df_wall-C_f','df_wall-C_h','df_wall-friction-velocity',
+			   'df_wall-tau-mag']
+# for d in data_fields[1:]:
+# 	test = np.load(datadir + 'data/' + d + '.npy')
+# 	np.save('Y_' + d + '.npy', test)
+data_field = data_fields[5]
+# for data_field in data_fields:
+print(data_field)
 datadir = '/Users/kchowdh/Research/sparc_tests/'
-X = np.load(datadir + 'data/X_' + 'heat_flux_wall' + '.npy')
-Y = np.load(datadir + 'data/Y_' + 'heat_flux_wall' + '.npy')
+X = np.load(datadir + 'data/X_samples.npy')
+x_domain = np.load(datadir + 'data/x_domain.npy')
+Y = np.load(datadir + 'data/Y_' + data_field + '.npy')
 
 Q = [.05,.5,.95]
 
@@ -363,19 +383,104 @@ X_col_names = ['dens_sc', 'vel_sc', 'temp_sc',
 feature_scaler = pypce.preprocessing.DomainScaler(dim=12, input_range=X_bounds, output_range=(-1, 1))
 X_scaled = feature_scaler.fit_transform(X)
 
-pca = PCATargetTransform(n_components='auto', cutoff=1e-3)
+# pca_params={'n_components':'auto','cutoff':1e-3}
+pca_params={'n_components':8}
+pca = PCATargetTransform(**pca_params)
 pca.fit(Y_scaled)
 Yhat_scaled = pca.transform(Y_scaled)
-Y_pca_recon = pca.inverse_transform(Yhat_scaled)
-Y_pca_q = np.quantile(Y_pca_recon,Q,axis=0)
+print('n components = ', Yhat_scaled.shape[1])
+Y_pca_recon0 = pca.inverse_transform(Yhat_scaled)
+Y_pca_q = np.quantile(Y_pca_recon0,Q,axis=0)
 
 # fit multiple target with type as single element list
 HFreg = MRegressionWrapperCV(
 			regressor=['pce'],
-			reg_params=[pce_param_grid2],
+			reg_params=[pce_param_grid],
 			n_jobs=8)
 # HFreg.fit(X_scaled,Yhat_scaled)
 # Yhat_pred = HFreg.predict(X_scaled)
 # Y_pce_recon = pca.inverse_transform(Yhat_pred)
 # Y_pce_q = np.quantile(Y_pce_recon,Q,axis=0)
+
+
+# fit multiple target with type as single element list
+HFreg2 = MRegressionWrapperCV(
+			regressor=['randforests'],
+			reg_params=[rf_param_grid],
+			target_transform=PCATargetTransform,
+			target_transform_params=pca_params,
+			n_jobs=8)
+HFreg2.fit(X_scaled,Y_scaled)
+Y_pce_recon2 = HFreg2.predict(X_scaled)
+Y_pce_q = np.quantile(Y_pce_recon2,Q,axis=0)
+print(HFreg2.best_scores_)
+
+# PLOTTING
+
+def plot_feature_importance(S,feature_labels,extra_line_plot=None):
+    assert isinstance(S,np.ndarray), "S must be a numpy array"
+    if S.ndim == 1:
+        ntargets = 1
+        ndim = len(S)
+        S = np.atleast_2d(S)
+
+    ntargets, ndim = S.shape
+    # normalize across columns (if not already)
+    S = S / np.atleast_2d(S.sum(axis=1)).T
+
+    # plot sobol indices as stacked bar charts
+
+    import matplotlib.pyplot as plt
+    import matplotlib._color_data as mcd
+    import seaborn as sns
+
+    xkcd_colors = []
+    xkcd = {name for name in mcd.CSS4_COLORS if "xkcd:" + name in mcd.XKCD_COLORS}
+    for j, n in enumerate(xkcd):
+        xkcd = mcd.XKCD_COLORS["xkcd:" + n].upper()
+        xkcd_colors.append(xkcd)
+
+    Ps = []
+    sns.set_palette(sns.color_palette("Paired", 12))
+    plt.figure(figsize=(20, 9))
+    bottom = np.zeros(ntargets)
+    for ii in range(ndim):
+        ptemp = plt.bar(np.arange(1, 1 + ntargets), S[:, ii], bottom=bottom, width=.25)
+        bottom = bottom + S[:, ii]  # reset bottom to new height
+        Ps.append(ptemp)
+    plt.ylabel('Sobol Scores')
+    plt.ylim([0, 1.1])
+    # plt.title('Sobol indices by pca mode')
+    # plt.xticks(t, ('PCA1','PCA2','PCA3','PCA4','PCA5','PCA6'))
+    # X_col_names = ['dens_sc', 'vel_sc', 'temp_sc',
+    #            'sigk1', 'sigk2', 'sigw1', 'sigw2',
+    #            'beta_s', 'kap', 'a1', 'beta1r', 'beta2r']
+    plt.legend(((p[0] for p in Ps)), (l for l in feature_labels),
+           fancybox=True, shadow=True,
+           loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=ndim)
+
+    # plot explained variance
+    if extra_line_plot is not None:
+        assert len(extra_line_plot) >= ntargets, "extra info must be the same length as the targets."
+        plt.plot(np.arange(1, 1 + ntargets), extra_line_plot[:ntargets], '--ok')
+    return plt
+
+plt = plot_feature_importance(HFreg2.feature_importances_(),X_col_names,pca.cumulative_error)
+plt.savefig(data_field + '_features.png')
+
+fig, ax = mpl.subplots(1,1,figsize=(20,9))
+x = 1.0*np.arange(len(Y_pca_q[0]))
+ax.fill_between(x=x/np.amax(x),y1=Y_pca_q[0],y2=Y_pca_q[2],color='b',alpha=.5)
+ax.plot(x/np.amax(x),Y_pca_q[1],'-w',alpha=.25)
+ax.fill_between(x=x/np.amax(x),y1=Y_pce_q[0],y2=Y_pce_q[2],color='r',alpha=.15)
+ax.plot(x/np.amax(x),Y_pce_q[1],'--r',alpha=.25)
+ax.set_title(data_field)
+
+fig.savefig(data_field + '_quantiles.png')
+# plt.show()
+# fig.show()
+
+
+
+
 

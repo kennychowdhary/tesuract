@@ -384,7 +384,7 @@ feature_scaler = pypce.preprocessing.DomainScaler(dim=12, input_range=X_bounds, 
 X_scaled = feature_scaler.fit_transform(X)
 
 # pca_params={'n_components':'auto','cutoff':1e-3}
-pca_params={'n_components':2}
+pca_params={'n_components':8}
 pca = PCATargetTransform(**pca_params)
 pca.fit(Y_scaled)
 Yhat_pca = pca.transform(Y_scaled)

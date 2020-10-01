@@ -3,8 +3,7 @@ import pypce
 from collections import defaultdict
 import time as T
 import matplotlib.pyplot as mpl
-
-import warnings
+import warnings, pdb
  
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.utils.estimator_checks import check_estimator 
@@ -14,7 +13,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.metrics import make_scorer
 from sklearn.decomposition import PCA
-   
+		
 class RegressionWrapperCV(BaseEstimator):
 	def __init__(self,regressor='pce',reg_params={},scorer='neg_root_mean_squared_error',n_jobs=1,verbose=1,cv=None):
 		self.regressor = regressor
@@ -354,7 +353,7 @@ data_fields = ['heat_flux_wall','df_pressure','df_wall-heat-flux',
 # for d in data_fields[1:]:
 # 	test = np.load(datadir + 'data/' + d + '.npy')
 # 	np.save('Y_' + d + '.npy', test)
-data_field = data_fields[5]
+data_field = data_fields[0]
 # for data_field in data_fields:
 print(data_field)
 datadir = '/Users/kchowdh/Research/sparc_tests/'
@@ -369,6 +368,7 @@ Q = [.05,.5,.95]
 target_scaler = pypce.preprocessing.MinMaxTargetScaler(target_range=(0, 1))
 Y_scaled = target_scaler.fit_transform(Y)
 Y_q = np.quantile(Y_scaled,Q,axis=0)
+pdb.set_trace()
 
 # Lower and Upper Bound for features in X (for future scaling)
 X_LB = np.array([.85, .85, .85, 0.7, 0.8, 0.3, 0.7, 0.0784, 0.38, 0.31, 1.19, 1.05])

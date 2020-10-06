@@ -1,8 +1,49 @@
 
-Getting Started
+Introduction
 ===============
 
-One of the main features of :ref:`pypce <main>` 
+pypce's main feature is constructing multivariate polynomial regression models
+using classic orthogonal polynomial constructions, e.g. Legendre polynomials.
+But there are a few more feature we will list below. 
+
+Main features of pypce
+----------------------
+
+* **Multivariate polynomial regression**
+    We provide an object oriented polynomial constructor class that creates a
+    polynomial estimator (based on the scikit-learn estimator API) and a
+    corresponding multivariate polynomial regression class that utilizes
+    existing linear regression algorithms in scikit-learn to train the model. 
+
+* **Variance based sensitivity analysis**
+
+    The polynomial regression class allows for easy feature importance or
+    sensitivity analysis. We use the Sobol sensitivity index to compute which
+    features are more important.
+
+* **Sparse quadrature methods for high-dimensional integration**
+
+    An alternate way to estimate the training weights of the multivariate
+    polynomial model (i.e., the coefficients of the polynomial expansion), is
+    direct numerical integration. Due to the orthogonality of the polynomial
+    basis terms, the training weights can be written in analytic form as a
+    integration rule. We provide high-dimensional, sparse, integration rules 
+    to estimate these coefficients. This is useful for *smooth* functions, rather
+    than functions corrupted by noise. 
+
+* **Utilities for preprocessing**
+    While scikit-learn contains many preprocessing utilities, we add a few more
+    that may be more tailored for scientific computing applications. Utilities
+    include min-max transforms for multi-target outputs, transforms for scaling
+    domains with known physical bounds, and more customizable dimension reduction
+    transforms, e.g., PCA. 
+
+* **Pipelines for multi-target fitting** [#]_
+
+
+
+.. [#] This is an advanced usage for pypce.  
+
 
 .. Special triangles
 .. -----------------

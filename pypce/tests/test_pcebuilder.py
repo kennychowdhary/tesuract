@@ -11,7 +11,8 @@ def mse(a,b):
 	return mean_squared_error(a,b,squared=False)
 
 class TestPCEBuilder(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		self.dim=2
 		self.rn = np.random.RandomState(23423)
 	def test_pcebuilder_customM(self):

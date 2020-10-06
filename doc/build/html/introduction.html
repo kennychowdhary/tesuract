@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting Started &mdash; pypce 1.0 documentation</title>
+  <title>Introduction &mdash; pypce 1.0 documentation</title>
   
 
   
@@ -30,6 +30,7 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -83,7 +84,10 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#main-features-of-pypce">Main features of pypce</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
@@ -131,13 +135,13 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Getting Started</li>
+      <li>Introduction</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/getting_started.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -150,9 +154,57 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="getting-started">
-<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
-<p>One of the main features of <a class="reference internal" href="index.html#main"><span class="std std-ref">pypce</span></a></p>
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>pypce’s main feature is constructing multivariate polynomial regression models
+using classic orthogonal polynomial constructions, e.g. Legendre polynomials.
+But there are a few more feature we will list below.</p>
+<div class="section" id="main-features-of-pypce">
+<h2>Main features of pypce<a class="headerlink" href="#main-features-of-pypce" title="Permalink to this headline">¶</a></h2>
+<ul>
+<li><dl class="simple">
+<dt><strong>Multivariate polynomial regression</strong></dt><dd><p>We provide an object oriented polynomial constructor class that creates a
+polynomial estimator (based on the scikit-learn estimator API) and a
+corresponding multivariate polynomial regression class that utilizes
+existing linear regression algorithms in scikit-learn to train the model.</p>
+</dd>
+</dl>
+</li>
+<li><p><strong>Variance based sensitivity analysis</strong></p>
+<blockquote>
+<div><p>The polynomial regression class allows for easy feature importance or
+sensitivity analysis. We use the Sobol sensitivity index to compute which
+features are more important.</p>
+</div></blockquote>
+</li>
+<li><p><strong>Sparse quadrature methods for high-dimensional integration</strong></p>
+<blockquote>
+<div><p>An alternate way to estimate the training weights of the multivariate
+polynomial model (i.e., the coefficients of the polynomial expansion), is
+direct numerical integration. Due to the orthogonality of the polynomial
+basis terms, the training weights can be written in analytic form as a
+integration rule. We provide high-dimensional, sparse, integration rules
+to estimate these coefficients. This is useful for <em>smooth</em> functions, rather
+than functions corrupted by noise.</p>
+</div></blockquote>
+</li>
+<li><dl class="simple">
+<dt><strong>Utilities for preprocessing</strong></dt><dd><p>While scikit-learn contains many preprocessing utilities, we add a few more
+that may be more tailored for scientific computing applications. Utilities
+include min-max transforms for multi-target outputs, transforms for scaling
+domains with known physical bounds, and more customizable dimension reduction
+transforms, e.g., PCA.</p>
+</dd>
+</dl>
+</li>
+<li><p><strong>Pipelines for multi-target fitting</strong> <a class="footnote-reference brackets" href="#id2" id="id1">1</a></p></li>
+</ul>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>This is an advanced usage for pypce.</p>
+</dd>
+</dl>
+</div>
 </div>
 
 

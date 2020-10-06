@@ -248,7 +248,7 @@ class PCEBuilder(BaseEstimator):
 		return self.mu, self.var
 
 
-class pcereg_old(PCEBuilder,RegressorMixin):
+class PCEReg_old(PCEBuilder,RegressorMixin):
 	def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2,normalized=False,w=None):
 		self.order = order
 		self.mindex_type = mindex_type
@@ -332,7 +332,7 @@ class pcereg_old(PCEBuilder,RegressorMixin):
 		ypred = self.polyeval(X)
 		return ypred
 
-class pcereg(PCEBuilder,RegressorMixin):
+class PCEReg(PCEBuilder,RegressorMixin):
 	def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',fit_params={},normalized=False):
 		# alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2
 		self.order = order
@@ -430,7 +430,7 @@ class pcereg(PCEBuilder,RegressorMixin):
 		return ypred
 
 # In development
-class pceseries():
+class PCESeries():
 	def __init__(self,dim,C,MIs,time=[],a=None,b=None):
 		# construct series of pce's
 		assert len(C) == len(MIs), 'coef and multindex mismatch!'
@@ -598,7 +598,7 @@ class pceseries():
 
 
 # # create function to plot sobol indices in a stacked graph
-# # to be added to the pypce pceseries class
+# # to be added to the pypce PCESeries class
 # C = []
 # M = []
 # Sobol = []
@@ -612,7 +612,7 @@ class pceseries():
 # xlabels = np.array(['dens_sc', 'vel_sc', 'temp_sc', 
 # 					'sigk1', 'sigk2', 'sigw1', 'sigw2',
 # 					'beta_s', 'kap', 'a1', 'beta1r', 'beta2r'])
-# pceS = pypce.pceseries(dim=xdim,C=C,MIs=M)
+# pceS = pypce.PCESeries(dim=xdim,C=C,MIs=M)
 
 # Sobol = np.array(Sobol)
 # # S = np.random.rand(4,12)

@@ -4,7 +4,7 @@
 =========
 
 **pypce** is a pure Python Uncertainty Quantification (UQ) software library.
-[#]_. It is built with object oriented design principals in mind and is thus
+[#]_ It is built with object oriented design principals in mind and is thus
 modular. 
 
 The pypce library contains modules for building multivariate polynomial
@@ -15,26 +15,47 @@ transforming feature and target spaces, e.g. PCA, and custom pipelines for
 fitting multi-target regression models and comparing different machine learning
 (ML) methods.
 
-The code is easy to install. After downloading, make sure you also have
-``numpy`` and ``scikit-learn``. Then, cd into the ``pypce`` directory, i.e. the
-folder with the ``setup.py`` file, and run
+Installation
+------------
+
+The code is super easy to install. Make sure you have ``numpy`` and
+``scikit-learn``. Then, after downloading, cd into the ``pypce`` directory, i.e.
+the folder with the ``setup.py``, and run
 
 ::
 
 	pip install .
 
-You can also run a suite of unittests with 
+You can also run a suite of unittests before installation with 
 
 ::
 
    python -m pytest -v -s pypce/tests
 
-That's it. Now you are ready to use **pypce**. 
+to check the library works. That's it! Now you are ready to use **pypce**. 
+
+Quickstart
+----------------
+
+Let's see how easy it is to create a multivariate polynomial regression model. 
+Let's create a :math:`4^{th}` order polynomial regression model [#]_ on the 
+:math:`[-1,1]^5` hypercube, with a simple least squares fitting. [#]_
+
+.. code-block:: python
+
+   import pypce
+   p = pypce.pcereg(order=4)
+
+That's it! Now, in order to perform regression, just run :code:`p.fit(X,y)` and
+:code:`p.predict(X)` for a data/ target pair :math:`(X,y)`. [#]_ 
+
+User Guide
+----------
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    
-   getting_started
+   introduction
    api
 
 
@@ -47,4 +68,13 @@ Indices and tables
 * :ref:`search`
 
 
-.. [#] Python 3+ is required and pypce has only been tested for 3.7.6 so far. 
+.. [#] Python 3+ is required and pypce has only been tested for 
+         3.7.6 so far. 
+
+.. [#] In short, a :math:`4^{th}` order polynomial means that the
+       terms are no higher than an :math:`x_i^4` for each dimension. 
+
+.. [#] Don't worry! There are a lot more customization options that we will get into later
+
+.. [#] The dimensionality is automatically determined by looking at the size 
+      of the data matrix columns. 

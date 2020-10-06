@@ -380,31 +380,6 @@ from collections import defaultdict
 from itertools import product
 
 class QuadGen(object):
-	""" Class for generating n-d quadrature
-
-	Example:
-		# test
-		dim = 5
-		Q = QuadGen(dim=dim,order=5,rule='legendre_gauss',sparse=True)
-		x,w = Q.run()
-
-		Q2 = QuadGen(dim=dim,order=5,rule='legendre_gauss',sparse=False)
-		x2,w2 = Q2.run()
-
-		# genz function tests
-
-		def genz_exp(x):
-			if x.ndim == 2:
-				output = np.exp(np.sum(x - 1,axis=1))
-			elif x.ndim == 1:
-				output = np.exp(np.sum(x - 1))
-			return output
-		soln = (np.exp(0) - np.exp(-1.0))**dim
-
-		approx = np.sum(genz_exp(x)*w)
-		error = np.mean((soln - approx)**2)/np.mean(soln**2)
-		print(soln, 'vs', approx,' , error = ', error)
-	"""
 	def __init__(self,dim,order=2,rule='legendre_gauss',sparse=True):
 		self.dim = dim
 		self.order = order
@@ -430,6 +405,7 @@ class QuadGen(object):
 		assert np.all(x >= 0.0) and np.all(x <= 1.0), "Points are outside the range [0,1]^d"
 		self.points, self.weights = x,w
 		return self.points, self.weights
+
 
 
 

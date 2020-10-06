@@ -7,7 +7,8 @@ relpath = pypce.__file__[:-11] # ignore the __init__.py specification
 print(relpath)
 
 class TestDomainScaler_old(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(self):
 		self.rn = np.random.RandomState(3123)
 	def test_scale_features_uniform_ab(self):
 		X = 3.5*self.rn.rand(30,3) + 2

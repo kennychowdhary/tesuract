@@ -1,6 +1,9 @@
 # Compiled python modules.
 *.pyc
+*.DS_Store
 __pycache__/
+.vscode/
+.pytest_cache/
 
 # Setuptools distribution folder.
 /dist/

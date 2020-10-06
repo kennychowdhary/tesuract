@@ -3,8 +3,23 @@
 API
 ===
 
-.. automodule:: pypce.pce
-	:members: PCEBuilder
+.. MultiIndex Classes
+.. ------------------
+
+.. .. automodule:: pypce.multiindex
+.. 	:members:
+
+.. Polynomial Classes
+.. ------------------
+
+.. .. automodule:: pypce.pce
+.. 	:members: PCEBuilder
+
+Preprocessing Utilities
+-----------------------
+
+.. automodule:: pypce.preprocessing
+	:members:
 
 .. The ``shape`` module
 .. --------------------

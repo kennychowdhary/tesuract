@@ -30,13 +30,14 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
+    <link rel="prev" title="Introduction" href="introduction.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,8 +83,11 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-pypce.preprocessing">Preprocessing Utilities</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -151,17 +155,104 @@
             
   <div class="section" id="api">
 <span id="id1"></span><h1>API<a class="headerlink" href="#api" title="Permalink to this headline">¶</a></h1>
-<span class="target" id="module-pypce.pce"></span><dl class="py class">
-<dt id="pypce.pce.PCEBuilder">
-<em class="property">class </em><code class="sig-prename descclassname">pypce.pce.</code><code class="sig-name descname">PCEBuilder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">customM</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mindex_type</span><span class="o">=</span><span class="default_value">'total_order'</span></em>, <em class="sig-param"><span class="n">coef</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">polytype</span><span class="o">=</span><span class="default_value">'Legendre'</span></em>, <em class="sig-param"><span class="n">normalized</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypce/pce.html#PCEBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypce.pce.PCEBuilder" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="pypce.pce.PCEBuilder.computeNormSq">
-<code class="sig-name descname">computeNormSq</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypce/pce.html#PCEBuilder.computeNormSq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypce.pce.PCEBuilder.computeNormSq" title="Permalink to this definition">¶</a></dt>
-<dd><p>separate routine to compute norms, in order to bypass construct basis</p>
+<div class="section" id="module-pypce.preprocessing">
+<span id="preprocessing-utilities"></span><h2>Preprocessing Utilities<a class="headerlink" href="#module-pypce.preprocessing" title="Permalink to this headline">¶</a></h2>
+<p>Example Google style docstrings.</p>
+<p>This module demonstrates documentation as specified by the <a class="reference external" href="https://google.github.io/styleguide/pyguide.html">Google Python
+Style Guide</a>. Docstrings may extend over multiple lines. Sections are created
+with a section header and a colon followed by a block of indented text.</p>
+<p class="rubric">Example</p>
+<p>Examples can be given using either the <code class="docutils literal notranslate"><span class="pre">Example</span></code> or <code class="docutils literal notranslate"><span class="pre">Examples</span></code>
+sections. Sections support any reStructuredText formatting, including
+literal blocks:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>$ python example_google.py
+</pre></div>
+</div>
+<p>Section breaks are created by resuming unindented text. Section breaks
+are also implicitly created anytime a new section starts.</p>
+<dl class="field-list">
+<dt class="field-odd">Attributes</dt>
+<dd class="field-odd"><p><strong>module_level_variable1</strong> (<em>int</em>) – Module level variables may be documented in
+either the <code class="docutils literal notranslate"><span class="pre">Attributes</span></code> section of the module docstring, or in an
+inline docstring immediately following the variable.</p>
+<p>Either form is acceptable, but the two should not be mixed. Choose
+one convention to document module level variables and be consistent
+with it.</p>
+</dd>
+</dl>
+<div class="admonition-todo admonition" id="id2">
+<p class="admonition-title">Todo</p>
+<ul class="simple">
+<li><p>For module TODOs</p></li>
+<li><p>You have to also use <code class="docutils literal notranslate"><span class="pre">sphinx.ext.todo</span></code> extension</p></li>
+</ul>
+</div>
+<dl class="py class">
+<dt id="pypce.preprocessing.MinMaxTargetScaler">
+<em class="property">class </em><code class="sig-prename descclassname">pypce.preprocessing.</code><code class="sig-name descname">MinMaxTargetScaler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">target_range</span><span class="o">=</span><span class="default_value">0, 1</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypce/preprocessing.html#MinMaxTargetScaler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypce.preprocessing.MinMaxTargetScaler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom target scaler which uses one min and max for all elements</p>
+<blockquote>
+<div><p>Description:</p>
+</div></blockquote>
+<p>A Transformer class that scales and shifts by the min/max</p>
+<p>This transformer transforms the target Y by the absolute max and minimum to
+the unit hypercube, i.e., [0,1]^dim.  It does not scale each target column
+differently as in sklearn’s preprocessing toolbox. The transform is simply</p>
+<p>Y = (max(Y)-min(Y))*Yhat + min(Y)</p>
+<div class="admonition-todo admonition" id="id3">
+<p class="admonition-title">Todo</p>
+<p>To do list</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is just a test</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>min</strong> (<em>float</em>) – minimum of Y (over all columns and rows)</p></li>
+<li><p><strong>max</strong> (<em>float</em>) – maximum of Y (over all columns and rows)</p></li>
+<li><p><strong>w</strong> (<em>float</em>) – diff btwn min and max of Y (over all columns and rows)</p></li>
+<li><p><strong>ab_w</strong> (<em>float</em>) – width of target range</p></li>
+</ul>
+</dd>
+<dt class="field-even">Attributes</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>min_</strong> (<em>float</em>) – minimum of Y (over all columns and rows)</p></li>
+<li><p><strong>max_</strong> (<em>float</em>) – maximum of Y (over all columns and rows)</p></li>
+<li><p><strong>w_</strong> (<em>float</em>) – diff btwn min and max of Y (over all columns and rows)</p></li>
+<li><p><strong>ab_w_</strong> (<em>float</em>) – width of target range</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The return value.</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>Attribute Errors</strong> – </p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Examples should be written in doctest format</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello World!&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt id="pypce.preprocessing.MinMaxTargetScaler.fit">
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">Y</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pypce/preprocessing.html#MinMaxTargetScaler.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pypce.preprocessing.MinMaxTargetScaler.fit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fit method</p>
+<p>This function compute the min, max and width, which are used in the above
+transform and inverse transform formulas.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Y</strong> (<em>numpy.ndarray</em><em>, </em><em>required</em>) – ndarray of shape (n_samples ,n_features)
+This is the (possibly multi) target output.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
 
+</div>
 </div>
 
 
@@ -173,7 +264,7 @@
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

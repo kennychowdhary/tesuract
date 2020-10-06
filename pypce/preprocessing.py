@@ -1,3 +1,37 @@
+"""Example Google style docstrings.
+
+This module demonstrates documentation as specified by the `Google Python
+Style Guide`_. Docstrings may extend over multiple lines. Sections are created
+with a section header and a colon followed by a block of indented text.
+
+Example:
+	Examples can be given using either the ``Example`` or ``Examples``
+	sections. Sections support any reStructuredText formatting, including
+	literal blocks::
+
+		$ python example_google.py
+
+Section breaks are created by resuming unindented text. Section breaks
+are also implicitly created anytime a new section starts.
+
+Attributes:
+	module_level_variable1 (int): Module level variables may be documented in
+		either the ``Attributes`` section of the module docstring, or in an
+		inline docstring immediately following the variable.
+
+		Either form is acceptable, but the two should not be mixed. Choose
+		one convention to document module level variables and be consistent
+		with it.
+
+Todo:
+	* For module TODOs
+	* You have to also use ``sphinx.ext.todo`` extension
+
+.. _Google Python Style Guide:
+   https://google.github.io/styleguide/pyguide.html
+
+"""
+
 import numpy as np
 import warnings, pdb 
 
@@ -118,27 +152,49 @@ class DomainScaler:
 		return X_inv 
 
 class MinMaxTargetScaler:
-	"""A Transformer class that scales and shifts by the min/max
+	"""Custom target scaler which uses one min and max for all elements
+ 
+		Description:
+
+	A Transformer class that scales and shifts by the min/max
 
 	This transformer transforms the target Y by the absolute max and minimum to
 	the unit hypercube, i.e., [0,1]^dim.  It does not scale each target column
 	differently as in sklearn's preprocessing toolbox. The transform is simply 
 
-	Yhat = (Y-min(Y))/(max(Y)-min(Y))
-
-	and the inverse is
-
 	Y = (max(Y)-min(Y))*Yhat + min(Y)
 
-	Parameters
-    ----------
-    
-    eps : float, default=1e-3
-        Length of the path. ``eps=1e-3`` means that
-        ``alpha_min / alpha_max = 1e-3``.
+	Todo:
+		To do list
+ 
+	Note:
+		This is just a test
+  
+	Parameters:
+		min_ (float):	minimum of Y (over all columns and rows)
+		max_ (float):	maximum of Y (over all columns and rows)
+		w_ (float):		diff btwn min and max of Y (over all columns and rows)
+		ab_w_ (float):		width of target range 
+	
+	Attributes:
+		min_ (float):	minimum of Y (over all columns and rows)
+		max_ (float):	maximum of Y (over all columns and rows)
+		w_ (float):		diff btwn min and max of Y (over all columns and rows)
+		ab_w_ (float):		width of target range 
 
+	Returns:
+		The return value. 
+  
+	Raises:
+		Attribute Errors
+  
+	Examples:
+		Examples should be written in doctest format
+
+		>>> print("Hello World!")
 	"""
 	def __init__(self,target_range=(0,1)):
+		"""This is a description of the constructor"""
 		self.a,self.b = target_range
 	def fit(self,Y):
 		"""

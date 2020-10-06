@@ -18,6 +18,8 @@ class LegendreQuad(QuadBase):
 	def get1dQuad(self,nquad=None):
 		if nquad is not None: self.nquad = nquad
 		x,w = leggauss(self.nquad)
+		# rescale weights to sum to 1
+		w = w/2.0
 		return x,w
 
 class HermiteQuad(QuadBase):
@@ -54,46 +56,53 @@ class ClenshawCurtis(QuadBase):
 			w[1:-1] = 2*w[1:-1]/(n-1)
 			w[-1] *= 1.0/(n-1)
 			return x,w
-	def get1dQuad(self,nquad):
+	def get1dQuad(self,nquad=None):
 		'''from chaospy'''
+		if nquad is not None: 
+			self.nquad = nquad
 		degree = self.nquad
 		n = self.nquad
-		points = -np.cos((np.pi * np.arange(n)) / (n - 1))
-		if n == 2:
-			weights = np.array([1.0, 1.0])
+		if n == 1:
+			points = np.array([0.0])
+			weights = np.array([2.0])
 		else:
-			n -= 1
-			N = np.arange(1, n, 2)
-			length = len(N)
-			m = n - length
-			v0 = np.concatenate(
-				[2.0 / N / (N - 2), np.array([1.0 / N[-1]]), np.zeros(m)]
-			)
-			v2 = -v0[:-1] - v0[:0:-1]
-			g0 = -np.ones(n)
-			g0[length] += n
-			g0[m] += n
-			g = g0 / (n ** 2 - 1 + (n % 2))
-
-			w = np.fft.ihfft(v2 + g)
-			assert max(w.imag) < 1.0e-15
-			w = w.real
-
-			if n % 2 == 1:
-				weights = np.concatenate([w, w[::-1]])
+			points = -np.cos((np.pi * np.arange(n)) / (n - 1))
+			if n == 2:
+				weights = np.array([1.0, 1.0])
 			else:
-				weights = np.concatenate([w, w[len(w) - 2 :: -1]])
+				n -= 1
+				N = np.arange(1, n, 2)
+				length = len(N)
+				m = n - length
+				v0 = np.concatenate(
+					[2.0 / N / (N - 2), np.array([1.0 / N[-1]]), np.zeros(m)]
+				)
+				v2 = -v0[:-1] - v0[:0:-1]
+				g0 = -np.ones(n)
+				g0[length] += n
+				g0[m] += n
+				g = g0 / (n ** 2 - 1 + (n % 2))
+
+				w = np.fft.ihfft(v2 + g)
+				assert max(w.imag) < 1.0e-15
+				w = w.real
+
+				if n % 2 == 1:
+					weights = np.concatenate([w, w[::-1]])
+				else:
+					weights = np.concatenate([w, w[len(w) - 2 :: -1]])
+		weights = weights/2.0
 		return points, weights
 
 class QuadFactory:
 	# generates QuadBase class object
 	@staticmethod
-	def newQuad(quadtype='Legendre'):
-		if quadtype == 'Legendre':
+	def newQuad(quadtype='legendre_gauss'):
+		if quadtype == 'legendre_gauss':
 			Q = LegendreQuad()
-		if quadtype == 'ClenshawCurtis':
+		if quadtype == 'clenshaw_curtis':
 			Q = ClenshawCurtis()
-		if quadtype == 'Hermite':
+		if quadtype == 'hermite_gauss':
 			Q = HermiteQuad()
 		return Q
 
@@ -129,7 +138,6 @@ class QuadRule:
 		return Qnew
 	def copy(self):
 		return QuadRule(self.x,self.w)
-
 
 class QuadOps:
 	@staticmethod
@@ -170,7 +178,7 @@ class QuadOps:
 		w = w[np.abs(w) > 1e-12]
 		return QuadRule(x,w)
 
-
+# deprecated for sparse, but good for full tensor product grid
 class QuadBuilder():
 	def __init__(self,grid_type='sparse',order=2,quad_type='Legendre'):
 		self.grid_type = grid_type
@@ -183,7 +191,7 @@ class QuadBuilder():
 		if self.grid_type == 'full':
 			self._full()
 		if self.grid_type == 'sparse':
-			if self.quad_type == 'Legendre': 
+			if self.quad_type == 'legendre_gauss': 
 				self.growth_rule = 0
 			self._sparse()
 		return self
@@ -192,9 +200,10 @@ class QuadBuilder():
 		quad_gen = QuadFactory.newQuad(self.quad_type)
 		x,w = quad_gen.get1dQuad(nquad=self.order+1) # 0th order means 1 point
 		q1d = QuadRule(x,w)
+		qnew = q1d.copy()
 		for i in range(1,self.ndim):
-			q1d *= q1d
-		q = q1d
+			qnew = qnew*q1d
+		q = qnew.copy()
 		self.rule_ = q
 	def _sparse(self):
 		for nlevel in range(-1,self.order):
@@ -307,82 +316,44 @@ class QuadBuilder():
 		self.rule_ = QuadOps.compressRule(self.rule_)
 		return self
 
-
-quad = QuadBuilder(order=5,grid_type='sparse')
-# quad.SetRule(ndim=2)
-# rule = quad.rule_
-# # rule = QuadOps.compressRule(quad.rule_)
-
-# L = LegendreQuad()
-# x,w = L.get1dQuad(8)
-# rn = np.random.RandomState(123)
-# X = 2*rn.rand(len(w),2)-1
-# W = 4./X.shape[0] + 0*w
-
-# q1 = QuadRule(x,w)
-# q2 = QuadRule(x,w)
-# Q1 = QuadRule(X,W)
-# Q2 = QuadRule(X,W)
-# q = q1+q2
-# Q = Q1+Q2
-
-# M = QuadOps.getMultiIndexLevel(level=3,ndim=2)
-
-# test chaospy
-def construct_lookup(
-		orders,
-		dists,
-		rules='gaussian',
-		accuracy=100,
-		growth=None,
-		recurrence_algorithm="",
-):
+def construct_lookup(orders, dim, rules='gaussian'):
 	"""
 	Create abscissas and weights look-up table so values do not need to be
 	re-calculatated on the fly.
 	"""
-	# from .frontend import generate_quadrature
 	if isinstance(rules, str):
-		rules = (rules,)*len(dists)
-	if isinstance(orders,int):
-		orders = orders*np.ones(len(dists), dtype=int)
+		rules = (rules,)*dim
+	if isinstance(orders, int):
+		orders = orders*np.ones(dim, dtype=int)
 	x_lookup = []
 	w_lookup = []
-	if rules[0] == "gaussian":
-		Q = QuadFactory.newQuad("Legendre")
+	if rules[0] == "gaussian" or "legendre_gauss":
+		Q = QuadFactory.newQuad("legendre_gauss")
+		growth = False
 	if rules[0] == "clenshaw_curtis":
-		Q = QuadFactory.newQuad("ClenshawCurtis")
+		Q = QuadFactory.newQuad("clenshaw_curtis")
+		growth = True
 	# if rules[0] == 'hermite':
-		# Q = QuadFactory.newQuad("Hermite")
-	for max_order, dist, rule in zip(orders, dists, rules):
+		# Q = QuadFactory.newQuad("hermite_gauss")
+	for max_order, rule in zip(orders, rules):
 		x_lookup.append([])
 		w_lookup.append([])
 		for order in range(max_order+1):
-			# abscissas, weights = Q.get1dQuad(order+1)
-			(abscissas,), weights = generate_quadrature(
-				order,
-				dist,
-				accuracy=100,
-				rule=rule,
-				growth=None
-			)
-			# err1 = np.linalg.norm(abscissas - abscissas0)
-			# err2 = np.linalg.norm(weights - weights0)
-			# print(err1,err2)
-			# print(weights,weights0)
+			if growth == True:
+				order_adj = 2**(order)+1
+			else:
+				order_adj = order + 1
+			abscissas, weights = Q.get1dQuad(order_adj)
 			x_lookup[-1].append(abscissas)
 			w_lookup[-1].append(weights)
 	return x_lookup, w_lookup
 
-def construct_collection(
-		orders,
-		dists,
-		x_lookup,
-		w_lookup,
-):
+
+def construct_collection(orders, dim, x_lookup, w_lookup
+                         ):
 	"""Create a collection of {abscissa: weight} key-value pairs."""
-	if isinstance(orders,int):
-		orders = orders*np.ones(len(dists), dtype=int)
+	if isinstance(orders, int):
+		orders = orders*np.ones(dim, dtype=int)
 	order = np.min(orders)
 	skew = orders-order
 
@@ -390,11 +361,11 @@ def construct_collection(
 	# indices = chaospy.numpoly.glexindex(
 	# 	order-len(dists)+1, order+1, dimensions=len(dists))
 	mi = []
-	for ilevel in range(order-len(dists)+1,order+1):
-		mi.append(QuadOps.getMultiIndexLevel(ilevel,len(dists)))
+	for ilevel in range(order-dim+1, order+1):
+		mi.append(QuadOps.getMultiIndexLevel(ilevel, dim))
 	indices = np.vstack(mi).astype('int')
 	coeffs = np.sum(indices, -1)
-	coeffs = (2*((order-coeffs+1) % 2)-1)*comb(len(dists)-1, order-coeffs)
+	coeffs = (2*((order-coeffs+1) % 2)-1)*comb(dim-1, order-coeffs)
 
 	collection = defaultdict(float)
 	for bidx, coeff in zip(indices+skew, coeffs.tolist()):
@@ -405,26 +376,60 @@ def construct_collection(
 
 	return collection
 
-import chaospy
-from chaospy import generate_quadrature
 from collections import defaultdict
 from itertools import product
 
-# dists = [chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1)]
-dists = [chaospy.Uniform(-1, 1),chaospy.Uniform(-1, 1)]
-distribution = chaospy.J(*dists)
-# distribution = chaospy.J(chaospy.Normal(0, 1), chaospy.Normal(0, 1))    
-order = 5
-# rule = "gaussian"
-rule = "clenshaw_curtis"
-# rule = "gaussian"
-x_lookup, w_lookup = construct_lookup(orders=order,dists=distribution,rules=rule)
-collection = construct_collection(orders=order,dists=distribution,x_lookup=x_lookup,w_lookup=w_lookup)
+class QuadGen(object):
+	""" Class for generating n-d quadrature
 
-x = sorted(collection)
-w = np.array([collection[key] for key in x])
-x = np.array(x).T
-print(np.sum(w))
+	Example:
+		# test
+		dim = 5
+		Q = QuadGen(dim=dim,order=5,rule='legendre_gauss',sparse=True)
+		x,w = Q.run()
+
+		Q2 = QuadGen(dim=dim,order=5,rule='legendre_gauss',sparse=False)
+		x2,w2 = Q2.run()
+
+		# genz function tests
+
+		def genz_exp(x):
+			if x.ndim == 2:
+				output = np.exp(np.sum(x - 1,axis=1))
+			elif x.ndim == 1:
+				output = np.exp(np.sum(x - 1))
+			return output
+		soln = (np.exp(0) - np.exp(-1.0))**dim
+
+		approx = np.sum(genz_exp(x)*w)
+		error = np.mean((soln - approx)**2)/np.mean(soln**2)
+		print(soln, 'vs', approx,' , error = ', error)
+	"""
+	def __init__(self,dim,order=2,rule='legendre_gauss',sparse=True):
+		self.dim = dim
+		self.order = order
+		self.rule = rule
+		self.sparse = sparse
+	def run(self,order=None):
+		if order is None: order = self.order
+		if self.sparse == False:
+			Qtemp = QuadBuilder(order=order,grid_type='full',quad_type=self.rule)
+			Qtemp.SetRule(ndim=self.dim)
+			x,w = Qtemp.rule_.x,Qtemp.rule_.w
+		elif self.sparse == True:
+			# create initial lookup table of 1d quadratures
+			self.x_lookup, self.w_lookup = construct_lookup(orders=order,dim=self.dim,rules=self.rule)
+			self.collection = construct_collection(orders=order,dim=self.dim,
+								x_lookup=self.x_lookup,w_lookup=self.w_lookup)
+			# scale and renormalize to over [0,1] and unit weight
+			x = sorted(self.collection)
+			w = np.array([self.collection[key] for key in x])
+			x = np.array(x) # each row is a data point
+			assert (np.abs(np.sum(w) - 1.0)) <= 1e-12, "Weights are not normalized on [0,1]." 
+		x = .5*(x + 1)
+		assert np.all(x >= 0.0) and np.all(x <= 1.0), "Points are outside the range [0,1]^d"
+		self.points, self.weights = x,w
+		return self.points, self.weights
 
 
 

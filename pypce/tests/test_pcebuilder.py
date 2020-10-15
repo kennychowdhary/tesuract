@@ -61,7 +61,7 @@ class TestPCEBuilder(unittest.TestCase):
 		Xhat = p.fit_transform(X)
 		assert Xhat.shape[1] == len(c_true), "coefficient array size is incorrect."
 		ypred = p.polyeval(c=c_true)
-		assert np.sum(np.abs(ypred - y)) <= 1e-15, "poly eval is not converging."
+		assert np.sum(np.abs(ypred - y)) <= 1e-14, "poly eval is not converging."
 		ctest = np.zeros(len(c_true)); ctest[2] = 1.0
 		ypred2 = p.polyeval(c=ctest)
 		assert np.sum(np.abs(ypred2 - X[:,1])) <= 1e-15, "polyeval with fixed X is not working right."

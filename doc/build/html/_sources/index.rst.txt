@@ -44,10 +44,10 @@ Let's create a :math:`4^{th}` order polynomial regression model [#]_ on the
 .. code-block:: python
 
    import pypce
-   p = pypce.pcereg(order=4)
+   p = pypce.PCEReg(order=4)
 
-That's it! Now, in order to perform regression, just run :code:`p.fit(X,y)` and
-:code:`p.predict(X)` for a data/ target pair :math:`(X,y)`. [#]_ 
+That's it! In order to perform the regression, just run :code:`p.fit(X,y)` and
+:code:`p.predict(X)` for any data/ target pair :math:`(X,y)`. [#]_ 
 
 User Guide
 ----------
@@ -56,6 +56,8 @@ User Guide
    :maxdepth: 2
    
    introduction
+   guide
+   tutorial
    api
 
 

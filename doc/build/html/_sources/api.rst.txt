@@ -9,17 +9,26 @@ API
 .. .. automodule:: pypce.multiindex
 .. 	:members:
 
-.. Polynomial Classes
-.. ------------------
+Polynomial Classes
+------------------
 
-.. .. automodule:: pypce.pce
-.. 	:members: PCEBuilder
+.. autoclass:: pypce.PCEBuilder
+	:members:
 
-Preprocessing Utilities
+.. .. autoclass:: pypce.PCEReg
+.. 	:members:
+
+.. Preprocessing Utilities
+.. -----------------------
+
+.. .. automodule:: pypce.preprocessing
+.. 	:members:
+
+Quadrature
 -----------------------
 
-.. automodule:: pypce.preprocessing
-	:members:
+.. .. autoclass:: pypce.QuadGen
+.. 	:members:
 
 .. The ``shape`` module
 .. --------------------
@@ -33,3 +42,4 @@ Preprocessing Utilities
 
 .. .. automodule:: trianglelib.utils
 .. 	:members:
+

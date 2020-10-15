@@ -35,6 +35,7 @@ extensions = ['sphinx.ext.autodoc',
 ]
 
 napoleon_google_docstring = True
+napolean_numpy_docstring = True
 todo_include_todos = True
 # napoleon_include_init_with_doc = True # True = show init
 # napoleon_use_admonition_for_examples = True

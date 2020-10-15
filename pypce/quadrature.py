@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as mpl
-import pdb, ipdb, warnings, pickle
+import pdb, warnings, pickle
 from numpy.polynomial.legendre import leggauss
 from numpy.polynomial.hermite_e import hermegauss
 import itertools

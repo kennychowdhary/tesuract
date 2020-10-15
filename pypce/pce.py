@@ -66,6 +66,56 @@ class PolyFactory:
 		return L
 
 class PCEBuilder(BaseEstimator):
+	""" Summary line. 
+
+	This is a summary of the PCEBuilder class. 
+
+	Attributes
+	----------
+	x :	float
+		The X coordinate
+	y :	float
+		The Y coordinate
+
+	Parameters
+	----------
+	x :	float
+		The X coordinate
+	y :	float
+		The Y coordinate
+
+	Returns
+	--------
+	x : int
+		Returns itself
+	y : int
+		Returns y coordinate. 
+
+	Notes
+	-----
+	The FFT is a fast implementation of the discrete Fourier transform:
+
+	.. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
+
+	Todo
+	-----
+	The FFT is a fast implementation of the discrete Fourier transform:
+
+	.. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}
+
+	Examples
+	--------
+	>>> np.add(1, 2)
+	3
+
+	Comment explaining the second example.
+
+	>>> np.add([1, 2], [3, 4])
+	array([4, 6])
+
+	
+
+	"""
 	def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False):
 		# self.dim = dim # no need to initialize with dim
 		self.order = order
@@ -246,7 +296,6 @@ class PCEBuilder(BaseEstimator):
 			self.mu = prob_weight * np.sqrt(normsq[0])*coef_[0]
 			self.var = prob_weight * np.sum(coef_[1:]**2)
 		return self.mu, self.var
-
 
 class PCEReg_old(PCEBuilder,RegressorMixin):
 	def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2,normalized=False,w=None):

@@ -369,7 +369,6 @@ Q = [.05,.5,.95]
 target_scaler = pypce.preprocessing.MinMaxTargetScaler(target_range=(0, 1))
 Y_scaled = target_scaler.fit_transform(Y)
 Y_q = np.quantile(Y_scaled,Q,axis=0)
-pdb.set_trace()
 
 # Lower and Upper Bound for features in X (for future scaling)
 X_LB = np.array([.85, .85, .85, 0.7, 0.8, 0.3, 0.7, 0.0784, 0.38, 0.31, 1.19, 1.05])
@@ -405,16 +404,20 @@ HFreg = MRegressionWrapperCV(
 
 
 # fit multiple target with type as single element list
+start = T.time()
 HFreg2 = MRegressionWrapperCV(
-			regressor=['randforests'],
-			reg_params=[rf_param_grid],
+			regressor=['pce'],
+			reg_params=[pce_param_grid],
 			target_transform=PCATargetTransform,
 			target_transform_params=pca_params,
 			n_jobs=8)
 HFreg2.fit(X_scaled,Y_scaled)
+end = T.time()
+print("Total time is %.5f seconds", end-start)
 Y_pce_recon2 = HFreg2.predict(X_scaled)
 Y_pce_q = np.quantile(Y_pce_recon2,Q,axis=0)
 print(HFreg2.best_scores_)
+
 
 # PLOTTING
 

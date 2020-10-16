@@ -179,6 +179,8 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		assert isinstance(res,dict), "for single prediction, results must be a dictionary."
 		Yhatpred_list = []
 		for estimator in self.best_estimators_:
+			if X.ndim == 1:
+				X = np.atleast_2d(X)
 			Yhatpred_list.append(estimator.predict(X))
 		Yhatpred = np.array(Yhatpred_list).T
 		Ypred = self.TT.inverse_transform(Yhatpred)
@@ -256,16 +258,16 @@ RW = RegressionWrapperCV(regressor='pce',reg_params=reg_params)
 # RW.fit(X,y)
 
 # pce grid search cv test
-pce_param_grid = [{'order': [1, 2, 3, 4],
+pce_param_grid = [{'order': [1, 2, 3],
 	 'mindex_type': ['total_order', 'hyperbolic', ],
 	 'fit_type': ['LassoCV', 'linear', 'ElasticNetCV']}]
 RW2 = RegressionWrapperCV(regressor='pce',reg_params=pce_param_grid,n_jobs=6)
 
 
 # random forest fit
-rf_param_grid = {'n_estimators': [500,1000],
+rf_param_grid = {'n_estimators': [100,300],
 				 'max_features': ['auto'],
-				 'max_depth': [5,10,15]
+				 'max_depth': [5,10]
 				 }
 RW3 = RegressionWrapperCV(regressor='randforests', reg_params=rf_param_grid,n_jobs=8)
 
@@ -361,7 +363,6 @@ X = np.load(datadir + 'data/X_samples.npy')
 x_domain = np.load(datadir + 'data/x_domain.npy')
 Y = np.load(datadir + 'data/Y_' + data_field + '.npy')
 
-
 Q = [.05,.5,.95]
 
 # Scale target Y (use inverse transform for new data)
@@ -393,10 +394,10 @@ Y_pca_recon0 = pca.inverse_transform(Yhat_scaled)
 Y_pca_q = np.quantile(Y_pca_recon0,Q,axis=0)
 
 # fit multiple target with type as single element list
-HFreg = MRegressionWrapperCV(
-			regressor=['pce'],
-			reg_params=[pce_param_grid],
-			n_jobs=8)
+# HFreg = MRegressionWrapperCV(
+# 			regressor=['pce'],
+# 			reg_params=[pce_param_grid],
+# 			n_jobs=8)
 # HFreg.fit(X_scaled,Yhat_scaled)
 # Yhat_pred = HFreg.predict(X_scaled)
 # Y_pce_recon = pca.inverse_transform(Yhat_pred)
@@ -411,15 +412,66 @@ HFreg2 = MRegressionWrapperCV(
 			target_transform=PCATargetTransform,
 			target_transform_params=pca_params,
 			n_jobs=8)
-HFreg2.fit(X_scaled,Y_scaled)
+# HFreg2.fit(X_scaled,Y_scaled)
 end = T.time()
 print("Total time is %.5f seconds" %(end-start))
-Y_pce_recon2 = HFreg2.predict(X_scaled)
-Y_pce_q = np.quantile(Y_pce_recon2,Q,axis=0)
-print(HFreg2.best_scores_)
+# Y_pce_recon2 = HFreg2.predict(X_scaled)
+# Y_pce_q = np.quantile(Y_pce_recon2,Q,axis=0)
+# print(HFreg2.best_scores_)
 
+# save model
+from joblib import dump, load
+# dump(HFreg2,'regmodel2.joblib')
+regmodel = load('regmodel2.joblib')
 
-# # PLOTTING
+# load observations for heat flux only
+# interpolate predictions for obersvations
+# if data_field == 'heat_flux_wall':
+x_heat_flux = np.load(datadir + 'data/x_heat_flux.npy')
+obs = np.loadtxt(datadir + 'data/mks_hifire1_run30_q.dat')
+x_obs, y_obs = obs.T
+# x_obs *= np.cos(7.0*np.pi/180.)
+# transform y_obs using 
+y_obs_scaled = target_scaler.transform(y_obs)
+
+# interpolate
+from scipy.interpolate import interp1d
+def interp_heat_flux(y):
+	# yi = np.interp(x_obs,x_heat_flux,y)
+	fi = interp1d(x_heat_flux,y)
+	yi = fi(x_obs)
+	return yi
+
+def objfun(x_uq):
+	y = regmodel.predict(x_uq)
+	yi = interp_heat_flux(y)
+	yi = np.atleast_2d(yi)
+	y_true = np.atleast_2d(y_obs_scaled)
+	ii = (x_obs >= 0) & (x_obs <= 1.8)
+	error = np.mean((y_true[:,ii] - yi[:,ii])**2, axis=1)/np.mean(y_true[:,ii]**2)
+	return error, yi
+
+def func(x):
+	error, yi = objfun(x)
+	return error
+
+x0 = np.zeros(12) #X_scaled[0]
+error0, ypred0 = objfun(x0)
+
+# optimize
+from scipy.optimize import fmin_l_bfgs_b
+dim = X_scaled.shape[1]
+bounds = [(-1.0,1.0) for d in range(dim)]
+res = fmin_l_bfgs_b(func,x0,
+		approx_grad=True,bounds=bounds,
+		factr=1e7,disp=2)
+x_opt = res[0]
+y_opt = regmodel.predict(x_opt)
+
+# PLOTTING
+mpl.plot(x_heat_flux,y_opt.T,'--.b',alpha=.25)
+mpl.plot(x_obs,y_obs_scaled,'*r')
+
 
 # def plot_feature_importance(S,feature_labels,extra_line_plot=None):
 #     assert isinstance(S,np.ndarray), "S must be a numpy array"

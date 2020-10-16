@@ -126,6 +126,8 @@ class DomainScaler:
 		b = np.array([ab[1] for ab in input_bounds]) # upper bounds
 		return input_bounds,a,b
 	def _range_check(self,X,B):
+		if X.ndim == 1:
+			X = np.atleast_2d(X)
 		n,d = X.shape
 		assert d == self.dim, "columns of X must be the same as dimensions"
 		assert len(B) == self.dim, "length of bounds list must be same as dimensions"

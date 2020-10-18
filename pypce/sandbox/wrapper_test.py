@@ -423,6 +423,7 @@ print("Total time is %.5f seconds" %(end-start))
 from joblib import dump, load
 # dump(HFreg2,'regmodel2.joblib')
 regmodel = load('regmodel2.joblib')
+# regmodel = HFreg2
 
 # load observations for heat flux only
 # interpolate predictions for obersvations
@@ -455,23 +456,57 @@ def func(x):
 	error, yi = objfun(x)
 	return error
 
+X0 = []
 x0 = np.zeros(12) #X_scaled[0]
+X0.append(x0)
+for i in range(100):
+	X0.append(2*np.random.rand(12)-1)
 error0, ypred0 = objfun(x0)
 
 # optimize
-from scipy.optimize import fmin_l_bfgs_b
+from scipy.optimize import fmin_l_bfgs_b, fmin_tnc, fmin_slsqp
 dim = X_scaled.shape[1]
 bounds = [(-1.0,1.0) for d in range(dim)]
-res = fmin_l_bfgs_b(func,x0,
-		approx_grad=True,bounds=bounds,
-		factr=1e7,disp=2)
-x_opt = res[0]
-y_opt = regmodel.predict(x_opt)
+def minimize_call(xstart,factr=1e2):
+    # neglogpost = lambda x: -1*logpost_emcee(x,model_info,LB,UB)
+    # lbfgs_options = {} #{"factr": 1e2, "pgtol": 1e-10, "maxiter": 200}
+    res = fmin_l_bfgs_b(func,xstart,approx_grad=True,bounds=bounds,
+							factr=factr,disp=1)
+    return res
+# res = fmin_l_bfgs_b(func,x0,approx_grad=True,bounds=bounds,
+# 							factr=1e2,pgtol=1e-8,disp=2)
+# res = fmin_tnc(func,x0,approx_grad=True,bounds=bounds)
+# res = fmin_slsqp(func, x0, iter=1000, bounds=bounds, acc=1e-9, iprint=2, full_output=True)
+# x_opt = res[0]
+# y_opt = regmodel.predict(x_opt)
 
-# PLOTTING
-mpl.plot(x_heat_flux,y_opt.T,'--.b',alpha=.25)
-mpl.plot(x_obs,y_obs_scaled,'*r')
+from functools import partial
+myfun = partial(minimize_call, factr=1e2)
+from multiprocessing import Pool
+nprocs = 4
+p = Pool(nprocs) 
+start = T.time()
+res = p.map(myfun,[x for x in X0[:nprocs]])
+end = T.time()
+p.close()
+p.terminate()
 
+fmins = [r['fun'] for r in res]
+# fmins = [r[1] for r in res]
+min_index = np.nanargmin(fmins)
+print('fmin is ', fmins[min_index])
+xstart = res[min_index]['x']
+print('xstart is ', xstart)
+
+# # PLOTTING
+# mpl.plot(x_heat_flux,y_opt.T,'--.b',alpha=.25)
+# mpl.plot(x_obs,y_obs_scaled,'*r')
+# mpl.ylim([-.1,.6])
+
+# soln unscaled over entire observation domain
+# array([[1.15, 0.94, 1.15, 1., 1.2, 0.7, 0.7, 0.1024, 0.41135679, 0.38735689, 1.22172531, 1.05]])
+# soln unscaled over observation domain [.5,1.6]
+# array([[1.07626664, 0.96534047, 1.15 , 0.89227786, 0.8, 0.42324062, 1., 0.09781106, 0.42, 0.37125262, 1.19, 1.45]])
 
 # def plot_feature_importance(S,feature_labels,extra_line_plot=None):
 #     assert isinstance(S,np.ndarray), "S must be a numpy array"

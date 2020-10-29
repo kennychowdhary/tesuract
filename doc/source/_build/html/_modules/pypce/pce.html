@@ -31,7 +31,7 @@
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
         <script src="../../_static/language_data.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
@@ -219,54 +219,64 @@
 		<span class="k">return</span> <span class="n">L</span>
 
 <div class="viewcode-block" id="PCEBuilder"><a class="viewcode-back" href="../../api.html#pypce.PCEBuilder">[docs]</a><span class="k">class</span> <span class="nc">PCEBuilder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
-	<span class="sd">&quot;&quot;&quot; Summary line. </span>
+	<span class="sd">&quot;&quot;&quot; Base class for building a multivariate polynomial basis.  </span>
 
-<span class="sd">	This is a summary of the PCEBuilder class. </span>
+<span class="sd">	This class creates a multi-variate polynomial object, aka as a polynomial</span>
+<span class="sd">	chaos model. The expansion looks like </span>
 
-<span class="sd">	Attributes</span>
-<span class="sd">	----------</span>
-<span class="sd">	x :	float</span>
-<span class="sd">		The X coordinate</span>
-<span class="sd">	y :	float</span>
-<span class="sd">		The Y coordinate</span>
+<span class="sd">	.. math::</span>
+
+<span class="sd">	    \sum_{i=1}^N c_i \Phi_i(\mathbf{x})</span>
+
+<span class="sd">	where :math:`N` is the number of polynomial terms, and</span>
+<span class="sd">	:math:`\Phi_i:\mathbf{x} \in \mathbb{R}^d \mapsto \mathbb{R}` is the</span>
+<span class="sd">	multivariate basis function which takes the form </span>
+
+<span class="sd">	.. math::</span>
+
+<span class="sd">	    \Phi_i = \prod_{j=1}^d L_{\\alpha_j^{(i)}}(x_i),</span>
+
+<span class="sd">	where :math:`\\alpha_j` is an integer tuple of size :math:`d` which</span>
+<span class="sd">	represents the multiindex, and :math:`L:\mathbb{R} \mapsto \mathbb{R}` are</span>
+<span class="sd">	the one-dimensional Legendre polynomials. So for example, in two dimensions,</span>
+<span class="sd">	we can have :math:`\Phi_i = xy`. The construction of the multiindex is done</span>
+<span class="sd">	behind the scenes in the ``multindex`` module.</span>
+
+<span class="sd">	Below we list the parameters to construct the object followed by the class</span>
+<span class="sd">	attributes and returns. </span>
 
 <span class="sd">	Parameters</span>
 <span class="sd">	----------</span>
-<span class="sd">	x :	float</span>
-<span class="sd">		The X coordinate</span>
-<span class="sd">	y :	float</span>
-<span class="sd">		The Y coordinate</span>
+<span class="sd">	order : int, default=2</span>
+<span class="sd">		Whether to calculate the intercept for this model. If set to False, no intercept will be used in calculations (i.e. data is expected to be centered).</span>
+
+<span class="sd">	Attributes</span>
+<span class="sd">	----------</span>
+<span class="sd">	x : float The X coordinate y : float The Y coordinate</span>
 
 <span class="sd">	Returns</span>
 <span class="sd">	--------</span>
-<span class="sd">	x : int</span>
-<span class="sd">		Returns itself</span>
-<span class="sd">	y : int</span>
-<span class="sd">		Returns y coordinate. </span>
+<span class="sd">	x : int Returns itself y : int Returns y coordinate. </span>
 
 <span class="sd">	Notes</span>
 <span class="sd">	-----</span>
-<span class="sd">	The FFT is a fast implementation of the discrete Fourier transform:</span>
-
-<span class="sd">	.. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}</span>
+<span class="sd">	As of now, the base class requires the inputs live on the default range</span>
+<span class="sd">	:math:`[-1,1]` for all dimensions. We have included a useful preprocessing</span>
+<span class="sd">	utility (``DomainScaler``) to transform the domain easily to the canonical</span>
+<span class="sd">	target range from any input range. In the future this will be an option in</span>
+<span class="sd">	the this class. </span>
 
 <span class="sd">	Todo</span>
 <span class="sd">	-----</span>
-<span class="sd">	The FFT is a fast implementation of the discrete Fourier transform:</span>
-
-<span class="sd">	.. math:: X(e^{j\omega } ) = x(n)e^{ - j\omega n}</span>
+<span class="sd">	* Add option for non-standard domain. </span>
 
 <span class="sd">	Examples</span>
 <span class="sd">	--------</span>
-<span class="sd">	&gt;&gt;&gt; np.add(1, 2)</span>
-<span class="sd">	3</span>
+<span class="sd">	&gt;&gt;&gt; np.add(1, 2) 3</span>
 
 <span class="sd">	Comment explaining the second example.</span>
 
-<span class="sd">	&gt;&gt;&gt; np.add([1, 2], [3, 4])</span>
-<span class="sd">	array([4, 6])</span>
-
-<span class="sd">	</span>
+<span class="sd">	&gt;&gt;&gt; np.add([1, 2], [3, 4]) array([4, 6])</span>
 
 <span class="sd">	&quot;&quot;&quot;</span>
 	<span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">customM</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">mindex_type</span><span class="o">=</span><span class="s1">&#39;total_order&#39;</span><span class="p">,</span><span class="n">coef</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">polytype</span><span class="o">=</span><span class="s1">&#39;Legendre&#39;</span><span class="p">,</span><span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>

@@ -30,13 +30,15 @@
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
         <script src="_static/language_data.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link href="_static/style.css" rel="stylesheet" type="text/css">
+
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,10 +84,20 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guide.html">Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="introduction.html#main-features-of-pypce">Main features of pypce</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="guides/PCEReg_guide.html">Guide to PCE Regression</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">The pypce tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#polynomial-classes">Polynomial Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#quadrature">Quadrature</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -154,6 +166,8 @@
 
 <div class="genindex-jumpbox">
  <a href="#C"><strong>C</strong></a>
+ | <a href="#E"><strong>E</strong></a>
+ | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -162,7 +176,31 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#pypce.PCEBuilder.compile">compile() (pypce.PCEBuilder method)</a>
+</li>
+      <li><a href="api.html#pypce.PCEBuilder.computeMoments">computeMoments() (pypce.PCEBuilder method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#pypce.PCEBuilder.computeNormSq">computeNormSq() (pypce.PCEBuilder method)</a>
+</li>
+      <li><a href="api.html#pypce.PCEBuilder.computeSobol">computeSobol() (pypce.PCEBuilder method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="E">E</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#pypce.PCEBuilder.eval">eval() (pypce.PCEBuilder method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#pypce.PCEBuilder.fit_transform">fit_transform() (pypce.PCEBuilder method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -179,6 +217,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api.html#pypce.PCEBuilder">PCEBuilder (class in pypce)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#pypce.PCEBuilder.polyeval">polyeval() (pypce.PCEBuilder method)</a>
 </li>
   </ul></td>
 </tr></table>

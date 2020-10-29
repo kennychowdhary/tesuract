@@ -258,7 +258,7 @@ RW = RegressionWrapperCV(regressor='pce',reg_params=reg_params)
 # RW.fit(X,y)
 
 # pce grid search cv test
-pce_param_grid = [{'order': [1, 2, 3],
+pce_param_grid = [{'order': [1, 2, 3, 4],
 	 'mindex_type': ['total_order', 'hyperbolic', ],
 	 'fit_type': ['LassoCV', 'linear', 'ElasticNetCV']}]
 RW2 = RegressionWrapperCV(regressor='pce',reg_params=pce_param_grid,n_jobs=6)
@@ -412,7 +412,7 @@ HFreg2 = MRegressionWrapperCV(
 			target_transform=PCATargetTransform,
 			target_transform_params=pca_params,
 			n_jobs=8)
-# HFreg2.fit(X_scaled,Y_scaled)
+HFreg2.fit(X_scaled,Y_scaled)
 end = T.time()
 print("Total time is %.5f seconds" %(end-start))
 # Y_pce_recon2 = HFreg2.predict(X_scaled)
@@ -421,8 +421,8 @@ print("Total time is %.5f seconds" %(end-start))
 
 # save model
 from joblib import dump, load
-# dump(HFreg2,'regmodel2.joblib')
-regmodel = load('regmodel2.joblib')
+dump(HFreg2,'regmodel.joblib')
+regmodel = load('regmodel.joblib')
 # regmodel = HFreg2
 
 # load observations for heat flux only
@@ -448,31 +448,45 @@ def objfun(x_uq):
 	yi = interp_heat_flux(y)
 	yi = np.atleast_2d(yi)
 	y_true = np.atleast_2d(y_obs_scaled)
-	ii = (x_obs >= 0) & (x_obs <= 1.8)
+	ii = (x_obs >= 0) & (x_obs <= 0.65)
 	error = np.mean((y_true[:,ii] - yi[:,ii])**2, axis=1)/np.mean(y_true[:,ii]**2)
 	return error, yi
 
+
 def func(x):
-	error, yi = objfun(x)
+	dim = 12
+	xref = np.zeros(dim)
+	# xref[[0,1,9]] = x
+	xref[:] = x
+	error, yi = objfun(xref)
 	return error
 
+dim = len(X_col_names)
+opt_dim = 12
 X0 = []
-x0 = np.zeros(12) #X_scaled[0]
+x0 = np.zeros(opt_dim) #X_scaled[0]
 X0.append(x0)
 for i in range(100):
-	X0.append(2*np.random.rand(12)-1)
-error0, ypred0 = objfun(x0)
+	X0.append(np.random.rand(opt_dim))
+xref = np.zeros(dim)
+error0, ypred0 = objfun(xref)
 
 # optimize
 from scipy.optimize import fmin_l_bfgs_b, fmin_tnc, fmin_slsqp
 dim = X_scaled.shape[1]
-bounds = [(-1.0,1.0) for d in range(dim)]
-def minimize_call(xstart,factr=1e2):
-    # neglogpost = lambda x: -1*logpost_emcee(x,model_info,LB,UB)
-    # lbfgs_options = {} #{"factr": 1e2, "pgtol": 1e-10, "maxiter": 200}
-    res = fmin_l_bfgs_b(func,xstart,approx_grad=True,bounds=bounds,
-							factr=factr,disp=1)
-    return res
+bounds = [(-1.0,1.0) for d in range(opt_dim)]
+
+Nfeval = 1
+def minimize_call(xstart,factr=1):
+	def callbackF(Xi):
+		global Nfeval
+		if Nfeval % 10 == 0: print('Iteration %i' %Nfeval)
+		Nfeval += 1
+	# neglogpost = lambda x: -1*logpost_emcee(x,model_info,LB,UB)
+	# lbfgs_options = {} #{"factr": 1e2, "pgtol": 1e-10, "maxiter": 200}
+	res = fmin_l_bfgs_b(func,xstart,approx_grad=True,bounds=bounds,
+							factr=factr,callback=callbackF,pgtol=1e-13,disp=2)
+	return res
 # res = fmin_l_bfgs_b(func,x0,approx_grad=True,bounds=bounds,
 # 							factr=1e2,pgtol=1e-8,disp=2)
 # res = fmin_tnc(func,x0,approx_grad=True,bounds=bounds)
@@ -482,31 +496,40 @@ def minimize_call(xstart,factr=1e2):
 
 from functools import partial
 myfun = partial(minimize_call, factr=1e2)
-from multiprocessing import Pool
-nprocs = 4
-p = Pool(nprocs) 
-start = T.time()
-res = p.map(myfun,[x for x in X0[:nprocs]])
-end = T.time()
-p.close()
-p.terminate()
+# from multiprocessing import Pool
+# nprocs = 1
+# p = Pool(nprocs) 
+# start = T.time()
+# res = p.map(myfun,[x for x in X0[:nprocs]])
+# end = T.time()
+# p.close()
+# p.terminate()
 
-fmins = [r['fun'] for r in res]
-# fmins = [r[1] for r in res]
-min_index = np.nanargmin(fmins)
-print('fmin is ', fmins[min_index])
-xstart = res[min_index]['x']
-print('xstart is ', xstart)
+# fmins = [r['fun'] for r in res]
+# # fmins = [r[1] for r in res]
+# min_index = np.nanargmin(fmins)
+# print('fmin is ', fmins[min_index])
+# xstart = res[min_index]['x']
+# print('xstart is ', xstart)
 
 # # PLOTTING
 # mpl.plot(x_heat_flux,y_opt.T,'--.b',alpha=.25)
 # mpl.plot(x_obs,y_obs_scaled,'*r')
 # mpl.ylim([-.1,.6])
 
-# soln unscaled over entire observation domain
-# array([[1.15, 0.94, 1.15, 1., 1.2, 0.7, 0.7, 0.1024, 0.41135679, 0.38735689, 1.22172531, 1.05]])
-# soln unscaled over observation domain [.5,1.6]
-# array([[1.07626664, 0.96534047, 1.15 , 0.89227786, 0.8, 0.42324062, 1., 0.09781106, 0.42, 0.37125262, 1.19, 1.45]])
+# X_col_names = ['dens_sc', 'vel_sc', 'temp_sc',
+#                'sigk1', 'sigk2', 'sigw1', 'sigw2',
+#                'beta_s', 'kap', 'a1', 'beta1r', 'beta2r']
+
+
+# # soln unscaled over entire observation domain
+# array([[1.15, 0.94, 1.15, 
+# 	    1., 1.2, 0.7, 0.7, 
+# 	    0.1024, 0.41135679, 0.38735689, 1.22172531, 1.05]])
+# # soln unscaled over observation domain [.5,1.6]
+# array([[1.07626664, 0.96534047, 1.15 , 
+# 	    0.89227786, 0.8, 0.42324062, 1., 
+# 	    0.09781106, 0.42, 0.37125262, 1.19, 1.45]])
 
 # def plot_feature_importance(S,feature_labels,extra_line_plot=None):
 #     assert isinstance(S,np.ndarray), "S must be a numpy array"

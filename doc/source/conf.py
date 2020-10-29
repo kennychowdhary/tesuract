@@ -25,23 +25,31 @@ sys.path.append(os.path.abspath('../../'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
-              'sphinx.ext.napoleon',
-              'sphinx.ext.doctest',
-              'sphinx.ext.mathjax',
-              'sphinx.ext.viewcode', 
-              'sphinx_rtd_theme',
-              'sphinx.ext.todo'
+# extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
+#               'sphinx.ext.doctest',
+#               'sphinx.ext.mathjax',
+#               'sphinx.ext.viewcode', 
+#               'sphinx_rtd_theme',
+#               'sphinx.ext.todo',
+#               'numpydoc'
+# ]
+extensions = [
+    'sphinx.ext.autodoc', 'sphinx.ext.autosummary',
+    'numpydoc',
+	'sphinx.ext.doctest',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.imgconverter',
 ]
 
-napoleon_google_docstring = True
-napolean_numpy_docstring = True
+# napoleon_google_docstring = False
+# napolean_numpy_docstring = True
 todo_include_todos = True
 # napoleon_include_init_with_doc = True # True = show init
 # napoleon_use_admonition_for_examples = True
 # napoleon_use_admonition_for_notes = False
-napoleon_use_ivar = False
+# napoleon_use_ivar = False
 # napoleon_use_param = True
+numpydoc_class_members_toctree = False
 
 autodoc_default_options = {
     'members': True,
@@ -63,6 +71,10 @@ exclude_patterns = []
 # a list of builtin themes.
 #
 html_theme = 'sphinx_rtd_theme'
+
+html_theme_options = {
+    'collapse_navigation': False
+}
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

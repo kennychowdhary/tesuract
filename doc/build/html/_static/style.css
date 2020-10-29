@@ -1,3 +1,10 @@
+.wy-nav-content {
+  max-width: 1000px !important;
+}
+.wy-nav-left {
+  max-width: 300px !important;
+}
+
 /* api docs */
 
 .class > dt, .function > dt, .method > dt {
@@ -196,7 +203,8 @@ dt.label {
   padding-right: 0.5rem;
 }
 
-/* copy buttonn */
+
+/* copy button */
 div.highlight:hover span.copybutton {
   background-color: #3F556B;
   color: white;

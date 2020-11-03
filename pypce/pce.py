@@ -560,7 +560,8 @@ class PCEReg(PCEBuilder,RegressorMixin):
             regmodel.fit(Xhat,y)
         if self.fit_type == 'LassoCV':
             if not self.fit_params: # if empty dictionary
-                self.fit_params={'alphas':np.logspace(-12,1,20),'max_iter':1000,'tol':1e-2}
+                self.fit_params={'alphas':np.logspace(-12,2,25),'max_iter':1000,'tol':1e-2}
+                # self.fit_params={}
             regmodel = linear_model.LassoCV(fit_intercept=False,**self.fit_params)
             regmodel.fit(Xhat,y)
             self.alpha_ = regmodel.alpha_

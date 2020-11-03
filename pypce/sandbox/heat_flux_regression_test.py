@@ -242,23 +242,8 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
 	        self.K = loc[0]
 
 
-# data
-n, d = 30, 2
-rn = np.random.RandomState(45)
-X = 2 * rn.rand(n, d) - 1
-y = 3 + 2 * .5 * (3 * X[:, 0] ** 2 - 1) + X[:, 1] * .5 * (3 * X[:, 0] ** 2 - 1)
-y2 = 1 + 2 * .5 * (3 * X[:, 1] ** 2 - 1) + 3 * X[:, 0] * .5 * (3 * X[:, 1] ** 2 - 1)
-Y = np.vstack([y, y2]).T  # test for multioutput regressor
-c_true = np.array([3., 0., 0., 2., 0., 0., 0., 1., 0., 0., ])
-
-
-# single parameter test
-reg_params = {'order': 3, 'mindex_type': 'total_order', 'fit_type': 'linear'}
-RW = RegressionWrapperCV(regressor='pce',reg_params=reg_params)
-# RW.fit(X,y)
-
 # pce grid search cv test
-pce_param_grid = [{'order': [1, 2, 3, 4],
+pce_param_grid = [{'order': [1, 2, 3],
 	 'mindex_type': ['total_order', 'hyperbolic', ],
 	 'fit_type': ['LassoCV', 'linear', 'ElasticNetCV']}]
 RW2 = RegressionWrapperCV(regressor='pce',reg_params=pce_param_grid,n_jobs=6)
@@ -269,79 +254,6 @@ rf_param_grid = {'n_estimators': [100,300],
 				 'max_features': ['auto'],
 				 'max_depth': [5,10]
 				 }
-RW3 = RegressionWrapperCV(regressor='randforests', reg_params=rf_param_grid,n_jobs=8)
-
-# random forest fit
-rf_param_grid2 = {'n_estimators': [1000],
-				 'max_features': ['log2'],
-				 'max_depth': [5]
-				 }
-RW4 = RegressionWrapperCV(regressor='randforests',reg_params=rf_param_grid2,n_jobs=8)
-
-# compute cv score for single target and list of regressors
-multreg = RegressionWrapperCV(
-		regressor=['pce','pce','randforests','randforests'],
-		reg_params=[pce_param_grid,reg_params,rf_param_grid,rf_param_grid2],
-		n_jobs=6)
-
-# fit multiple target with single type
-mtarg1a = MRegressionWrapperCV(
-			regressor='pce',
-			reg_params=pce_param_grid,
-			n_jobs=8)
-
-# fit multiple target with single type
-mtarg1b = MRegressionWrapperCV(
-			regressor='randforests',
-			reg_params=rf_param_grid,
-			n_jobs=8)
-
-# fit multiple target with type as single element list
-mtarg2 = MRegressionWrapperCV(
-			regressor=['pce'],
-			reg_params=[pce_param_grid],
-			n_jobs=8)
-
-
-# fit multiple target with more than one type and mixed basis
-mtarg3 = MRegressionWrapperCV(
-			regressor=['pce','randforests'],
-			reg_params=[pce_param_grid,rf_param_grid],
-			n_jobs=8,
-			mixed=True)
-
-# fit multiple target with more than one type
-# returns a list of models, not suitable for cross-validation
-# probably won't include because we can't use validation score from sklearn
-mtarg4 = MRegressionWrapperCV(
-			regressor=['pce','randforests'],
-			reg_params=[pce_param_grid,rf_param_grid],
-			n_jobs=4,
-			mixed=False)
-
-# cross validation test
-def multi_target_metric(y_true,y_pred):
-	if y_true.ndim == 2 and y_true.ndim == 2: 
-	    error_array =  np.linalg.norm(y_true - y_pred,axis=1)/np.linalg.norm(y_true,axis=1)
-	    return error_array.mean()
-	else:
-		return np.linalg.norm(y_true - y_pred)/np.linalg.norm(y_true)
-scorer = make_scorer(multi_target_metric,greater_is_better=False)
-cv_outer = KFold(n_splits=5)
-# cv_results = cross_validate(mtarg1a,X,Y,scoring=scorer,cv=cv_outer,verbose=1,return_train_score=True)
-
-# grid search cv
-param_grid = [
-			  {'regressor': ['pce'], 'reg_params': [pce_param_grid]},
-			  {'regressor': ['randforests'], 'reg_params': [rf_param_grid]}
-			 ]
-gsCV = GridSearchCV(MRegressionWrapperCV(n_jobs=8,verbose=0), param_grid, 
-					scoring=scorer, cv=cv_outer, 
-					verbose=1, return_train_score=True)
-start = T.time()
-# gsCV.fit(X,Y)
-end = T.time()
-print("Total time is %.5f seconds" %(end-start))
 
 ################################################################
 # PCA Target Transform
@@ -362,10 +274,13 @@ datadir = '/Users/kchowdh/Research/sparc_tests/'
 if data_field == 'heat_flux':
 	x_domain = np.load(datadir + 'data/x_heat_flux.npy')
 	X = np.load(datadir + 'data/LHS_' + data_field + '.npy')
+	obs = np.loadtxt(datadir + 'data/mks_hifire1_run30_q.dat')
+	xobs,yobs = obs.T
 else:
 	x_domain = np.load(datadir + 'data/x_df_domain.npy')
 	X = np.load(datadir + 'data/LHS_df_samples.npy')
 Y = np.load(datadir + 'data/Y_' + data_field + '.npy')
+
 
 Q = [.025,.5,.975]
 
@@ -398,17 +313,6 @@ Y_pca_recon0 = pca.inverse_transform(Yhat_scaled)
 Y_pca_q = np.quantile(Y_pca_recon0,Q,axis=0)
 
 # fit multiple target with type as single element list
-# HFreg = MRegressionWrapperCV(
-# 			regressor=['pce'],
-# 			reg_params=[pce_param_grid],
-# 			n_jobs=8)
-# HFreg.fit(X_scaled,Yhat_scaled)
-# Yhat_pred = HFreg.predict(X_scaled)
-# Y_pce_recon = pca.inverse_transform(Yhat_pred)
-# Y_pce_q = np.quantile(Y_pce_recon,Q,axis=0)
-
-
-# fit multiple target with type as single element list
 start = T.time()
 HFreg2 = MRegressionWrapperCV(
 			regressor=['pce'],
@@ -416,12 +320,34 @@ HFreg2 = MRegressionWrapperCV(
 			target_transform=PCATargetTransform,
 			target_transform_params=pca_params,
 			n_jobs=8)
-# HFreg2.fit(X_scaled,Y_scaled)
+HFreg2.fit(X_scaled,Y_scaled)
 end = T.time()
 print("Total time is %.5f seconds" %(end-start))
 # Y_pce_recon2 = HFreg2.predict(X_scaled)
 # Y_pce_q = np.quantile(Y_pce_recon2,Q,axis=0)
 # print(HFreg2.best_scores_)
+
+#######################
+# PLOT
+######################
+# plot
+
+QY_pca = target_scaler.inverse_transform(Y_pca_q)
+
+fig = mpl.figure()
+ax = fig.add_subplot(111)
+ax.fill_between
+ax.fill_between(x_domain,QY_pca[0],QY_pca[2],alpha=.5,label='2.5-50-97.5% PCA')
+ax.plot(x_domain,QY_pca[1],'--b',alpha=.35)
+ax.plot(xobs,yobs,'.r',alpha=.6,label='Observations')
+
+# add details to plot
+ax.set_yscale("log")
+ax.set_xlabel("x")
+ax.set_ylabel("heat flux")
+ax.grid(True,which='both',alpha=.5)
+ax.legend(fancybox=True, framealpha=0.25)
+# ax.set_title('heat flux sim vs obs for hiFire runs')
 
 #######################
 ## Save and calibrate
@@ -519,92 +445,6 @@ def calibrate():
 	# print('fmin is ', fmins[min_index])
 	# xstart = res[min_index]['x']
 	# print('xstart is ', xstart)
-
-#############################
-############ OLD PLOTTING
-#############################
-# # PLOTTING
-# mpl.plot(x_heat_flux,y_opt.T,'--.b',alpha=.25)
-# mpl.plot(x_obs,y_obs_scaled,'*r')
-# mpl.ylim([-.1,.6])
-
-# X_col_names = ['dens_sc', 'vel_sc', 'temp_sc',
-#                'sigk1', 'sigk2', 'sigw1', 'sigw2',
-#                'beta_s', 'kap', 'a1', 'beta1r', 'beta2r']
-
-
-# # soln unscaled over entire observation domain
-# array([[1.15, 0.94, 1.15, 
-# 	    1., 1.2, 0.7, 0.7, 
-# 	    0.1024, 0.41135679, 0.38735689, 1.22172531, 1.05]])
-# # soln unscaled over observation domain [.5,1.6]
-# array([[1.07626664, 0.96534047, 1.15 , 
-# 	    0.89227786, 0.8, 0.42324062, 1., 
-# 	    0.09781106, 0.42, 0.37125262, 1.19, 1.45]])
-
-# def plot_feature_importance(S,feature_labels,extra_line_plot=None):
-#     assert isinstance(S,np.ndarray), "S must be a numpy array"
-#     if S.ndim == 1:
-#         ntargets = 1
-#         ndim = len(S)
-#         S = np.atleast_2d(S)
-
-#     ntargets, ndim = S.shape
-#     # normalize across columns (if not already)
-#     S = S / np.atleast_2d(S.sum(axis=1)).T
-
-#     # plot sobol indices as stacked bar charts
-
-#     import matplotlib.pyplot as plt
-#     import matplotlib._color_data as mcd
-#     import seaborn as sns
-
-#     xkcd_colors = []
-#     xkcd = {name for name in mcd.CSS4_COLORS if "xkcd:" + name in mcd.XKCD_COLORS}
-#     for j, n in enumerate(xkcd):
-#         xkcd = mcd.XKCD_COLORS["xkcd:" + n].upper()
-#         xkcd_colors.append(xkcd)
-
-#     Ps = []
-#     sns.set_palette(sns.color_palette("Paired", 12))
-#     plt.figure(figsize=(20, 9))
-#     bottom = np.zeros(ntargets)
-#     for ii in range(ndim):
-#         ptemp = plt.bar(np.arange(1, 1 + ntargets), S[:, ii], bottom=bottom, width=.25)
-#         bottom = bottom + S[:, ii]  # reset bottom to new height
-#         Ps.append(ptemp)
-#     plt.ylabel('Sobol Scores')
-#     plt.ylim([0, 1.1])
-#     # plt.title('Sobol indices by pca mode')
-#     # plt.xticks(t, ('PCA1','PCA2','PCA3','PCA4','PCA5','PCA6'))
-#     # X_col_names = ['dens_sc', 'vel_sc', 'temp_sc',
-#     #            'sigk1', 'sigk2', 'sigw1', 'sigw2',
-#     #            'beta_s', 'kap', 'a1', 'beta1r', 'beta2r']
-#     plt.legend(((p[0] for p in Ps)), (l for l in feature_labels),
-#            fancybox=True, shadow=True,
-#            loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=ndim)
-
-#     # plot explained variance
-#     if extra_line_plot is not None:
-#         assert len(extra_line_plot) >= ntargets, "extra info must be the same length as the targets."
-#         plt.plot(np.arange(1, 1 + ntargets), extra_line_plot[:ntargets], '--ok')
-#     return plt
-
-# plt = plot_feature_importance(HFreg2.feature_importances_(),X_col_names,pca.cumulative_error)
-# plt.savefig(data_field + '_features.png')
-
-# fig, ax = mpl.subplots(1,1,figsize=(20,9))
-# x = 1.0*np.arange(len(Y_pca_q[0]))
-# ax.fill_between(x=x/np.amax(x),y1=Y_pca_q[0],y2=Y_pca_q[2],color='b',alpha=.5)
-# ax.plot(x/np.amax(x),Y_pca_q[1],'-w',alpha=.25)
-# ax.fill_between(x=x/np.amax(x),y1=Y_pce_q[0],y2=Y_pce_q[2],color='r',alpha=.15)
-# ax.plot(x/np.amax(x),Y_pce_q[1],'--r',alpha=.25)
-# ax.set_title(data_field)
-
-# fig.savefig(data_field + '_quantiles.png')
-# # plt.show()
-# # fig.show()
-
 
 
 

@@ -41,7 +41,7 @@ class TestPCEBuilder(unittest.TestCase):
 		X = 2*self.rn.rand(10,self.dim)-1
 		Xhat = p.fit_transform(X)
 		int_P0 = 2*np.mean(Xhat[:,0])
-		assert int_P0 == 1, "First term should integrate to 1"
+		assert np.abs(int_P0-1.0) <= 1e-15, "First term should integrate to 1"
 	def test_fit_transform_w_nonnormalized(self):
 		p = pypce.PCEBuilder(order=4,normalized=False)
 		X = 2*self.rn.rand(10,self.dim)-1

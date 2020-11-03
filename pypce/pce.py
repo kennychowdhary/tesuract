@@ -5,8 +5,8 @@ from sklearn.decomposition import PCA
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.preprocessing import MinMaxScaler
 
-from multiindex import RecursiveHypMultiIndex
-from multiindex import MultiIndex
+from .multiindex import RecursiveHypMultiIndex
+from .multiindex import MultiIndex
 
 from sklearn.utils.estimator_checks import check_estimator 
 from sklearn.utils.validation import check_X_y, check_array
@@ -37,6 +37,10 @@ def Leg1dPoly(order,x):
         y = .5*(5.0*x**3-3*x)
     elif order == 4:
         y = (1./8)*(35.0*x**4 - 30.0*x**2 + 3.0)
+    elif order == 5:
+        y = (1./8)*(63.0*x**5 - 70.0*x**3 + 15.0*x)
+    elif order == 6:
+        y = (1./16)*(231.0*x**6 - 31.0*x**4 + 105.0*x**2  - 5.0)
     return y
     
 class LegPoly2(PolyBase):
@@ -82,31 +86,48 @@ class LegPoly(PolyBase):
         # returns matrix where each column is Li(x)
         self.K = K
         self.Lis = [Legendre.basis(k,self.domain) for k in range(self.K+1)]
-        return np.array([Li(x) for Li in self.Lis]).T
-    def Eval1dBasisNorm(self,x,K):
-        # returns matrix where each column is Li(x)
-        self.K = K
-        self.Lis = [Legendre.basis(k,self.domain) for k in range(self.K+1)]
-        return np.array([Li(x)/self.normsq[i] for i,Li in enumerate(self.Lis)]).T
+        return np.array([Li(x) for Li in self.Lis])
     def normsq(self,K):
         # compute the squared norm of each basis up to K
         bma = self.domain[1] - self.domain[0]
         normsq = np.array([bma/(2*k+1) for k in range(K+1)])
         self.normsq = normsq
         return normsq
-    def plotBasis(self,x,K,normed=False):
-        if normed == False: 
-            output = self.Eval1dBasis(x,K)
-        elif normed == True:
-            output = self.Eval1dBasisNorm(x,K)
-        [mpl.plot(Li) for Li in output]
-        mpl.show()
+
+class LegPolyNorm(PolyBase):
+    '''
+    Usage for 1d polynomial basis construction
+    L = LegPoly()
+    x = np.linspace(-1,1,100)
+    L.plotBasis(x,K,normed=True)
+    '''
+    def __init__(self,domain=np.array([-1,1])):
+        self.domain = domain
+        self.a = domain[0]
+        self.b = domain[1]
+        super().__init__()
+    def Eval1dBasis(self,x,K):
+        # returns matrix where each column is Li(x)
+        self.K = K
+        # compute norms
+        normsq = np.array([(self.b-self.a)/(2*k+1) for k in range(K+1)])
+        self.Lis = [Legendre.basis(k,self.domain) for k in range(self.K+1)]
+        return np.array([Li(x)/np.sqrt(normsq[i]) for i,Li in enumerate(self.Lis)])
+    def normsq(self,K):
+        # compute the squared norm of each basis up to K
+        bma = self.domain[1] - self.domain[0]
+        normsq = np.array([bma/(2*k+1) for k in range(K+1)])
+        self.normsq = 1.0 + 0*normsq
+        return normsq
 
 class PolyFactory:
     # generates PolyBase class object
     @staticmethod
-    def newPoly(polytype='Legendre'):
+    def newPoly(polytype='Leg'):
         L = LegPoly()
+        return L
+    def newPoly(polytype='LegNorm'):
+        L = LegPolyNorm()
         return L
 
 
@@ -257,20 +278,23 @@ class PCEBuilder(BaseEstimator):
 
         '''
         mindex = self.mindex # use internal mindex array
-        # compute multindex
-        Kmax = np.amax(mindex,0)
+        # L = []
+        Kmax = np.amax(self.mindex,axis=0)
         NormSq = []
-        for d in range(self.dim):
+        for i in range(self.dim):
             # Compute Legendre objects and eval 1d basis
-            assert self.polytype == 'Legendre', "Only works with Legendre for now!"
-            L = PolyFactory.newPoly(self.polytype)
-            NormSq.append(L.normsq(Kmax[d])) # norms up to K order
-        # Multiply basis to eval nd polynomial
-        normsq = NormSq[0][mindex[:,0]]
-        # print(norms)
-        for n in range(1,self.dim):
-            norms_new = NormSq[n][mindex[:,n]]
-            normsq = np.multiply(normsq,norms_new) # get norm squared of basis functions
+            if self.normalized == False:
+                Leg = LegPoly()
+            elif self.normalized == True:
+                Leg = LegPolyNorm()
+            NormSq.append(Leg.normsq(Kmax[i])) # norms up to K order
+
+        # start computing products
+        # Phi = 1.0
+        normsq = 1.0
+        for di in range(self.dim):
+            # Phi = L[di][self.mindex[:,di]] * Phi
+            normsq = NormSq[di][mindex[:,di]] * normsq   
         self.normsq = normsq # norm squared * integration factor of 1/2 (since domain is [-1,1])
         self.norm = np.sqrt(normsq)
         return self.normsq
@@ -284,7 +308,7 @@ class PCEBuilder(BaseEstimator):
         if self.mindex is None:
             self.compile(dim=X.shape[1]) # only compiles once
         Max = np.amax(self.mindex,axis=0)
-            # construct and evaluate each basis using mindex
+        # construct and evaluate each basis using mindex
         L = []
         NormSq = []
         self.output_type = None
@@ -293,7 +317,10 @@ class PCEBuilder(BaseEstimator):
             self.output_type = 'scalar'
         for i in range(self.dim):
             # Compute Legendre objects and eval 1d basis
-            Leg = LegPoly2()
+            if self.normalized == False:
+                Leg = LegPoly()
+            elif self.normalized == True:
+                Leg = LegPolyNorm()
             Li_max = Leg.Eval1dBasis(x=X[:,i],K=Max[i])
             L.append(Li_max) # list of size dim of Legendre polys
             NormSq.append(Leg.normsq(Max[i])) # norms up to K order
@@ -306,44 +333,11 @@ class PCEBuilder(BaseEstimator):
             normsq = NormSq[di][self.mindex[:,di]] * normsq
         self.Phi = Phi.T 
         self.normsq = normsq # norm squared
-        if self.normalized:
-            return self.Phi/np.sqrt(normsq)
-        else:
-            return self.Phi
-        # Kmax = np.amax(self.mindex,0)
-        # P = []
-        # Px = []
-        # NormSq = []
-        # for d in range(self.dim):
-        #     # Compute Legendre objects and eval 1d basis
-        #     assert self.polytype == 'Legendre', "Only works with Legendre for now!"
-        #     L = PolyFactory.newPoly(self.polytype)
-        #     P.append(L)
-        #     Lix = L.Eval1dBasis(X[:,d],Kmax[d]) # each dimension may use different points so we need to loop
-        #     # print(Lix.shape)
-        #     Px.append(Lix) # list of size dim of Legendre polys
-        #     NormSq.append(L.normsq(Kmax[d])) # norms up to K order
-        # # Multiply basis to eval nd polynomial
-        # Index = self.mindex
-        # Phi = Px[0] # get first group of Legendre basis polynomials
-        # Phi = Phi[:,Index[:,0]] # reorder according to multi-index for first dimension
-        # normsq = NormSq[0][Index[:,0]]
-        # # print(norms)
-        # for n in range(1,self.dim):
-        #     Phi_temp = Px[n] # get next group of Leg basis polynomaisl
-        #     Phi_new = Phi_temp[:,Index[:,n]] # order according to next multindex
-        #     Phi = np.multiply(Phi,Phi_new) # multiple previous matrix
-        #     norms_new = NormSq[n][Index[:,n]]
-        #     normsq = np.multiply(normsq,norms_new) # get norm squared of basis functions
-        #     # print(norms_new)
-
-        # # internally set Phi and norms for repeated use in eval
-        # self.Phi = Phi
-        # self.normsq = normsq # norm squared
         # if self.normalized:
         #     return self.Phi/np.sqrt(normsq)
         # else:
         #     return self.Phi
+        return self.Phi
     def polyeval(self,X=None,c=None):
         """Placeholder
         """

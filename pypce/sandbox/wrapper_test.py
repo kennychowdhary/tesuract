@@ -349,7 +349,7 @@ print("Total time is %.5f seconds" %(end-start))
 print("Performing PCA transform...")
 # test target transform
 # Load the data
-data_fields = ['heat_flux_wall','df_pressure','df_wall-heat-flux',
+data_fields = ['heat_flux','df_pressure','df_wall-heat-flux',
 			   'df_wall-C_f','df_wall-C_h','df_wall-friction-velocity',
 			   'df_wall-tau-mag']
 # for d in data_fields[1:]:
@@ -359,11 +359,15 @@ data_field = data_fields[0]
 # for data_field in data_fields:
 print(data_field)
 datadir = '/Users/kchowdh/Research/sparc_tests/'
-X = np.load(datadir + 'data/X_samples.npy')
-x_domain = np.load(datadir + 'data/x_domain.npy')
+if data_field == 'heat_flux':
+	x_domain = np.load(datadir + 'data/x_heat_flux.npy')
+	X = np.load(datadir + 'data/LHS_' + data_field + '.npy')
+else:
+	x_domain = np.load(datadir + 'data/x_df_domain.npy')
+	X = np.load(datadir + 'data/LHS_df_samples.npy')
 Y = np.load(datadir + 'data/Y_' + data_field + '.npy')
 
-Q = [.05,.5,.95]
+Q = [.025,.5,.975]
 
 # Scale target Y (use inverse transform for new data)
 # Each row is a functional output, so we should scale each row
@@ -412,106 +416,113 @@ HFreg2 = MRegressionWrapperCV(
 			target_transform=PCATargetTransform,
 			target_transform_params=pca_params,
 			n_jobs=8)
-HFreg2.fit(X_scaled,Y_scaled)
+# HFreg2.fit(X_scaled,Y_scaled)
 end = T.time()
 print("Total time is %.5f seconds" %(end-start))
 # Y_pce_recon2 = HFreg2.predict(X_scaled)
 # Y_pce_q = np.quantile(Y_pce_recon2,Q,axis=0)
 # print(HFreg2.best_scores_)
 
-# save model
-from joblib import dump, load
-dump(HFreg2,'regmodel.joblib')
-regmodel = load('regmodel.joblib')
-# regmodel = HFreg2
+#######################
+## Save and calibrate
+#######################
+def calibrate():
 
-# load observations for heat flux only
-# interpolate predictions for obersvations
-# if data_field == 'heat_flux_wall':
-x_heat_flux = np.load(datadir + 'data/x_heat_flux.npy')
-obs = np.loadtxt(datadir + 'data/mks_hifire1_run30_q.dat')
-x_obs, y_obs = obs.T
-# x_obs *= np.cos(7.0*np.pi/180.)
-# transform y_obs using 
-y_obs_scaled = target_scaler.transform(y_obs)
+	# save model
+	from joblib import dump, load
+	dump(HFreg2,'regmodel.joblib')
+	regmodel = load('regmodel.joblib')
+	# regmodel = HFreg2
 
-# interpolate
-from scipy.interpolate import interp1d
-def interp_heat_flux(y):
-	# yi = np.interp(x_obs,x_heat_flux,y)
-	fi = interp1d(x_heat_flux,y)
-	yi = fi(x_obs)
-	return yi
+	# load observations for heat flux only
+	# interpolate predictions for obersvations
+	# if data_field == 'heat_flux_wall':
+	x_heat_flux = x_domain #np.load(datadir + 'data/x_heat_flux.npy')
+	obs = np.loadtxt(datadir + 'data/mks_hifire1_run30_q.dat')
+	x_obs, y_obs = obs.T
+	# transform y_obs using 
+	y_obs_scaled = target_scaler.transform(y_obs)
 
-def objfun(x_uq):
-	y = regmodel.predict(x_uq)
-	yi = interp_heat_flux(y)
-	yi = np.atleast_2d(yi)
-	y_true = np.atleast_2d(y_obs_scaled)
-	ii = (x_obs >= 0) & (x_obs <= 0.65)
-	error = np.mean((y_true[:,ii] - yi[:,ii])**2, axis=1)/np.mean(y_true[:,ii]**2)
-	return error, yi
+	# interpolate
+	from scipy.interpolate import interp1d
+	def interp_heat_flux(y):
+		# yi = np.interp(x_obs,x_heat_flux,y)
+		fi = interp1d(x_heat_flux,y)
+		yi = fi(x_obs)
+		return yi
+
+	def objfun(x_uq):
+		y = regmodel.predict(x_uq)
+		yi = interp_heat_flux(y)
+		yi = np.atleast_2d(yi)
+		y_true = np.atleast_2d(y_obs_scaled)
+		ii = (x_obs >= 0) & (x_obs <= 0.65)
+		error = np.mean((y_true[:,ii] - yi[:,ii])**2, axis=1)/np.mean(y_true[:,ii]**2)
+		return error, yi
 
 
-def func(x):
-	dim = 12
+	def func(x):
+		dim = 12
+		xref = np.zeros(dim)
+		# xref[[0,1,9]] = x
+		xref[:] = x
+		error, yi = objfun(xref)
+		return error
+
+	dim = len(X_col_names)
+	opt_dim = 12
+	X0 = []
+	x0 = np.zeros(opt_dim) #X_scaled[0]
+	X0.append(x0)
+	for i in range(100):
+		X0.append(np.random.rand(opt_dim))
 	xref = np.zeros(dim)
-	# xref[[0,1,9]] = x
-	xref[:] = x
-	error, yi = objfun(xref)
-	return error
+	error0, ypred0 = objfun(xref)
 
-dim = len(X_col_names)
-opt_dim = 12
-X0 = []
-x0 = np.zeros(opt_dim) #X_scaled[0]
-X0.append(x0)
-for i in range(100):
-	X0.append(np.random.rand(opt_dim))
-xref = np.zeros(dim)
-error0, ypred0 = objfun(xref)
+	# optimize
+	from scipy.optimize import fmin_l_bfgs_b, fmin_tnc, fmin_slsqp
+	dim = X_scaled.shape[1]
+	bounds = [(-1.0,1.0) for d in range(opt_dim)]
 
-# optimize
-from scipy.optimize import fmin_l_bfgs_b, fmin_tnc, fmin_slsqp
-dim = X_scaled.shape[1]
-bounds = [(-1.0,1.0) for d in range(opt_dim)]
+	Nfeval = 1
+	def minimize_call(xstart,factr=1):
+		def callbackF(Xi):
+			global Nfeval
+			if Nfeval % 10 == 0: print('Iteration %i' %Nfeval)
+			Nfeval += 1
+		# neglogpost = lambda x: -1*logpost_emcee(x,model_info,LB,UB)
+		# lbfgs_options = {} #{"factr": 1e2, "pgtol": 1e-10, "maxiter": 200}
+		res = fmin_l_bfgs_b(func,xstart,approx_grad=True,bounds=bounds,
+								factr=factr,callback=callbackF,pgtol=1e-13,disp=2)
+		return res
+	# res = fmin_l_bfgs_b(func,x0,approx_grad=True,bounds=bounds,
+	# 							factr=1e2,pgtol=1e-8,disp=2)
+	# res = fmin_tnc(func,x0,approx_grad=True,bounds=bounds)
+	# res = fmin_slsqp(func, x0, iter=1000, bounds=bounds, acc=1e-9, iprint=2, full_output=True)
+	# x_opt = res[0]
+	# y_opt = regmodel.predict(x_opt)
 
-Nfeval = 1
-def minimize_call(xstart,factr=1):
-	def callbackF(Xi):
-		global Nfeval
-		if Nfeval % 10 == 0: print('Iteration %i' %Nfeval)
-		Nfeval += 1
-	# neglogpost = lambda x: -1*logpost_emcee(x,model_info,LB,UB)
-	# lbfgs_options = {} #{"factr": 1e2, "pgtol": 1e-10, "maxiter": 200}
-	res = fmin_l_bfgs_b(func,xstart,approx_grad=True,bounds=bounds,
-							factr=factr,callback=callbackF,pgtol=1e-13,disp=2)
-	return res
-# res = fmin_l_bfgs_b(func,x0,approx_grad=True,bounds=bounds,
-# 							factr=1e2,pgtol=1e-8,disp=2)
-# res = fmin_tnc(func,x0,approx_grad=True,bounds=bounds)
-# res = fmin_slsqp(func, x0, iter=1000, bounds=bounds, acc=1e-9, iprint=2, full_output=True)
-# x_opt = res[0]
-# y_opt = regmodel.predict(x_opt)
+	from functools import partial
+	myfun = partial(minimize_call, factr=1e2)
+	# from multiprocessing import Pool
+	# nprocs = 1
+	# p = Pool(nprocs) 
+	# start = T.time()
+	# res = p.map(myfun,[x for x in X0[:nprocs]])
+	# end = T.time()
+	# p.close()
+	# p.terminate()
 
-from functools import partial
-myfun = partial(minimize_call, factr=1e2)
-# from multiprocessing import Pool
-# nprocs = 1
-# p = Pool(nprocs) 
-# start = T.time()
-# res = p.map(myfun,[x for x in X0[:nprocs]])
-# end = T.time()
-# p.close()
-# p.terminate()
+	# fmins = [r['fun'] for r in res]
+	# # fmins = [r[1] for r in res]
+	# min_index = np.nanargmin(fmins)
+	# print('fmin is ', fmins[min_index])
+	# xstart = res[min_index]['x']
+	# print('xstart is ', xstart)
 
-# fmins = [r['fun'] for r in res]
-# # fmins = [r[1] for r in res]
-# min_index = np.nanargmin(fmins)
-# print('fmin is ', fmins[min_index])
-# xstart = res[min_index]['x']
-# print('xstart is ', xstart)
-
+#############################
+############ OLD PLOTTING
+#############################
 # # PLOTTING
 # mpl.plot(x_heat_flux,y_opt.T,'--.b',alpha=.25)
 # mpl.plot(x_obs,y_obs_scaled,'*r')

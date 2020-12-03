@@ -12,6 +12,8 @@ from sklearn.utils.estimator_checks import check_estimator
 from sklearn.utils.validation import check_X_y, check_array
 from sklearn import linear_model
 
+from numba import jit
+
 # Polynomials classes
 class PolyBase:
     def __init__(self):
@@ -130,7 +132,6 @@ class PolyFactory:
         L = LegPolyNorm()
         return L
 
-
 class PCEBuilder(BaseEstimator):
     ''' Base class for building a multivariate polynomial basis.  
 
@@ -205,6 +206,10 @@ class PCEBuilder(BaseEstimator):
         Integer array of the multiindex which describes the structure of the
         polynomial basis. 
 
+    nPCTerms : int
+
+        The number of basis terms of the multi-variate polynomial. 
+
     Notes
     -----
     As of now, the base class requires the input range to be on the default
@@ -220,7 +225,8 @@ class PCEBuilder(BaseEstimator):
 
     Examples
     --------
-    >>> from pypce import PCEBuilder p = PCEBuilder(order=3,normalized=True)
+    >>> from pypce import PCEBuilder 
+    >>> p = PCEBuilder(order=3,normalized=True)
     >>> print(p.mindex)
     '''
     def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False):
@@ -239,7 +245,39 @@ class PCEBuilder(BaseEstimator):
         self.mindex = None
         self.normalized = normalized
     def compile(self,dim):
-        """Placeholder
+        """Setup for instantiating the basis class
+
+        Constructs the multi-dimensional multi-index which defines the
+        polynomial basis elements. Note that this is only done once during the
+        fit method of the class, unless the mindex variable is undefined. 
+
+        The multi-index array is of size :math:`N \\times dim` where :math:`N`
+        is the number of basis elements. The multi-index determine the order or
+        degree of the univariate polynomial in 
+
+        .. math::
+
+            \Phi_i = \prod_{j=1}^d L_{\\alpha_j^{(i)}}(x_i).
+
+        So for example, :math:`\\alpha_j=2` corresponds to a second order or
+        quadratic Legendre polynomial. 
+
+        Lastly, this method also defines the number of basis elements. 
+
+        Parameters
+        ----------
+
+        dim : int
+
+            dimension of the polynomials
+
+        Returns
+        -------
+
+        self: object
+
+            Returns the object itself. 
+
         """
         self.dim = dim
         #constructor for different multindices (None, object, and array)
@@ -264,17 +302,7 @@ class PCEBuilder(BaseEstimator):
             assert len(self.coef) == self.mindex.shape[0], "coefficient array is not the same size as the multindex array."
         self.compile_flag = True
     def computeNormSq(self):
-        ''' separate routine to compute norms, in order to bypass construct basis
-
-        Parameters
-        ----------
-        deep : bool, default=True
-            If True, will return the parameters for this estimator and contained subobjects that are estimators.
-
-        Returns
-        -------
-        x : int
-            Parameter names mapped to their values.
+        ''' Separate method to compute norms, in order to bypass construct basis. For use when computing the feature importance/ Sobol sensitivity indices. 
 
         '''
         mindex = self.mindex # use internal mindex array
@@ -299,7 +327,31 @@ class PCEBuilder(BaseEstimator):
         self.norm = np.sqrt(normsq)
         return self.normsq
     def fit_transform(self,X):
-        """Placeholder
+        """Fit and transform the given :math:`X` coordinates to the polynomial
+        space. 
+
+        This method essentially performs a high dimensional kernel mapping onto
+        a polynomial space spanned by the Legendre polynomials. This is similar
+        to sklearn's PolynomialFeatures, except here the features are
+        multi-variate Legendre; the big difference being that the features are
+        uncorrelated. 
+
+        Alternatively, the resulting 
+
+        Parameters
+        ----------
+
+        X   :  numpy.ndarray of shape (nsamples, dim)
+
+            feature matrix where each row is a sample of the feature space. 
+
+        Returns
+        -------
+
+        Phi :  numpy.ndarray of shape (nsamples, nPCTerms)
+
+            returns the polynomial feature map that transforms each sample in :math:`X` of dimension :math:`d` to dimension :math:`nPCTerms`. 
+
         """
         # only works for [-1,1] for far
         # compute multindex
@@ -318,7 +370,7 @@ class PCEBuilder(BaseEstimator):
         for i in range(self.dim):
             # Compute Legendre objects and eval 1d basis
             if self.normalized == False:
-                Leg = LegPoly()
+                Leg = LegPoly2()
             elif self.normalized == True:
                 Leg = LegPolyNorm()
             Li_max = Leg.Eval1dBasis(x=X[:,i],K=Max[i])
@@ -339,7 +391,29 @@ class PCEBuilder(BaseEstimator):
         #     return self.Phi
         return self.Phi
     def polyeval(self,X=None,c=None):
-        """Placeholder
+        """Method to evaluate the polynomial. 
+
+        Evaluates the polynomial for a given set of coefficients and data
+        points. 
+
+        Parameters
+        ----------
+
+        X   :  numpy.ndarray of shape (nsamples, dim)
+
+            feature matrix where each row is a sample of the feature space. 
+
+        c   : numpy.ndarray of shape (nPCTerms,) (optional)
+
+            coefficient array. The evaluation is simply np.dot(Phi,c). The coefficient array can also be internally set so that it does not need to be fed in each time we need to evaluate the polynomial. 
+
+        Returns
+        -------
+
+        yeval   : numpy.ndarray of shape (X.shape[0],)
+
+            The scalar outputs of the multivariate polynomial evaluated at the feature matrix data points. 
+            
         """
         if c is not None: 
             coef_ = c # use c in polyeval
@@ -358,11 +432,46 @@ class PCEBuilder(BaseEstimator):
 
         return yeval
     def eval(self,X=None,c=None):
-        """Placeholder
+        """Duplicate of polyeval
         """
         return self.polyeval(X=None,c=None)
     def computeSobol(self,c=None):
-        """Placeholder
+        """Compute Sobol total order variance based sensitivity indices
+
+        Depending on the Legendre polynomial type (normalized vs non-normalized)
+        the formula will be different. The total order sensitivity is given by 
+
+        .. math::
+
+            S_i = \sum_{k} \gamma^{-2}_{\\beta^i_k} c^2_{\\beta^i_k}
+
+        where :math:`\{\\beta^i_k\}_{k=\dots}` are the indices that contain at
+        least the :math:`i^{th}` dimension, and :math:`\gamma` is the square root norm of that particular basis polynomial (which is 1 for the normalized case). 
+
+        For this method, we return the normalized Sobol indices, i.e. 
+
+        .. math::
+
+            T_i \doteq S_i/S_{T}
+
+        where :math:`S_{T}` is the total variance, i.e. :math:`\{\\beta^i_k\}_{k=\dots}` are the entire set of basis functions. Thus, the total order sensitivity indices are always less than 1, although their sum can be greater than :math:`S_{T}`.
+
+        This is another advantage of using the Legendre polynomials, in that they are uncorrelated so that their feature importance calculations are very easy to compute. 
+
+        Parameters
+        ----------
+
+        c   : numpy.ndarray of shape (nPCTerms,)
+
+            coefficient to determine the Sobol indices.
+
+        Returns
+        -------
+
+        T   : numpy.ndarray of shape (dim,)
+
+            The total order Sobol sensitivity indices for each dimension
+
         """
         if self.mindex is None:
             self.compile(dim=self.dim)
@@ -400,7 +509,39 @@ class PCEBuilder(BaseEstimator):
                 S.append(s)
         return S
     def computeMoments(self,c=None):
-        """Placeholder
+        """Methods to compute the mean and variance of the resulting polynomial
+
+        Assuming a uniform distribution over :math:`[-1,1]`, this method
+        computes the mean and variance. The mean is the coefficient of the
+        :math:`0^{th}` order term, while the variance is the weighted sum of
+        squares of the other coefficients. The weighted sum is determined by
+        using either the normalized or non-normalized Legendre polynomials.
+        Finally, the weight is scaled by .5 correpsonding to the density
+        function for the uniform distribution on the previously stated domain. 
+
+        .. math::
+
+            \mu = \\frac{1}{2} c_0
+
+        .. math::
+
+            \sigma^2 = \\frac{1}{2} \sum_{i=1}^N \gamma^2_i c^2_i 
+
+        Parameters
+        ----------
+
+        c   : numpy.ndarray of shape (nPCTerms, )
+
+            coefficient of the polynomial basis. Must have the same number of elements as the number of basis elements. 
+
+        Returns
+        -------
+
+        mu, var : float,float
+
+            mean and variance floating point values
+
+
         """
         if c is None:
             assert self.coef is not None, "coef is not defined. Try running fit or input c"
@@ -646,176 +787,3 @@ class PCESeries():
             yitemp = np.interp(T1d[i],self.time,Y[i])
             Yi.append(yitemp)
         return np.array(Yi)
-
-# class pcasurrogate:
-#   def __init__(self,X,Y,norm=True,xbounds=None,xlabels=None,npca=50,pca_datafile=None):
-#       self.xnsamples,self.d = X.shape
-#       self.ynsamples,self.n = Y.shape
-#       self.xlabels = xlabels
-#       self.pca_datafile = pca_datafile
-#       assert self.xnsamples == self.ynsamples, "Sample mismatch between X and Y!"
-#       # normalize X data
-#       if norm == True:
-#           assert xbounds is not None, "Must provide bounds on X. Otherwise, set norm=False"
-#           LB,UB = xbounds
-#           self.Xscaled = 2*( (X - LB) * 1./(UB-LB) ) - 1
-#           # normalize Y -> [0,1]
-#           self.Ymax = np.amax(Y)
-#           self.Ymin = np.amin(Y)
-#           self.Yscaled = (Y - self.Ymin)/(self.Ymax - self.Ymin)
-#       # perform PCA with npca components
-#       self.npca = npca
-#       assert self.npca >= 2, "Number of PCA should be > 1!"
-#       self.project_flag = False
-#   def run(self,full=True,load=False,save=False,mre_cutoff=1e-3,K=None,error=False):
-#       # if load == True, just load data
-#       if error == False: assert K is not None, "Must choose K PCA modes."
-#       if K is not None: self.npca = K # set npca to K
-#       if save == True: assert self.pca_datafile is not None, "datafile field must be specified."
-#       if full == True and load == False:
-#           self.performPCA(self.npca)
-#           if error == True: # only perform recon error if user defined
-#               if self.pca_datafile is None or save == False:
-#                   "running PCA without saving data..." 
-#                   self.performPCAerroranalysis(save=False)
-#               else:
-#                   self.performPCAerroranalysis(save=True,filename=self.pca_datafile)
-#       elif load == True:
-#           assert self.pca_datafile is not None, "Must specify pca_datafile."
-#           if save == True: warnings.warn("save option is ignored.")
-#           self.loaddata(self.pca_datafile)
-#       self.project(K=K,mre_cutoff=mre_cutoff)
-#   def performPCA(self,npca):
-#       print("performing PCA analysis...")
-#       self.pca = PCA(n_components=self.npca,svd_solver='full')
-#       self.pca.fit(self.Yscaled)
-#       # cumulative sum of explained variance
-#       self.explained_variance = np.cumsum(self.pca.explained_variance_ratio_)
-#       # save data
-#       self.muY = self.Yscaled.mean(0)
-#       self.Y0 = self.Yscaled - self.muY
-#       self.V = self.pca.components_.T # projection basis
-#       self.P = np.dot(self.Y0,self.V) # projection coefficients
-#       assert self.V.shape[0] == self.n, "Basis dimension should be same dimension as each Y sample."
-#       assert self.P.shape == (self.ynsamples,self.npca), "Shape of projection coefficients is not right!"
-#   def performPCAerroranalysis(self,save=True,filename=None):
-#       # calculate relative error of projections for increasing npca up to self.npca
-#       self.__mre = [] # mean relative reconstruction error
-#       for k in tqdm(range(2,self.npca)):
-#           Y0approx = np.dot(self.V[:,:k],self.P[:,:k].T).T
-#           RE = [] # relative error for each sample
-#           for i,y0 in enumerate(self.Y0):
-#               re = np.linalg.norm(y0 - Y0approx[i])/np.linalg.norm(self.muY + y0)
-#               RE.append(re)
-#           muRE = np.mean(np.array(RE))
-#           # print("Mean relative errors", np.mean(RE))
-#           self.__mre.append(muRE) # average over all samples
-#           self.mre = np.array(self.__mre)
-#       if save == True:
-#           assert filename is not None, "Must specify filename to save pca dictionary data."
-#           # save data as dictionary
-#           datadict = {}
-#           datadict['V'] = self.V # projection basis
-#           datadict['P'] = self.P # projection coefficients
-#           datadict['Y0'] = self.Y0 # centered data
-#           datadict['muY'] = self.muY # mean of original data
-#           datadict['mre'] = self.mre # reconstruction relative error
-#           datadict['expvar'] = self.explained_variance # cumulative explained variance
-#           datadict['Xscaled'] = self.Xscaled # normalized data to [-1,1]
-#           datadict['xlabels'] = self.xlabels # labels of x data
-#           print("saving PCA data...")
-#           with open(filename + '.pkl', 'wb') as pfile:
-#               pickle.dump(datadict, pfile)
-#   def loaddata(self,filename):
-#       # import data dictionary with PCA modes and projections
-#       try:
-#           with open(filename, 'rb') as pfile:
-#               datadict = pickle.load(pfile)
-#       except:
-#           with open(filename + '.pkl', 'rb') as pfile:
-#               datadict = pickle.load(pfile)
-#       print("loading PCA data...")
-#       self.V = datadict['V'] # projection basis
-#       self.P = datadict['P'] # projection coefficients
-#       self.Y0 = datadict['Y0'] # centered data
-#       self.muY = datadict['muY'] # mean of original data
-#       self.mre = datadict['mre'] # reconstruction relative error
-#       self.explained_variance = datadict['expvar'] # cumulative explained variance
-#       self.Xscaled = datadict['Xscaled'] # normalized data to [-1,1]
-#       self.xlabels = datadict['xlabels'] # labels of x data
-#   def project(self,K=None,mre_cutoff=1e-3):
-#       if K is not None:
-#           self.K = K # use K if user defined
-#       else:
-#           # find PCA mode where recon error is greater than cutoff
-#           cutoff_indices = np.where(self.mre > mre_cutoff)[0]
-#           if len(cutoff_indices) == 0:
-#               warnings.warn("cutoff is too large. try decreasing. setting K = 1")
-#               self.K = 1 # only use 1 PCA mode
-#           else:
-#               self.K = cutoff_indices[-1] + 1 # add one since we are starting with 1 after the mean
-
-#       # get projections and basis columns
-#       self.Vk = self.V[:,:self.K]
-#       self.Pk = self.P[:,:self.K] # each row is the proj coef
-#       self.project_flag = True
-#   def invert(self,P):
-#       P = np.atleast_2d(P.copy())
-#       assert P.shape[1] == S.K, "dimension mismatch in P and V."
-#       R = np.dot(self.Vk,P.T)
-#       return R.T
-#   def pcefit(self):
-#       assert self.project_flag == True, "Must project data onto K PCA modes first. "
-#       npce = self.Vk.shape[1]
-
-
-# # create function to plot sobol indices in a stacked graph
-# # to be added to the pypce PCESeries class
-# C = []
-# M = []
-# Sobol = []
-# t = []
-# for pce in PCEs:
-#   C.append(pce['c'])
-#   M.append(pce['M'])
-#   t.append(pce['pca_mode'])
-#   Sobol.append(pce['S'])
-
-# xlabels = np.array(['dens_sc', 'vel_sc', 'temp_sc', 
-#                   'sigk1', 'sigk2', 'sigw1', 'sigw2',
-#                   'beta_s', 'kap', 'a1', 'beta1r', 'beta2r'])
-# pceS = pypce.PCESeries(dim=xdim,C=C,MIs=M)
-
-# Sobol = np.array(Sobol)
-# # S = np.random.rand(4,12)
-# normS = np.array([s/np.sum(s) for s in Sobol]).T
-
-# import matplotlib.pyplot as plt
-# import matplotlib._color_data as mcd
-
-# xkcd_colors = []
-# xkcd = {name for name in mcd.CSS4_COLORS if "xkcd:" + name in mcd.XKCD_COLORS}
-# for j, n in enumerate(xkcd):
-#   xkcd = mcd.XKCD_COLORS["xkcd:" + n].upper()
-#   xkcd_colors.append(xkcd)
-
-# Ps = []
-# bottom = np.zeros(len(t))
-# import seaborn as sns
-# sns.set_palette(sns.color_palette("Paired", 12))
-# plt.figure(figsize=(20,9))
-# for ii in range(xdim):
-#   ptemp = plt.bar(t,normS[ii],bottom=bottom,width=.25)
-#   bottom = bottom + normS[ii] # reset bottom to new height
-#   Ps.append(ptemp)
-# plt.ylabel('Sobol Scores')
-# plt.ylim([0,1.1])
-# # plt.title('Sobol indices by pca mode')
-# plt.xticks(t, ('PCA1','PCA2','PCA3','PCA4','PCA5','PCA6'))
-# plt.legend(((p[0] for p in Ps)), (l for l in xlabels),
-#           fancybox=True, shadow=True,
-#           loc='upper center', bbox_to_anchor=(0.5, 1.05),ncol=xdim)
-
-# # plot explained variance
-# plt.plot(t,S.explained_variance,'--ok')
-# plt.savefig('figs/SA_'+y_label+'.png')

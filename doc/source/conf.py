@@ -49,11 +49,12 @@ todo_include_todos = True
 # napoleon_use_admonition_for_notes = False
 # napoleon_use_ivar = False
 # napoleon_use_param = True
-numpydoc_class_members_toctree = False
+numpydoc_class_members_toctree = True
 
 autodoc_default_options = {
     'members': True,
-    'inherited-members': True
+    'inherited-members': True,
+    'member-order': 'bysource'
 }
 
 # Add any paths that contain templates here, relative to this directory.

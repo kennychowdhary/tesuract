@@ -14,6 +14,7 @@ Polynomial Classes
 
 .. autoclass:: pypce.PCEBuilder
 	:members:
+	:exclude-members: get_params, set_params
 
 .. .. autoclass:: pypce.PCEReg
 .. 	:members:

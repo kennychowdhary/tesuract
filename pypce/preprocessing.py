@@ -221,14 +221,14 @@ class MinMaxTargetScaler:
 		# scale to 0 -> 1 first
 		Yhat = (Y - self.min_)/self.w_
 		# scale to target_range
-		Yhat = (Yhat - self.a)/self.ab_w_ 
+		Yhat = Yhat*self.ab_w_ + self.a 
 		return Yhat
 	def fit_transform(self,Y):
 		self.fit(Y)
 		return self.transform(Y)
 	def inverse_transform(self,Yhat):
 		# first transform back to [0,1]
-		Y = Yhat*self.ab_w_ + self.a
+		Y = (Yhat - self.a)/self.ab_w_
 		# back to true range
 		Y = self.w_*Y  + self.min_
 		return Y

@@ -198,7 +198,7 @@ class MinMaxTargetScaler:
 	def __init__(self,target_range=(0,1)):
 		"""This is a description of the constructor"""
 		self.a,self.b = target_range
-	def fit(self,Y):
+	def fit(self,Y,target=None):
 		"""
 		Fit method
 
@@ -223,13 +223,13 @@ class MinMaxTargetScaler:
 		# scale to target_range
 		Yhat = Yhat*self.ab_w_ + self.a 
 		return Yhat
-	def fit_transform(self,Y):
+	def fit_transform(self,Y,target=None):
 		self.fit(Y)
 		return self.transform(Y)
 	def inverse_transform(self,Yhat):
 		# first transform back to [0,1]
-		Y = (Yhat - self.a)/self.ab_w_
+		# Y = (Yhat - self.a)/self.ab_w_
 		# back to true range
-		Y = self.w_*Y  + self.min_
+		Y = (self.w_/self.ab_w_)*(Yhat - self.a)  + self.min_
 		return Y
 

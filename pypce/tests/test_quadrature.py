@@ -93,6 +93,8 @@ class TestQuad(unittest.TestCase):
 
         assert x_tp.shape[1] == 10 and x_sp.shape[1] == 10, \
             "Dimensions of grids do not match input dimensions. "
+    
+
     def test_sparse_and_tensor_grid_x_and_w_size_match_LG(self):
         # test...
         dim = 10

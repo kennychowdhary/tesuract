@@ -35,6 +35,13 @@ Todo:
 import numpy as np
 import warnings, pdb 
 
+from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
+from sklearn.utils.estimator_checks import check_estimator 
+from sklearn.utils.validation import check_X_y, check_array
+from sklearn.preprocessing import FunctionTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.decomposition import PCA
+
 class scale:
 	def __init__(self,X,a=None,b=None):
 		self.X = np.atleast_2d(X)
@@ -232,4 +239,78 @@ class MinMaxTargetScaler:
 		# back to true range
 		Y = (self.w_/self.ab_w_)*(Yhat - self.a)  + self.min_
 		return Y
+
+class PCATargetTransform(BaseEstimator, TransformerMixin):
+    def __init__(self, n_components=2, cutoff=1e-2, svd_solver='arpack'):
+        self.n_components = n_components
+        self.cutoff = cutoff
+        self.svd_solver = svd_solver
+        self.K = None
+    def fit(self, Y, target=None):
+        self.n, self.d = Y.shape
+        if self.n_components == 'auto':
+            self._compute_K(Y)
+        if isinstance(self.n_components, int):
+            self._compute_K(Y) # compute K regardless to get cumulative error
+            self.K = self.n_components
+            if self.n_components > self.d:
+                warnings.warn("No of components greater than dimension. Setting to maximum allowable.")
+                self.n_components = self.d
+        assert self.K is not None, "K components is not defined or being set properly."
+        
+        self.pca = PCA(n_components=self.K, svd_solver=self.svd_solver)
+        self.pca.fit(Y)
+        self.cumulative_error = self.cumulative_error_full[:self.K]
+        return self
+    def fit_transform(self, Y):
+        self.fit(Y)
+        return self.pca.transform(Y)
+    def transform(self, Y):
+        assert hasattr(self, 'pca'), "Perform fit first."
+        return self.pca.transform(Y)
+    def inverse_transform(self, Yhat):
+        return self.pca.inverse_transform(Yhat)
+    def _compute_K(self, Y, max_n_components=50):
+        ''' automatically compute number of PCA terms '''
+        skpca = PCA(n_components=min(max_n_components, self.d), svd_solver=self.svd_solver)
+        skpca.fit(Y)
+        self.cumulative_error_full = np.cumsum(skpca.explained_variance_ratio_)
+        # print(cumulative_error)
+        # need to check whether to use + 1 or not
+        loc = np.where(1 - self.cumulative_error_full <= self.cutoff)[0] + 1
+        if loc.size == 0:
+        	warnings.warn("Cutoff may be too big. Setting K = 16")
+        	self.K = 16
+        elif loc.size > 0:
+	        self.K = loc[0]
+
+class LogTransform:
+	def __init__(self):
+		pass
+	def fit(self,X,y=None):
+		assert np.all(X > 0), "X has negative values."
+		return self
+	def transform(self,X):
+		self.fit(X)
+		return np.log(X)
+	def inverse_transform(self,Xhat):
+		return np.exp(Xhat)
+
+def gen_scale_pipeline(log=True,scale=True,pca=True,**kwargs):
+	target_range = kwargs.get('target_range',(0,1))
+	n_components = kwargs.get('n_components',4)
+	svd_solver = kwargs.get('svd_solver','arpack')
+	estimators = []
+	if log: 
+		estimators.append(('log',LogTransform()))
+	if scale: 
+		estimators.append(('scaler',MinMaxTargetScaler(target_range=target_range)))
+	if pca: 
+		estimators.append(('pca',PCATargetTransform(n_components=n_components,svd_solver=svd_solver)))
+	pipe = Pipeline(estimators)
+	return pipe
+
+
+
+
 

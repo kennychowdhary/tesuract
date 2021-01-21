@@ -65,7 +65,6 @@ User Guide
    
    introduction
    guide
-   tutorial
    api
 
 

@@ -1,14 +1,15 @@
 ..  _intro:
 
-Introduction
-===============
+Main features
+=============
 
 pypce's main feature is constructing multivariate polynomial regression models
-using classic orthogonal polynomial constructions, e.g. Legendre polynomials.
-But there are a few more feature we will list below. 
+using classic orthogonal polynomial constructions, e.g. Legendre polynomials. We
+use the scikit-learn API to build these estimators, which allows easy and seamless integration with the scikit-learn. Here is a list of the main features of this library. 
 
-Main features of pypce
-----------------------
+* **Integration with scikit-learn**
+    Both :mod:`~pypce.PCEBuilder` and :mod:`~pypce.PCEReg` classes for
+    constructing multivariate polynomial interpolation inherit the BaseEstimator class from scikit-learn. This means both these object integrate seamlessly with the scikit-learn environment, which, for example, allows one to use the grid search cross-validation wrapper or even third party libraries like skopt on top of these polynomial estimator classes. 
 
 * **Multivariate polynomial regression**
     We provide an object oriented polynomial constructor class that creates a

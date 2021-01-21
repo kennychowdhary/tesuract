@@ -9,15 +9,20 @@ API
 .. .. automodule:: pypce.multiindex
 .. 	:members:
 
-Polynomial Classes
-------------------
+PCE Base Class
+--------------
 
 .. autoclass:: pypce.PCEBuilder
 	:members:
-	:exclude-members: get_params, set_params
+	:exclude-members: get_params, set_params, computeNormSq
 
-.. .. autoclass:: pypce.PCEReg
-.. 	:members:
+PCE Regression Class
+--------------------
+
+.. autoclass:: pypce.PCEReg
+	:members: 
+	:exclude-members: get_params, set_params, compile, eval, polyeval, score, fit_transform, computeMoments, computeSobol, computeNormSq, sensitivity_indices, multiindex
+	:private-members: _compile, _quad_fit
 
 .. Preprocessing Utilities
 .. -----------------------
@@ -25,8 +30,8 @@ Polynomial Classes
 .. .. automodule:: pypce.preprocessing
 .. 	:members:
 
-Quadrature
------------------------
+.. Quadrature
+.. -----------------------
 
 .. .. autoclass:: pypce.QuadGen
 .. 	:members:

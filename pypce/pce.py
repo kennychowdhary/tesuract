@@ -210,6 +210,10 @@ class PCEBuilder(BaseEstimator):
 
         The number of basis terms of the multi-variate polynomial. 
 
+    coef    : ndarray of shape (nbasis,)
+
+        Coefficient array
+
     Notes
     -----
     As of now, the base class requires the input range to be on the default
@@ -645,6 +649,116 @@ class PCEReg_old(PCEBuilder,RegressorMixin):
         return ypred
 
 class PCEReg(PCEBuilder,RegressorMixin):
+    ''' Class for performing multivariate polynomial regression 
+
+    This class fits the coefficients of a a multivariate polynomial object, aka
+    as a polynomial chaos model, using different linear regression algorithms
+    from sklearn. Given labeled data pairs :math:`(x_j,y_j)` for
+    :math:`j=1,\dots,n`, where :math:`x_j \in \mathbb{R}^d` and :math:`y_j \in
+    \mathbb{R}`, we look for 
+
+    .. math::
+
+        \\text{arg} \min_{c} \sum_{j}d\left(f(\mathbf{x}_j;c),y_j\\right) + \\text{Regularizer}(c)
+
+    where :math:`f` is the polynomial model with unknown coefficient parameters, i.e., 
+
+    .. math::
+
+        f(\mathbf{x}_j;c) \doteq \sum_{i=1}^N c_i \Phi_i(\mathbf{x}_j)
+
+    where :math:`d` is the error metric, which is typically a squared error, and the regularizer can be either :math:`\ell_1` (lasso), :math:`\ell_2` (ridge), or both (elastic net). Again, we note that the input must be on :math:`[-1,1]` for now since the polynomials are setup on that domain by default. One may use sklearn's preprocessing utilities to make that transformation or use the DomainScaler class that comes with this library. 
+
+    Below we list the parameters to construct the object followed by the class
+    attributes and returns. 
+
+    Parameters
+    ----------
+    order : int, default=2 
+
+        Description of the order of the polynomials in the
+        expansion. For total order, the order is the maximum polynomial order
+        for each basis function per dimension.
+
+    customM : numpy.ndarray, default=None 
+
+        An integer numpy aray of size (# of basis functions, # of dimensions). Each
+        row represents the basis function and each column represents the order of
+        the 1d polynomial, :math:`L_i`. 
+
+    mindex_type : {'total_order', 'hyperbolic'}, default='total_order' 
+
+        Different types of multiindex generators. Total order produces basis vectors
+        that have a maximum order as defined by **order**. Hyperbolic order is
+        similar but generates fewer cross terms. 
+
+    coef : numpy.ndarray, default=None
+
+        1d numpy coefficient array if defining polynomial. Must be the same length
+        as the number of basis elements, i.e. length of multiindex array. 
+
+    polytype : {'Legendre'}, default='Legendre'
+
+        A string representing the type of polynomial. So far we only include
+        Legendre polynomial construction defined on [-1,1]
+
+    fit_type : {'linear','LassoCV','ElasticNetCV','OmpCV','quadrature'}, default='linear'
+
+        A string defining the algorithm to solve the linear regression problem. All but the quadrature option utilizes sklearn's linear regression algorithms. In order to use the quadrature routine, you must define the 'w' variable in the fit_params dictionary. 
+    
+    fit_params : default={}
+
+        Dictionary to be passed to the particular fit type algorithm chosen above. See sklearn's documentation for parameters. This dictionary will be passed as a **kwargs type input for the fit algorithm. 
+    
+
+    normalized : bool, default=False
+
+        Whether or not to use normalized polynomials such that
+        :math:`\int_{-1}^{1}L_i(x)dx = 1` or :math:`\\frac{2}{2n+1}` if True or False, respecively, where
+        :math:`n` is the order of the polynomial (only for Legendre polynomials).  
+
+    Attributes
+    ----------
+    dim : int
+
+        Dimension of the polynomial, defined after construction. 
+
+    mindex : ndarray of shape (nbasis, dim)
+
+        Integer array of the multiindex which describes the structure of the
+        polynomial basis. 
+
+    nPCTerms : int
+
+        The number of basis terms of the multi-variate polynomial. 
+
+    feature_importances : ndarray of shape (dim,)
+
+        Sobol sensitivity indices for each dimension
+
+    coef    : ndarray of shape (nbasis,)
+
+        coefficient array of polynomial function. It can be fed into the constructor, but for most cases it will be computed after self.fit is called. 
+        
+    Notes
+    -----
+    As of now, the base class requires the input range to be on the default
+    range :math:`[-1,1]` for all dimensions. We have included a useful
+    preprocessing utility (``DomainScaler``) to transform the domain easily to
+    the canonical target range from any input range. In the future this will be
+    an option in the this class. 
+
+    Todo
+    -----
+    * Add option for non-standard domain. 
+    * Add attribute for feature_importances() is polynomial is defined. 
+
+    Examples
+    --------
+    >>> from pypce import PCEReg
+    >>> p = PCEReg(order=3)
+    >>> p.fit(X,y)
+    '''
     def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',fit_params={},normalized=False):
         # alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2
         self.order = order
@@ -664,13 +778,44 @@ class PCEReg(PCEBuilder,RegressorMixin):
         self.normalized = normalized
         super().__init__(order=self.order,customM=self.customM,mindex_type=self.mindex_type,coef=self.coef,a=self.a,b=self.b,polytype=self.polytype,normalized=self.normalized)
     def _compile(self,X):
-        # build multindex and get Xhat
+        '''Builds the multiindex using the PCEBuilder class. Private. 
+        
+        Parameters
+        ----------
+
+        X   : numpy array of size (nsamples, dim)
+
+            data matrix in feature space. 
+        
+        Returns
+        -------
+
+        self    : self
+
+            returns object
+
+        '''
         self._dim = X.shape[1]
         super().compile(dim=self._dim) # use parent compile to produce the multiindex
         self._M = self.multiindex
         self.Xhat = self.fit_transform(X)
         return self
     def _quad_fit(self,X,y):
+        '''
+        Fit the coefficients of the polynomial model using quadrature points and weights
+
+        It is expected that the data matrix X represent the quadrature point and the weights are given in the fit_params dictionary with the key name 'w'. 
+
+        Parameters
+        ----------
+        X       : numpy.ndarray of size (nsamples, dim)
+
+                Data matrix where each row is the first part of the data pairs (x,y)_i. X values must be between (-1,1), for now. 
+
+        y       : numpy.ndarray of size (nsamples,)
+
+                1d array of the data labels. Must be the same size as the number of rows of X.  
+        '''
         # let us assume the weights are for [-1,1]
         self._compile(X) # compute normalized or non-normalized Xhat
         normsq = self.computeNormSq()
@@ -685,6 +830,30 @@ class PCEReg(PCEBuilder,RegressorMixin):
             self.coef = int_fact*np.dot(w*y,self.Xhat)/normsq
         return self
     def fit(self,X,y):
+        '''
+        Fit the polynomial using linear regression or quadrature solvers
+
+        The algorithm is determined by the fit_type option in the initialization and the options in fit_params. 
+
+        Parameters
+        ----------
+
+        X       : numpy.ndarray of shape (nsamples, dim)
+
+                data matrix feature space samples. Must be in [-1,1]
+
+        y       : numpy.ndarray of shape (nsamples,)
+
+                data labels. 
+
+        Returns
+        -------
+
+        self    : self object
+
+                sets the internal coefficient array self.coef_
+
+        '''
         X,y = check_X_y(X,y)
         # get data attributes
         self._n,self._dim = X.shape
@@ -725,6 +894,20 @@ class PCEReg(PCEBuilder,RegressorMixin):
         assert self.coef is not None, "Must run fit or feed in coef array."
         return self.computeSobol()
     def feature_importances(self):
+        '''
+        Compute feature importances which are equivalent to the normalized Sobol total order sensitivity indices. 
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        feature_importances_    : numpy.ndarray of shape (dim,)
+
+            array representing normalized Sobol total order indices. 
+
+        '''
         S = np.array(self.computeSobol())
         S = S/S.sum()
         self.feature_importances_ = S
@@ -733,6 +916,24 @@ class PCEReg(PCEBuilder,RegressorMixin):
         assert self._M is not None, "Must run fit or feed in mindex array."
         return self._M
     def predict(self,X):
+        ''' 
+        After fitting, evaluates the polynomial for a single feature space sample or array of samples. 
+
+        Parameters
+        ----------
+
+        X       : numpy.ndarray of shape (nsamples, dim)
+
+                Samples to evaluate the fit polynomial. Must have self.coef_ set or defined already. Can take 1d or 2d array of samples. 
+
+        Returns
+        -------
+
+        y       : numpy.ndarray of shape (nsamples,)
+
+                Returns the scalar array of polynomial evaluations. 
+
+        '''
         # check_is_fitted(self)
         X = np.atleast_2d(X)
         X = check_array(X)

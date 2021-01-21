@@ -288,7 +288,8 @@ class LogTransform:
 	def __init__(self):
 		pass
 	def fit(self,X,y=None):
-		assert np.all(X > 0), "X has negative values."
+		if isinstance(X,np.ndarray):
+			assert np.all(X > 0), "X has negative values."
 		return self
 	def transform(self,X):
 		self.fit(X)

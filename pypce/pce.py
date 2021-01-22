@@ -493,23 +493,24 @@ class PCEBuilder(BaseEstimator):
 
         assert len(coef_) == self.mindex.shape[0], "Coefficient vector must match the no of rows of the multiindex."
 
+        new_index = (np.sum(self.mindex,1)!=0) # boolean array that doesn't include mean mindex
         if self.normalized:
-            totvar_vec = coef_[1:]**2
+            totvar_vec = coef_[new_index]**2
             self.coefsq = coef_**2
         else:
-            totvar_vec = normsq[1:]*coef_[1:]**2
+            totvar_vec = normsq[new_index]*coef_[new_index]**2
             self.coefsq = normsq*coef_**2
         totvar = np.sum(totvar_vec)
         # assert totvar > 0, "Coefficients are all zero!"
         S = []
         # in case elements have nan in them
-        if np.all(coef_[1:] == 0): # ignore the mean
+        if np.all(coef_[new_index] == 0): # ignore the mean
             print("Returning equal weights!")
             S = np.ones(self.dim)/self.dim # return equal weights
         else:
             for i in range(self.dim):
                 si = self.mindex[:,i] > 0 # boolean
-                s = np.sum(totvar_vec[si[1:]])/totvar
+                s = np.sum(totvar_vec[si[new_index]])/totvar
                 S.append(s)
         return S
     def computeMoments(self,c=None):
@@ -732,14 +733,14 @@ class PCEReg(PCEBuilder,RegressorMixin):
 
         The number of basis terms of the multi-variate polynomial. 
 
-    feature_importances : ndarray of shape (dim,)
+    feature_importances_ : ndarray of shape (dim,)
 
-        Sobol sensitivity indices for each dimension
+        Sobol sensitivity indices for each dimension. This is computed after the fit function is called. 
 
     coef    : ndarray of shape (nbasis,)
 
         coefficient array of polynomial function. It can be fed into the constructor, but for most cases it will be computed after self.fit is called. 
-        
+
     Notes
     -----
     As of now, the base class requires the input range to be on the default
@@ -888,7 +889,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
         if self.fit_type != "quadrature":
             self.coef = regmodel.coef_
         self.coef_ = self.coef # backwards comaptible with sklearn API
-        self.feature_importances()
+        self.feature_importances_ = self.feature_importances()
         return self
     def sensitivity_indices(self):
         assert self.coef is not None, "Must run fit or feed in coef array."

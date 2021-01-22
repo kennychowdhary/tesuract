@@ -17,6 +17,13 @@ use the scikit-learn API to build these estimators, which allows easy and seamle
     corresponding multivariate polynomial regression class that utilizes
     existing linear regression algorithms in scikit-learn to train the model. 
 
+* **Hyper-parameter search for best model fit**
+    
+    pypce provides methods to perform hyper-parameter search for finding the
+    best fit polynomial model. Moreover, we provide methods to compare these
+    methods to other popular machine learning regression models like random
+    forest regression and multi-layer perceptron models. [#]_ 
+
 * **Variance based sensitivity analysis**
 
     The polynomial regression class allows for easy feature importance or
@@ -42,10 +49,11 @@ use the scikit-learn API to build these estimators, which allows easy and seamle
 
 * **Pipelines for multi-target fitting** [#]_
 
+  
 
+.. [#] In the future, we will be able to compare methods in tensorflow. The machinery is there for connecting tensorflow to sklearn, but it just needs to be done!
 
-.. [#] This is an advanced usage for pypce.  
-
+.. [#] This is an advanced usage for pypce.
 
 .. Special triangles
 .. -----------------

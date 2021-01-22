@@ -46,6 +46,18 @@ class TestPCERegression(unittest.TestCase):
 		p = pypce.PCEReg(order=self.order,customM=p0._M)
 		p.fit(self.X,self.y)
 		assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-15, "Fit coefficient did not match truth."
+	def test_custom_feature_importance(self):
+		rn = np.random.RandomState(123)
+		X = 2*rn.rand(100,2)-1
+		y = X[:,0] + .5*(3*X[:,1]**2-1)
+		p0 = pypce.PCEReg(self.order)
+		p0.fit(X,y)
+		fi0 = p0.feature_importances_
+		p = pypce.PCEReg(customM=p0.mindex[1:])
+		p.fit(X,y)
+		fi = p.feature_importances_
+		assert np.sum((fi-fi0)**2) <= 1e-16, "feature importance for custom multiindex failed."
+		# assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-15, "Fit coefficient did not match truth."
 	def test_LassoCV_fit(self):
 		p = pypce.PCEReg(self.order,fit_type='LassoCV')
 		y = self.y + .001*self.rn.rand(len(self.y)) # add noise

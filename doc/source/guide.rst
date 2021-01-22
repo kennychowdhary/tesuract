@@ -11,8 +11,8 @@ multi-variate polynomial object and fit the coefficients using existing
 regression algorithms in scikit-learn. 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 0
    
-   tutorials/PCEReg_guide
-
+   tutorials/tutorial01
+   tutorials/tutorial02
 

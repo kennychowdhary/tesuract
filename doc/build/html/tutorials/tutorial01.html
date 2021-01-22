@@ -1,0 +1,531 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Introduction to polynomial regression &mdash; pypce 1.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Some other usage cases" href="tutorial02.html" />
+    <link rel="prev" title="Tutorials" href="../guide.html" />
+    <link href="../_static/style.css" rel="stylesheet" type="text/css">
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> pypce
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Main features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../guide.html">Tutorials</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Introduction to polynomial regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setup-the-problem">Setup the problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fit-a-polynomial">Fit a polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#feature-importance">Feature importance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#prediction">Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scale-error">Scale error</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#different-fit-algorithms">Different fit algorithms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial02.html">Some other usage cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorial02.html#defining-custom-coefficient-array">Defining custom coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial02.html#custom-multiindex-array">Custom multiindex array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial02.html#custom-multiindex-and-coefficient-array">Custom multiindex and coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorial02.html#using-normalized-legendre-basis">Using normalized Legendre basis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#pce-base-class">PCE Base Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#pce-regression-class">PCE Regression Class</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">pypce</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../guide.html">Tutorials</a> &raquo;</li>
+        
+      <li>Introduction to polynomial regression</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/tutorial01.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="introduction-to-polynomial-regression">
+<h1>Introduction to polynomial regression<a class="headerlink" href="#introduction-to-polynomial-regression" title="Permalink to this headline">¶</a></h1>
+<p>Let’s start my first importing the pypce library and any third party
+libraries we might need like numpy or matplotlib.</p>
+<div class="section" id="setup-the-problem">
+<h2>Setup the problem<a class="headerlink" href="#setup-the-problem" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pypce</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">mpl</span>
+</pre></div>
+</td></tr></table></div>
+<p>Now, let’s generate some two-dimensional multivariate data to show how
+pypce works!</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">rn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">rn</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="p">(</span><span class="mi">100</span><span class="p">,)</span>
+</pre></div>
+</div>
+<p>This generate a data matrix <span class="math notranslate nohighlight">\(X\)</span> of size (nsamples,dim) and labeled
+data <span class="math notranslate nohighlight">\(y\)</span> of shape (nsamples,). We can plot the univariate data
+using matplotlib.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">mpl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span> <span class="n">at</span> <span class="mh">0x1408ada10</span><span class="o">&gt;</span><span class="p">]</span>
+</pre></div>
+</div>
+<img alt="../_images/tutorial01_6_1.png" src="../_images/tutorial01_6_1.png" />
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">mpl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span> <span class="n">at</span> <span class="mh">0x143057290</span><span class="o">&gt;</span><span class="p">]</span>
+</pre></div>
+</div>
+<img alt="../_images/tutorial01_7_1.png" src="../_images/tutorial01_7_1.png" />
+<p>Note that the <span class="math notranslate nohighlight">\(x_1\)</span> dependence on <span class="math notranslate nohighlight">\(y\)</span> is more linear,
+whereas the <span class="math notranslate nohighlight">\(x_2\)</span> dependence is quadratic, which is done by
+construction. Let’s keep this in mind so that we can make sure the
+polynomial fit we obtain reflects this relation.</p>
+</div>
+<div class="section" id="fit-a-polynomial">
+<h2>Fit a polynomial<a class="headerlink" href="#fit-a-polynomial" title="Permalink to this headline">¶</a></h2>
+<p>Now let’s fit the polynomial. To do this we need to initialize the PCE
+regression class. To do this, we need to define the order of the
+polynomial we want to fit and the fit algorithm. These two common
+parameters are referred to as hyper-parameters. We can optimize over
+them later using the grid search methods in sklearn. For now, let us
+choose a second order polynomial and a least squares fit algorithm.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">pce</span> <span class="o">=</span> <span class="n">pypce</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">fit_type</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<p>Initialization is fast since no computation or basis construction has
+been done. It is when we fit the polynomial that the basis construction
+takes place. So let’s fit the polynomial!</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">pce</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PCEReg</span><span class="p">(</span><span class="n">coef</span><span class="o">=</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.99913597</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span> <span class="o">-</span><span class="mf">0.</span>        <span class="p">,</span>
+        <span class="mf">0.99834676</span><span class="p">]),</span>
+       <span class="n">fit_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;l1_ratio&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                   <span class="s1">&#39;n_alphas&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s1">&#39;tol&#39;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">},</span>
+       <span class="n">fit_type</span><span class="o">=</span><span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This returns the object back and displays the coefficient vector. For
+all intents and purposes, a user does not need to know what the
+coefficients are, but for purposes of this tutorial, let us take a look
+so that we can verify that the fit is correct.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">&quot;c=</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">pce</span><span class="o">.</span><span class="n">coef</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;multi-index:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span><span class="n">pce</span><span class="o">.</span><span class="n">mindex</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">c</span><span class="o">=</span>
+ <span class="p">[</span> <span class="mf">3.68829304e-17</span>  <span class="mf">1.00000000e+00</span> <span class="o">-</span><span class="mf">1.11022302e-15</span>  <span class="mf">4.44089210e-16</span>
+ <span class="o">-</span><span class="mf">1.11022302e-16</span>  <span class="mf">1.00000000e+00</span><span class="p">]</span>
+<span class="n">multi</span><span class="o">-</span><span class="n">index</span><span class="p">:</span>
+ <span class="p">[[</span><span class="mi">0</span> <span class="mi">0</span><span class="p">]</span>
+ <span class="p">[</span><span class="mi">1</span> <span class="mi">0</span><span class="p">]</span>
+ <span class="p">[</span><span class="mi">0</span> <span class="mi">1</span><span class="p">]</span>
+ <span class="p">[</span><span class="mi">2</span> <span class="mi">0</span><span class="p">]</span>
+ <span class="p">[</span><span class="mi">1</span> <span class="mi">1</span><span class="p">]</span>
+ <span class="p">[</span><span class="mi">0</span> <span class="mi">2</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Notice that coefficient array contains all zeros (essentially) except
+for the second and last entries. This is actually by design! We defined
+the function <span class="math notranslate nohighlight">\(y\)</span> to be a simple sum of the first order Legendre
+polynomial in <span class="math notranslate nohighlight">\(x_1\)</span> and the second order Legendre polynomial in
+<span class="math notranslate nohighlight">\(x_2\)</span>. And if we look at the multi-index array, which represents
+the components of each basis function, the second and last row
+correspond to these exact polynomial terms. To be explicit, the
+multi-index row <span class="math notranslate nohighlight">\([p,q]\)</span> represents the basis corresponding to the
+product of the <span class="math notranslate nohighlight">\(p^{th}\)</span> order polynomial in <span class="math notranslate nohighlight">\(x_1\)</span> and the
+<span class="math notranslate nohighlight">\(q^{th}\)</span> order polynomial in <span class="math notranslate nohighlight">\(x_2\)</span>.</p>
+<p>Two final points before we move on. The linear fit algorithm worked
+perfectly well since our data was not corrupted by noise. When noise
+becomes a problem, or we expect outliers, it is probably better to use
+the LassoCV or ElasticNetCV algorithms. The good news is that we have
+wrappers that allow the user to perform a simple hyper-parameter search
+to figure out the best fit. To show that a fit with regression would not
+work well for this case, look at the following.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">pce_lasso</span> <span class="o">=</span> <span class="n">pypce</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">fit_type</span><span class="o">=</span><span class="s1">&#39;LassoCV&#39;</span><span class="p">)</span>
+<span class="n">pce_lasso</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PCEReg</span><span class="p">(</span><span class="n">coef</span><span class="o">=</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">4.23429475e-04</span><span class="p">,</span>  <span class="mf">1.00037195e+00</span><span class="p">,</span>  <span class="mf">2.12998050e-04</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.61174005e-04</span><span class="p">,</span>
+       <span class="o">-</span><span class="mf">5.52452618e-04</span><span class="p">,</span>  <span class="mf">9.99757827e-01</span><span class="p">]),</span>
+       <span class="n">fit_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;alphas&#39;</span><span class="p">:</span> <span class="n">array</span><span class="p">([</span><span class="mf">1.00000000e-12</span><span class="p">,</span> <span class="mf">3.83118685e-12</span><span class="p">,</span> <span class="mf">1.46779927e-11</span><span class="p">,</span> <span class="mf">5.62341325e-11</span><span class="p">,</span>
+       <span class="mf">2.15443469e-10</span><span class="p">,</span> <span class="mf">8.25404185e-10</span><span class="p">,</span> <span class="mf">3.16227766e-09</span><span class="p">,</span> <span class="mf">1.21152766e-08</span><span class="p">,</span>
+       <span class="mf">4.64158883e-08</span><span class="p">,</span> <span class="mf">1.77827941e-07</span><span class="p">,</span> <span class="mf">6.81292069e-07</span><span class="p">,</span> <span class="mf">2.61015722e-06</span><span class="p">,</span>
+       <span class="mf">1.00000000e-05</span><span class="p">,</span> <span class="mf">3.83118685e-05</span><span class="p">,</span> <span class="mf">1.46779927e-04</span><span class="p">,</span> <span class="mf">5.62341325e-04</span><span class="p">,</span>
+       <span class="mf">2.15443469e-03</span><span class="p">,</span> <span class="mf">8.25404185e-03</span><span class="p">,</span> <span class="mf">3.16227766e-02</span><span class="p">,</span> <span class="mf">1.21152766e-01</span><span class="p">,</span>
+       <span class="mf">4.64158883e-01</span><span class="p">,</span> <span class="mf">1.77827941e+00</span><span class="p">,</span> <span class="mf">6.81292069e+00</span><span class="p">,</span> <span class="mf">2.61015722e+01</span><span class="p">,</span>
+       <span class="mf">1.00000000e+02</span><span class="p">]),</span>
+                   <span class="s1">&#39;max_iter&#39;</span><span class="p">:</span> <span class="mi">1000</span><span class="p">,</span> <span class="s1">&#39;tol&#39;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">},</span>
+       <span class="n">fit_type</span><span class="o">=</span><span class="s1">&#39;LassoCV&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The coefficient array in this case is over regularized but it’s not bad.
+This is because the LassoCV is allowed to find the best regularization
+parameter, which in this case it <span class="math notranslate nohighlight">\(0\)</span>.</p>
+</div>
+<div class="section" id="feature-importance">
+<h2>Feature importance<a class="headerlink" href="#feature-importance" title="Permalink to this headline">¶</a></h2>
+<p>Let’s us now see how we can show the feature importances. For
+polynomials, we use the total order Sobol sensitivity indices. This is
+essentially a weighted average of the polynomial coefficients. This is
+one of the nice properties of using orthogonal polynomials.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">pce</span><span class="o">.</span><span class="n">feature_importances_</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.625</span><span class="p">,</span> <span class="mf">0.375</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Sobol sensitivity indices essentially give us a metric for how much of
+the total variance is explained by each individual variance. So what
+this says is that <span class="math notranslate nohighlight">\(x_1\)</span> is more importance to the variability of
+the output. This doesn’t mean that <span class="math notranslate nohighlight">\(x_2\)</span> doesn’t matter. Note the
+syntax is similar to the random forest feature importance syntax in
+sklearn.</p>
+</div>
+<div class="section" id="prediction">
+<h2>Prediction<a class="headerlink" href="#prediction" title="Permalink to this headline">¶</a></h2>
+<p>Once the coefficient array is determined, typically by the fit function
+or (less commonly) by pre-defining the coefficient array in the
+constructor, we can make predictions. This is quite simple by using the
+<code class="docutils literal notranslate"><span class="pre">predict</span></code> class method.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">ypred</span> <span class="o">=</span> <span class="n">pce</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;MSE: </span><span class="si">{0:2E}</span><span class="s1">, </span><span class="se">\n</span><span class="s1">MPE: </span><span class="si">{1:3E}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">ypred</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">ypred</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">y</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">MSE</span><span class="p">:</span> <span class="mf">6.985656E-31</span><span class="p">,</span>
+<span class="n">MPE</span><span class="p">:</span> <span class="mf">3.553763E-26</span>
+</pre></div>
+</div>
+<p>We can see this in another way by plotting the prediction vs the truth.
+Ideally, the graph should align perfectly with a y=x line plot.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">mpl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;k&#39;</span><span class="p">,</span><span class="n">alpha</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">ms</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">mpl</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">ypred</span><span class="p">,</span><span class="s1">&#39;o&#39;</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">lines</span><span class="o">.</span><span class="n">Line2D</span> <span class="n">at</span> <span class="mh">0x145123410</span><span class="o">&gt;</span><span class="p">]</span>
+</pre></div>
+</div>
+<img alt="../_images/tutorial01_24_1.png" src="../_images/tutorial01_24_1.png" />
+<div class="section" id="scale-error">
+<h3>Scale error<a class="headerlink" href="#scale-error" title="Permalink to this headline">¶</a></h3>
+<p>We mentioned before that <span class="math notranslate nohighlight">\(X\)</span> must be scaled to be over [-1,1]
+since the polynomials are defined on that range. Let’s see what happens
+when we feed a polynomial outside that range.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">pce</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">---------------------------------------------------------------------------</span>
+
+<span class="ne">AssertionError</span>                            <span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">)</span>
+
+<span class="o">&lt;</span><span class="n">ipython</span><span class="o">-</span><span class="nb">input</span><span class="o">-</span><span class="mi">12</span><span class="o">-</span><span class="n">d32815d055ad</span><span class="o">&gt;</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+<span class="o">----&gt;</span> <span class="mi">1</span> <span class="n">pce</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+
+
+<span class="o">~/.</span><span class="n">pyenv</span><span class="o">/</span><span class="n">versions</span><span class="o">/</span><span class="mf">3.7</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pypce</span><span class="o">/</span><span class="n">pce</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+    <span class="mi">858</span>         <span class="c1"># get data attributes</span>
+    <span class="mi">859</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_n</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+<span class="o">--&gt;</span> <span class="mi">860</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_compile</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="c1"># build multindex and construct basis</span>
+    <span class="mi">861</span>         <span class="n">Xhat</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">check_X_y</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Xhat</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="mi">862</span>         <span class="c1"># pypce.PCEBuilder(dim=self.dim,self.order)</span>
+
+
+<span class="o">~/.</span><span class="n">pyenv</span><span class="o">/</span><span class="n">versions</span><span class="o">/</span><span class="mf">3.7</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pypce</span><span class="o">/</span><span class="n">pce</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">_compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+    <span class="mi">799</span>         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim</span><span class="p">)</span> <span class="c1"># use parent compile to produce the multiindex</span>
+    <span class="mi">800</span>         <span class="bp">self</span><span class="o">.</span><span class="n">_M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiindex</span>
+<span class="o">--&gt;</span> <span class="mi">801</span>         <span class="bp">self</span><span class="o">.</span><span class="n">Xhat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="mi">802</span>         <span class="k">return</span> <span class="bp">self</span>
+    <span class="mi">803</span>     <span class="k">def</span> <span class="nf">_quad_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+
+
+<span class="o">~/.</span><span class="n">pyenv</span><span class="o">/</span><span class="n">versions</span><span class="o">/</span><span class="mf">3.7</span><span class="o">.</span><span class="mi">6</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">pypce</span><span class="o">/</span><span class="n">pce</span><span class="o">.</span><span class="n">py</span> <span class="ow">in</span> <span class="n">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">)</span>
+    <span class="mi">360</span>         <span class="c1"># only works for [-1,1] for far</span>
+    <span class="mi">361</span>         <span class="c1"># compute multindex</span>
+<span class="o">--&gt;</span> <span class="mi">362</span>         <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;range for X must be between -1 and 1 for now. scale inputs accordingly. &quot;</span>
+    <span class="mi">363</span>         <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="mi">364</span>         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mindex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+
+<span class="ne">AssertionError</span><span class="p">:</span> <span class="nb">range</span> <span class="k">for</span> <span class="n">X</span> <span class="n">must</span> <span class="n">be</span> <span class="n">between</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">now</span><span class="o">.</span> <span class="n">scale</span> <span class="n">inputs</span> <span class="n">accordingly</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Note that we will NOT get an error if X is defined on <span class="math notranslate nohighlight">\([0,1]\)</span>.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">pce</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="o">.</span><span class="mi">5</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span><span class="n">y</span><span class="p">)</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">PCEReg</span><span class="p">(</span><span class="n">coef</span><span class="o">=</span><span class="n">array</span><span class="p">([</span> <span class="mf">1.49367831</span><span class="p">,</span>  <span class="mf">1.77311607</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.79944048</span><span class="p">,</span>  <span class="mf">0.16374152</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.</span>        <span class="p">,</span>
+        <span class="mf">3.24392684</span><span class="p">]),</span>
+       <span class="n">fit_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;l1_ratio&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                   <span class="s1">&#39;n_alphas&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span> <span class="s1">&#39;tol&#39;</span><span class="p">:</span> <span class="mf">0.01</span><span class="p">},</span>
+       <span class="n">fit_type</span><span class="o">=</span><span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this case, the fit will not be what one expects since we expect the
+input to be on [-1,1]. So be careful!!</p>
+</div>
+</div>
+<div class="section" id="different-fit-algorithms">
+<h2>Different fit algorithms<a class="headerlink" href="#different-fit-algorithms" title="Permalink to this headline">¶</a></h2>
+<p>Now let’s look at the accuracy of different fit algorithms. In this
+example, we will train and test on the same set, but in a formal
+setting, you should not do that (we will explore this in later
+tutorials).</p>
+<p>The different fit algorithms from sklearn are LassoCV, ElasticNetCV,
+OmpCV, and linear least squares. We will fit a polynomial for each one
+of these algorithms with and without noise to see how accurate they are.</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">algs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;LassoCV&#39;</span><span class="p">,</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">alg</span> <span class="ow">in</span> <span class="n">algs</span><span class="p">:</span>
+    <span class="n">pce</span> <span class="o">=</span> <span class="n">pypce</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">fit_type</span><span class="o">=</span><span class="n">alg</span><span class="p">)</span>
+    <span class="n">pce</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">ypred</span> <span class="o">=</span> <span class="n">pce</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error using </span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1:.3E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alg</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">ypred</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span> <span class="n">using</span> <span class="n">linear</span><span class="p">:</span> <span class="mf">6.986E-29</span>
+<span class="n">Error</span> <span class="n">using</span> <span class="n">LassoCV</span><span class="p">:</span> <span class="mf">2.085E-05</span>
+<span class="n">Error</span> <span class="n">using</span> <span class="n">ElasticNetCV</span><span class="p">:</span> <span class="mf">7.523E-05</span>
+</pre></div>
+</div>
+<p>They are all pretty good, but linear least squares gives the best fit.
+Now, let’s try the same with noise! First, let us create an output
+corrupted by simple additive white noise</p>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">y_w_noise</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="o">+</span> <span class="o">.</span><span class="mi">1</span><span class="o">*</span><span class="n">rn</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">))</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-ipython3 notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
+2
+3
+4
+5
+6</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="n">algs</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;LassoCV&#39;</span><span class="p">,</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">alg</span> <span class="ow">in</span> <span class="n">algs</span><span class="p">:</span>
+    <span class="n">pce</span> <span class="o">=</span> <span class="n">pypce</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span><span class="n">fit_type</span><span class="o">=</span><span class="n">alg</span><span class="p">)</span>
+    <span class="n">pce</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y_w_noise</span><span class="p">)</span>
+    <span class="n">ypred</span> <span class="o">=</span> <span class="n">pce</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Error using </span><span class="si">{0}</span><span class="s2">: </span><span class="si">{1:.3E}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">alg</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">((</span><span class="n">ypred</span><span class="o">-</span><span class="n">y</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+</pre></div>
+</td></tr></table></div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Error</span> <span class="n">using</span> <span class="n">linear</span><span class="p">:</span> <span class="mf">4.601E-02</span>
+<span class="n">Error</span> <span class="n">using</span> <span class="n">LassoCV</span><span class="p">:</span> <span class="mf">2.747E-02</span>
+<span class="n">Error</span> <span class="n">using</span> <span class="n">ElasticNetCV</span><span class="p">:</span> <span class="mf">2.552E-02</span>
+</pre></div>
+</div>
+<p>This time, LassoCV or ElasticNetCV give the best solution!</p>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="tutorial02.html" class="btn btn-neutral float-right" title="Some other usage cases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../guide.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, K. Chowdhary
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

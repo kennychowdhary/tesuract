@@ -15,10 +15,18 @@ transforming feature and target spaces, e.g. PCA, and custom pipelines for
 fitting multi-target regression models and comparing different machine learning
 (ML) methods.
 
+These classical and non-classical UQ methods integrate seamlessly with
+estimators in scikit-learn's toolbox, thus allowing integration and testing
+within the prolific machine learning library.  For example, the user can utilize
+the cross validation utilities to easily compare multi-variate polynomial
+estimators with sklearn's random forest regression methods. In fact, we provide
+classes that have this ability baked in so that the user can perform efficient
+and easy model selection to find the best model for the job. 
+
 Installation
 ------------
 
-The code is super easy to install. Make sure you have ``numpy`` and
+The code is super easy to install with ``pip``. Make sure you have ``numpy`` and
 ``scikit-learn``. Then, after downloading, cd into the ``pypce`` directory, i.e.
 the folder with the ``setup.py``, and run
 
@@ -26,13 +34,13 @@ the folder with the ``setup.py``, and run
 
 	pip install .
 
-You can also run a suite of unittests before installation with 
+You can also run a suite of unit tests and regression tests before installation with 
 
 ::
 
    python -m pytest -v -s pypce/tests
 
-to check the library works. That's it! Now you are ready to use **pypce**. 
+to check that the library works. That's it! Now you are ready to use **pypce**. 
 
 Quickstart
 ----------------
@@ -57,7 +65,6 @@ User Guide
    
    introduction
    guide
-   tutorial
    api
 
 

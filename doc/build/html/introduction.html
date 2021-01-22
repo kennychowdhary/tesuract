@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Introduction &mdash; pypce 1.0 documentation</title>
+  <title>Main features &mdash; pypce 1.0 documentation</title>
   
 
   
@@ -38,7 +38,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Guide" href="guide.html" />
+    <link rel="next" title="Tutorials" href="guide.html" />
     <link rel="prev" title="pypce" href="index.html" />
     <link href="_static/style.css" rel="stylesheet" type="text/css">
 
@@ -87,18 +87,31 @@
             
             
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#main-features-of-pypce">Main features of pypce</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Main features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html">Introduction to polynomial regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#setup-the-problem">Setup the problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#fit-a-polynomial">Fit a polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#feature-importance">Feature importance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#prediction">Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorials/tutorial01.html#scale-error">Scale error</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="guide.html">Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guides/PCEReg_guide.html">Guide to PCE Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#different-fit-algorithms">Different fit algorithms</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">The pypce tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html">Some other usage cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#defining-custom-coefficient-array">Defining custom coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-array">Custom multiindex array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-and-coefficient-array">Custom multiindex and coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#using-normalized-legendre-basis">Using normalized Legendre basis</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#polynomial-classes">Polynomial Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#quadrature">Quadrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-base-class">PCE Base Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-regression-class">PCE Regression Class</a></li>
 </ul>
 </li>
 </ul>
@@ -147,7 +160,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Introduction</li>
+      <li>Main features</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -166,14 +179,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="introduction">
-<span id="intro"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="main-features">
+<span id="intro"></span><h1>Main features<a class="headerlink" href="#main-features" title="Permalink to this headline">¶</a></h1>
 <p>pypce’s main feature is constructing multivariate polynomial regression models
-using classic orthogonal polynomial constructions, e.g. Legendre polynomials.
-But there are a few more feature we will list below.</p>
-<div class="section" id="main-features-of-pypce">
-<h2>Main features of pypce<a class="headerlink" href="#main-features-of-pypce" title="Permalink to this headline">¶</a></h2>
+using classic orthogonal polynomial constructions, e.g. Legendre polynomials. We
+use the scikit-learn API to build these estimators, which allows easy and seamless integration with the scikit-learn. Here is a list of the main features of this library.</p>
 <ul>
+<li><dl class="simple">
+<dt><strong>Integration with scikit-learn</strong></dt><dd><p>Both <a class="reference internal" href="api.html#pypce.PCEBuilder" title="pypce.PCEBuilder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEBuilder</span></code></a> and <a class="reference internal" href="api.html#pypce.PCEReg" title="pypce.PCEReg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEReg</span></code></a> classes for
+constructing multivariate polynomial interpolation inherit the BaseEstimator class from scikit-learn. This means both these object integrate seamlessly with the scikit-learn environment, which, for example, allows one to use the grid search cross-validation wrapper or even third party libraries like skopt on top of these polynomial estimator classes.</p>
+</dd>
+</dl>
+</li>
 <li><dl class="simple">
 <dt><strong>Multivariate polynomial regression</strong></dt><dd><p>We provide an object oriented polynomial constructor class that creates a
 polynomial estimator (based on the scikit-learn estimator API) and a
@@ -181,6 +198,14 @@ corresponding multivariate polynomial regression class that utilizes
 existing linear regression algorithms in scikit-learn to train the model.</p>
 </dd>
 </dl>
+</li>
+<li><p><strong>Hyper-parameter search for best model fit</strong></p>
+<blockquote>
+<div><p>pypce provides methods to perform hyper-parameter search for finding the
+best fit polynomial model. Moreover, we provide methods to compare these
+methods to other popular machine learning regression models like random
+forest regression and multi-layer perceptron models. <a class="footnote-reference brackets" href="#id3" id="id1">1</a></p>
+</div></blockquote>
 </li>
 <li><p><strong>Variance based sensitivity analysis</strong></p>
 <blockquote>
@@ -209,14 +234,16 @@ transforms, e.g., PCA.</p>
 </dd>
 </dl>
 </li>
-<li><p><strong>Pipelines for multi-target fitting</strong> <a class="footnote-reference brackets" href="#id2" id="id1">1</a></p></li>
+<li><p><strong>Pipelines for multi-target fitting</strong> <a class="footnote-reference brackets" href="#id4" id="id2">2</a></p></li>
 </ul>
 <dl class="footnote brackets">
-<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>In the future, we will be able to compare methods in tensorflow. The machinery is there for connecting tensorflow to sklearn, but it just needs to be done!</p>
+</dd>
+<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
 <dd><p>This is an advanced usage for pypce.</p>
 </dd>
 </dl>
-</div>
 </div>
 
 
@@ -227,7 +254,7 @@ transforms, e.g., PCA.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="guide.html" class="btn btn-neutral float-right" title="Guide" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="guide.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="pypce" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

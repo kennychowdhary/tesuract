@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Guide &mdash; pypce 1.0 documentation</title>
+  <title>Tutorials &mdash; pypce 1.0 documentation</title>
   
 
   
@@ -38,8 +38,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Guide to PCE Regression" href="guides/PCEReg_guide.html" />
-    <link rel="prev" title="Introduction" href="introduction.html" />
+    <link rel="next" title="Introduction to polynomial regression" href="tutorials/tutorial01.html" />
+    <link rel="prev" title="Main features" href="introduction.html" />
     <link href="_static/style.css" rel="stylesheet" type="text/css">
 
 </head>
@@ -87,18 +87,31 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#main-features-of-pypce">Main features of pypce</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Main features</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html">Introduction to polynomial regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#setup-the-problem">Setup the problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#fit-a-polynomial">Fit a polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#feature-importance">Feature importance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#prediction">Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorials/tutorial01.html#scale-error">Scale error</a></li>
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guides/PCEReg_guide.html">Guide to PCE Regression</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#different-fit-algorithms">Different fit algorithms</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">The pypce tutorial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html">Some other usage cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#defining-custom-coefficient-array">Defining custom coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-array">Custom multiindex array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-and-coefficient-array">Custom multiindex and coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#using-normalized-legendre-basis">Using normalized Legendre basis</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#polynomial-classes">Polynomial Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#quadrature">Quadrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-base-class">PCE Base Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-regression-class">PCE Regression Class</a></li>
 </ul>
 </li>
 </ul>
@@ -147,7 +160,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Guide</li>
+      <li>Tutorials</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -166,16 +179,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="guide">
-<span id="usage"></span><h1>Guide<a class="headerlink" href="#guide" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="tutorials">
+<span id="usage"></span><h1>Tutorials<a class="headerlink" href="#tutorials" title="Permalink to this headline">¶</a></h1>
 <p>Here we layout some useful basic usage guides for the user. We start with an
-introduction to the <a class="reference internal" href="api.html#pypce.PCEBuilder" title="pypce.PCEBuilder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEBuilder</span></code></a> and the <code class="xref py py-mod docutils literal notranslate"><span class="pre">pypce.PCEReg</span></code>
+introduction to the <a class="reference internal" href="api.html#pypce.PCEBuilder" title="pypce.PCEBuilder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEBuilder</span></code></a> and the <a class="reference internal" href="api.html#pypce.PCEReg" title="pypce.PCEReg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEReg</span></code></a>
 classes, which are the building blocks of <strong>pypce</strong>. They construct the
 multi-variate polynomial object and fit the coefficients using existing
 regression algorithms in scikit-learn.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="guides/PCEReg_guide.html">Guide to PCE Regression</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/tutorial01.html">Introduction to polynomial regression</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html#setup-the-problem">Setup the problem</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html#fit-a-polynomial">Fit a polynomial</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html#feature-importance">Feature importance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html#prediction">Prediction</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#scale-error">Scale error</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html#different-fit-algorithms">Different fit algorithms</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/tutorial02.html">Some other usage cases</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html#defining-custom-coefficient-array">Defining custom coefficient array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-array">Custom multiindex array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-and-coefficient-array">Custom multiindex and coefficient array</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html#using-normalized-legendre-basis">Using normalized Legendre basis</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -188,10 +218,10 @@ regression algorithms in scikit-learn.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="guides/PCEReg_guide.html" class="btn btn-neutral float-right" title="Guide to PCE Regression" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tutorials/tutorial01.html" class="btn btn-neutral float-right" title="Introduction to polynomial regression" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Main features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

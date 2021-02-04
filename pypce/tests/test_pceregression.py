@@ -25,16 +25,16 @@ class TestPCERegression(unittest.TestCase):
 	def test_linear_fit(self):
 		p = pypce.PCEReg(self.order)
 		p.fit(self.X,self.y)
-		assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-15, "Fit coefficient did not match truth."
+		assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-12, "Fit coefficient did not match truth."
 	def test_linear_fit_w_normalization(self):
 		p = pypce.PCEReg(self.order,normalized=True)
 		p.fit(self.X,self.y)
 		normsq = p.computeNormSq()
-		assert mse(p.coef/np.sqrt(normsq),self.c_true) <= 5e-15, "Fit coefficient did not match truth."
+		assert mse(p.coef/np.sqrt(normsq),self.c_true) <= 5e-12, "Fit coefficient did not match truth."
 	def test_linear_fit_prediction_w_normalization(self):
 		p = pypce.PCEReg(self.order,normalized=True)
 		p.fit(self.X,self.y)
-		assert mse(p.predict(self.X),self.y) <= 5e-15, "linear fit with normalization is broken."
+		assert mse(p.predict(self.X),self.y) <= 5e-12, "linear fit with normalization is broken."
 	def test_multindex(self):
 		p = pypce.PCEReg(self.order)
 		p.fit(self.X,self.y)
@@ -45,7 +45,7 @@ class TestPCERegression(unittest.TestCase):
 		p0.fit(self.X,self.y)
 		p = pypce.PCEReg(order=self.order,customM=p0._M)
 		p.fit(self.X,self.y)
-		assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-15, "Fit coefficient did not match truth."
+		assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-12, "Fit coefficient did not match truth."
 	def test_custom_feature_importance(self):
 		rn = np.random.RandomState(123)
 		X = 2*rn.rand(100,2)-1
@@ -57,7 +57,7 @@ class TestPCERegression(unittest.TestCase):
 		p.fit(X,y)
 		fi = p.feature_importances_
 		assert np.sum((fi-fi0)**2) <= 1e-16, "feature importance for custom multiindex failed."
-		# assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-15, "Fit coefficient did not match truth."
+		# assert np.mean(np.abs(p.coef - self.c_true)) <= 1e-12, "Fit coefficient did not match truth."
 	def test_LassoCV_fit(self):
 		p = pypce.PCEReg(self.order,fit_type='LassoCV')
 		y = self.y + .001*self.rn.rand(len(self.y)) # add noise
@@ -94,8 +94,8 @@ class TestPCERegression(unittest.TestCase):
 		M = np.array([[0,0],[2,0],[2,1]])
 		p = pypce.PCEReg(order=self.order,customM=M)
 		p.fit(self.X,self.y)
-		assert np.mean(p.coef - np.array([3.,2.,1.])) <= 1e-15, "coefficients did not converge for custom multindex."
-		assert np.mean(np.abs(self.y - p.predict(self.X))) <= 1e-15, "Fit did not converge and/or predict did not match pce.eval."
+		assert np.mean(p.coef - np.array([3.,2.,1.])) <= 1e-10, "coefficients did not converge for custom multindex."
+		assert np.mean(np.abs(self.y - p.predict(self.X))) <= 1e-10, "Fit did not converge and/or predict did not match pce.eval."
 	def test_grid_search_cv(self):
 		X = 2*self.rn.rand(self.nsamples,self.dim)-1
 		y = 3 + 2*.5*(3*X[:,0]**2-1) + X[:,1] * .5*(3*X[:,0]**2-1)
@@ -107,7 +107,7 @@ class TestPCERegression(unittest.TestCase):
 		from sklearn.model_selection import GridSearchCV 
 		pceCV = GridSearchCV(pypce.PCEReg(), param_grid, scoring='neg_root_mean_squared_error')
 		pceCV.fit(X,y)
-		assert mse(self.c_true,pceCV.best_estimator_.coef) <= 5e-15
+		assert mse(self.c_true,pceCV.best_estimator_.coef) <= 5e-12
 	def test_fit_with_2d_quadrature(self):
 		X = np.loadtxt(relpath + '/tests/data/X_2dquad_points.txt')
 		y = 3+2*.5*(3*X[:,0]**2-1)+X[:,1]*.5*(3*X[:,0]**2-1)

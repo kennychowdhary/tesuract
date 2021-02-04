@@ -242,12 +242,13 @@ class PCEBuilder(BaseEstimator):
         self.coef = coef
         # self.coef_ = self.coef
         self.polytype = polytype
-        # self.a = a # lower bounds on domain of x
-        # self.b = b # upper bound on domain of x
+        self.a = a # lower bounds on domain of x
+        self.b = b # upper bound on domain of x
         self.normsq = np.array([])
         self.compile_flag = False
         self.mindex = None
         self.normalized = normalized
+        self._mindex_compute_count_ = 0
     def compile(self,dim):
         """Setup for instantiating the basis class
 
@@ -285,15 +286,31 @@ class PCEBuilder(BaseEstimator):
         """
         self.dim = dim
         #constructor for different multindices (None, object, and array)
+        ##############################################################
+        # Note that sklearn base cv search clones each estimator so that the multi-index is created for each cv sub score
+        # Here we recompute the multiindex only if mindex is None or if the X dimension does not match the already existing mindex
         if self.customM is None:
-            self.M = MultiIndex(dim,self.order,self.mindex_type)
+            # only place where the multindex is computed!
+            if self.mindex is None:
+                # compute when mindex is None
+                self.M = MultiIndex(dim,self.order,self.mindex_type)
+                self._mindex_compute_count_ += 1
+                # print(self.M.index.shape)
+            elif self.mindex.shape[1] == self.dim:
+                # don't recompute if dimension stays the same
+                pass
+            else:
+                # recompute when dim changes
+                self.M = MultiIndex(dim,self.order,self.mindex_type)
+                self._mindex_compute_count_ += 1
+        ##############################################################
         elif isinstance(self.customM,MultiIndex):
             # print("Using custom Multiindex object.")
             assert(self.customM.dim == dim)
             self.M = customM
         elif isinstance(self.customM,np.ndarray):
             self.dim = self.customM.shape[1] # set dim to match multiindex
-            self.M = MultiIndex(self.dim,order=1,mindex_type='total_order') # use default
+            self.M = MultiIndex(self.dim,order=1,mindex_type='total_order') # setup default
             self.M.setIndex(self.customM)
             self.order = None # leave blank to indicate custom order
         self.mindex = self.M.index
@@ -302,8 +319,8 @@ class PCEBuilder(BaseEstimator):
             warnings.warn("Converting multindex array to integer array.")
             self.mindex = self.mindex.astype('int')
         self.nPCTerms = self.mindex.shape[0]
-        if self.coef is not None: 
-            assert len(self.coef) == self.mindex.shape[0], "coefficient array is not the same size as the multindex array."
+        # if self.coef is not None:
+        #     assert len(self.coef) == self.mindex.shape[0], "coefficient array is not the same size as the multindex array."
         self.compile_flag = True
     def computeNormSq(self):
         ''' Separate method to compute norms, in order to bypass construct basis. For use when computing the feature importance/ Sobol sensitivity indices. 
@@ -363,6 +380,10 @@ class PCEBuilder(BaseEstimator):
         X = np.atleast_2d(X)
         if self.mindex is None:
             self.compile(dim=X.shape[1]) # only compiles once
+        else:
+            pass
+        # or recompute if dimensions change?
+        
         Max = np.amax(self.mindex,axis=0)
         # construct and evaluate each basis using mindex
         L = []
@@ -505,7 +526,7 @@ class PCEBuilder(BaseEstimator):
         S = []
         # in case elements have nan in them
         if np.all(coef_[new_index] == 0): # ignore the mean
-            print("Returning equal weights!")
+            # print("Returning equal weights!")
             S = np.ones(self.dim)/self.dim # return equal weights
         else:
             for i in range(self.dim):
@@ -796,6 +817,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
             returns object
 
         '''
+        # only 
         self._dim = X.shape[1]
         super().compile(dim=self._dim) # use parent compile to produce the multiindex
         self._M = self.multiindex
@@ -858,12 +880,17 @@ class PCEReg(PCEBuilder,RegressorMixin):
         X,y = check_X_y(X,y)
         # get data attributes
         self._n,self._dim = X.shape
+        # Check if dimension has changed and clear multiindices and coefficient if that's the case. If not, leave everythign the same.
+        # fit overwrites the coefficient array if there is a mismatch like if the X dimension changes
+        if self.coef is not None:
+            if len(self.coef) != self.multiindex.shape[0]:
+                print("coefficient array mismatch. ")
+                self.coef = None # set to none and fit again
+
         self._compile(X) # build multindex and construct basis
         Xhat,y = check_X_y(self.Xhat,y)
-        # pypce.PCEBuilder(dim=self.dim,self.order)
+            # assert len(self.coef) == self.multiindex.shape[0],"length of coefficient vector is not the same shape as the multindex!"
         # run quadrature fit if weights are specified:
-        if self.coef is not None:
-            assert len(self.coef) == self.multiindex.shape[0],"length of coefficient vector is not the same shape as the multindex!"
         if self.fit_type == "quadrature":
             self._quad_fit(X,y)
         if self.fit_type == 'linear':

@@ -1,5 +1,5 @@
 import numpy as np
-import pdb, warnings, pickle
+import pdb, warnings, pickle, time
 # from tqdm import tqdm
 from sklearn.decomposition import PCA
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
@@ -405,15 +405,32 @@ class PCEBuilder(BaseEstimator):
         # start computing products
         Phi = 1.0
         normsq = 1.0
-        for di in range(self.dim):
-            Phi = L[di][self.mindex[:,di]] * Phi
-            normsq = NormSq[di][self.mindex[:,di]] * normsq
+        L_array = np.array(L)
+        
+        # # method 2 looping over number of samples
+        # start = time.time()
+        # I = self.mindex.T
+        # I0 = np.ones_like(I)*np.arange(self.dim)[:,np.newaxis]
+        # Lbig = L_array[I0.ravel(),I.ravel(),:]
+        # # Phi = np.prod(Lbig,axis=0)
+        # # self.Phi = Phi.T
+        # print(time.time() - start)
+
+        # method 2 - looping over dimensions
+        # start = time.time()
+        for di in range(self.dim): 
+            # if di%2 == 0: print("main prod loop...", di)
+            Phi = L_array[di][self.mindex[:,di]] * Phi
+            normsq = NormSq[di][self.mindex[:,di]] * normsq   
         self.Phi = Phi.T 
         self.normsq = normsq # norm squared
+        # print(time.time() - start)
+        
         # if self.normalized:
         #     return self.Phi/np.sqrt(normsq)
         # else:
         #     return self.Phi
+        # pdb.set_trace()
         return self.Phi
     def polyeval(self,X=None,c=None):
         """Method to evaluate the polynomial. 

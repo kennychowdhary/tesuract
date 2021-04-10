@@ -395,7 +395,7 @@ class PCEBuilder(BaseEstimator):
         for i in range(self.dim):
             # Compute Legendre objects and eval 1d basis
             if self.normalized == False:
-                Leg = LegPoly2()
+                Leg = LegPoly()
             elif self.normalized == True:
                 Leg = LegPolyNorm()
             Li_max = Leg.Eval1dBasis(x=X[:,i],K=Max[i])

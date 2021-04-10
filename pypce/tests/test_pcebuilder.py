@@ -122,6 +122,36 @@ class TestPCEBuilder(unittest.TestCase):
 		s = p.computeSobol()
 		print(s,p.mindex)
 		assert mse(s,[1.0, 0.2]) == 0, "sobol indices for normalized case is  not right."
+	def test_1d_poly_feature_transform(self):
+		N = 32 # number of x grid points
+		x = np.linspace(-1,1,N)[:,np.newaxis]
+		rn = np.random.RandomState(23948)
+		x_random = 2*rn.rand(N)[:,np.newaxis]-1
+		x_chebychev = -np.cos(np.pi*x)
+
+		# define test functions
+		runge = lambda x: 1./(1 + 16.*x**2)
+		gibbs = lambda x: np.sign(np.sin(np.pi*(x-np.pi/2)))
+
+		# get polynomial features
+		from sklearn.preprocessing import PolynomialFeatures
+		P = 8
+		polyfeatures = PolynomialFeatures(degree=P)
+		X = polyfeatures.fit_transform(x)
+
+		# Legendre features
+		import pypce
+		pce = pypce.PCEBuilder(order=P)
+		Xleg = pce.fit_transform(x)
+		print(Xleg.shape, Xleg)
+		# pce.compile(x)
+		# for i in range(pce.dim):
+		# 	# Compute Legendre objects and eval 1d basis
+		# 	Leg = pypce.LegPoly()
+		# 	Li_max = Leg.Eval1dBasis(x=X[:,i],K=Max[i])
+		# 	L.append(Li_max) # list of size dim of Legendre polys
+		# 	NormSq.append(Leg.normsq(Max[i])) # norms up to K order
+		# # Xleg = pce.fit_transform(x)
 
 
 

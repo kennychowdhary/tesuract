@@ -1,13 +1,13 @@
 ..  _main:
 
-**pypce**
+**tesuract**
 =========
 
-**pypce** is a pure Python Uncertainty Quantification (UQ) software library.
+**tesuract** is a pure Python Uncertainty Quantification (UQ) software library.
 [#]_ It is built with object oriented design principals in mind and is thus
 modular. 
 
-The pypce library contains modules for building multivariate polynomial
+The tesuract library contains modules for building multivariate polynomial
 regression models (built with the scikit-learn API in mind), constructing
 quadrature rules for high-dimensional numerical integration, performing
 sensitivity analysis or feature importance, preprocessing utilities for
@@ -27,7 +27,7 @@ Installation
 ------------
 
 The code is super easy to install with ``pip``. Make sure you have ``numpy`` and
-``scikit-learn``. Then, after downloading, cd into the ``pypce`` directory, i.e.
+``scikit-learn``. Then, after downloading, cd into the ``tesuract`` directory, i.e.
 the folder with the ``setup.py``, and run
 
 ::
@@ -38,9 +38,9 @@ You can also run a suite of unit tests and regression tests before installation 
 
 ::
 
-   python -m pytest -v -s pypce/tests
+   python -m pytest -v -s tesuract/tests
 
-to check that the library works. That's it! Now you are ready to use **pypce**. 
+to check that the library works. That's it! Now you are ready to use **tesuract**. 
 
 Quickstart
 ----------------
@@ -51,8 +51,8 @@ Let's create a :math:`4^{th}` order polynomial regression model [#]_ on the
 
 .. code-block:: python
 
-   import pypce
-   p = pypce.PCEReg(order=4)
+   import tesuract
+   p = tesuract.PCEReg(order=4)
 
 That's it! In order to perform the regression, just run :code:`p.fit(X,y)` and
 :code:`p.predict(X)` for any data/ target pair :math:`(X,y)`. [#]_ 
@@ -77,7 +77,7 @@ Indices and tables
 * :ref:`search`
 
 
-.. [#] Python 3+ is required and pypce has only been tested for 
+.. [#] Python 3+ is required and tesuract has only been tested for 
          3.7.6 so far. 
 
 .. [#] In short, a :math:`4^{th}` order polynomial means that the

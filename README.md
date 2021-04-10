@@ -1,3 +1,3 @@
-# pypce
+# tesuract
 
-python library for performing polynomial chaos expansion (pce) regression. 
+python library for tensor surrogate approximation for exascale predictions

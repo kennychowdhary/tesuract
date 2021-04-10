@@ -229,7 +229,7 @@ class PCEBuilder(BaseEstimator):
 
     Examples
     --------
-    >>> from pypce import PCEBuilder 
+    >>> from tesuract import PCEBuilder 
     >>> p = PCEBuilder(order=3,normalized=True)
     >>> print(p.mindex)
     '''
@@ -644,7 +644,7 @@ class PCEReg_old(PCEBuilder,RegressorMixin):
         # get data attributes
         self._n,self._dim = X.shape
         self._compile(X) # build multindex and construct basis
-        # pypce.PCEBuilder(dim=self.dim,self.order)
+        # tesuract.PCEBuilder(dim=self.dim,self.order)
         # run quadrature fit if weights are specified:
         if self.coef is not None:
             assert len(self.coef) == self._M.shape[0],"length of coefficient vector is not the same shape as the multindex!"
@@ -794,7 +794,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
 
     Examples
     --------
-    >>> from pypce import PCEReg
+    >>> from tesuract import PCEReg
     >>> p = PCEReg(order=3)
     >>> p.fit(X,y)
     '''

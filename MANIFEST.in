@@ -1,2 +1,2 @@
 include README.rst
-include pypce/tests/data/*.txt
+include tesuract/tests/data/*.txt

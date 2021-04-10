@@ -4,15 +4,15 @@ def readme():
     with open('README.rst') as f:
         return f.read()
 
-setup(name='pypce',
+setup(name='tesuract',
       version='1.0',
-      description='pce class for regression',
+      description='Tensor surrogate construction methods',
       long_description='TBD',
       url='TBD',
       author='K. Chowdhary',
       author_email='kchowdh@sandia.gov',
       license='MIT',
-      packages=['pypce'],
+      packages=['tesuract'],
       test_suite='nose.collector',
       tests_required=['nose'],
       install_requires=[

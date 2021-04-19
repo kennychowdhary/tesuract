@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Main features &mdash; pypce 1.0 documentation</title>
+  <title>The pypce tutorial &mdash; pypce 1.0 documentation</title>
   
 
   
@@ -38,8 +38,6 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorials" href="guide.html" />
-    <link rel="prev" title="tesuract" href="index.html" />
     <link href="_static/style.css" rel="stylesheet" type="text/css">
 
 </head>
@@ -86,8 +84,8 @@
               
             
             
-              <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Main features</a></li>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Main features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide.html">Tutorials</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html">Introduction to polynomial regression</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#setup-the-problem">Setup the problem</a></li>
@@ -160,13 +158,13 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Main features</li>
+      <li>The pypce tutorial</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="_sources/introduction.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/tutorial.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -179,71 +177,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="main-features">
-<span id="intro"></span><h1>Main features<a class="headerlink" href="#main-features" title="Permalink to this headline">¶</a></h1>
-<p>pypce’s main feature is constructing multivariate polynomial regression models
-using classic orthogonal polynomial constructions, e.g. Legendre polynomials. We
-use the scikit-learn API to build these estimators, which allows easy and seamless integration with the scikit-learn. Here is a list of the main features of this library.</p>
-<ul>
-<li><dl class="simple">
-<dt><strong>Integration with scikit-learn</strong></dt><dd><p>Both <code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEBuilder</span></code> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEReg</span></code> classes for
-constructing multivariate polynomial interpolation inherit the BaseEstimator class from scikit-learn. This means both these object integrate seamlessly with the scikit-learn environment, which, for example, allows one to use the grid search cross-validation wrapper or even third party libraries like skopt on top of these polynomial estimator classes.</p>
-</dd>
-</dl>
-</li>
-<li><dl class="simple">
-<dt><strong>Multivariate polynomial regression</strong></dt><dd><p>We provide an object oriented polynomial constructor class that creates a
-polynomial estimator (based on the scikit-learn estimator API) and a
-corresponding multivariate polynomial regression class that utilizes
-existing linear regression algorithms in scikit-learn to train the model.</p>
-</dd>
-</dl>
-</li>
-<li><p><strong>Hyper-parameter search for best model fit</strong></p>
-<blockquote>
-<div><p>pypce provides methods to perform hyper-parameter search for finding the
-best fit polynomial model. Moreover, we provide methods to compare these
-methods to other popular machine learning regression models like random
-forest regression and multi-layer perceptron models. <a class="footnote-reference brackets" href="#id3" id="id1">1</a></p>
-</div></blockquote>
-</li>
-<li><p><strong>Variance based sensitivity analysis</strong></p>
-<blockquote>
-<div><p>The polynomial regression class allows for easy feature importance or
-sensitivity analysis. We use the Sobol sensitivity index to compute which
-features are more important.</p>
-</div></blockquote>
-</li>
-<li><p><strong>Sparse quadrature methods for high-dimensional integration</strong></p>
-<blockquote>
-<div><p>An alternate way to estimate the training weights of the multivariate
-polynomial model (i.e., the coefficients of the polynomial expansion), is
-direct numerical integration. Due to the orthogonality of the polynomial
-basis terms, the training weights can be written in analytic form as a
-integration rule. We provide high-dimensional, sparse, integration rules
-to estimate these coefficients. This is useful for <em>smooth</em> functions, rather
-than functions corrupted by noise.</p>
-</div></blockquote>
-</li>
-<li><dl class="simple">
-<dt><strong>Utilities for preprocessing</strong></dt><dd><p>While scikit-learn contains many preprocessing utilities, we add a few more
-that may be more tailored for scientific computing applications. Utilities
-include min-max transforms for multi-target outputs, transforms for scaling
-domains with known physical bounds, and more customizable dimension reduction
-transforms, e.g., PCA.</p>
-</dd>
-</dl>
-</li>
-<li><p><strong>Pipelines for multi-target fitting</strong> <a class="footnote-reference brackets" href="#id4" id="id2">2</a></p></li>
-</ul>
-<dl class="footnote brackets">
-<dt class="label" id="id3"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p>In the future, we will be able to compare methods in tensorflow. The machinery is there for connecting tensorflow to sklearn, but it just needs to be done!</p>
-</dd>
-<dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
-<dd><p>This is an advanced usage for pypce.</p>
-</dd>
-</dl>
+  <div class="section" id="the-pypce-tutorial">
+<h1>The pypce tutorial<a class="headerlink" href="#the-pypce-tutorial" title="Permalink to this headline">¶</a></h1>
 </div>
 
 
@@ -251,15 +186,6 @@ transforms, e.g., PCA.</p>
            
           </div>
           <footer>
-  
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="guide.html" class="btn btn-neutral float-right" title="Tutorials" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="index.html" class="btn btn-neutral float-left" title="tesuract" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
-    </div>
   
 
   <hr/>

@@ -1,3 +1,3 @@
 # tesuract
 
-python library for tensor surrogate approximation for exascale predictions
+Python library for tensor surrogate approximation and prediction, compatible with sklearn's API. 

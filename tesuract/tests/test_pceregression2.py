@@ -1,4 +1,4 @@
-import pypce
+import tesuract
 import unittest
 import numpy as np
 import warnings, pdb
@@ -10,7 +10,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.model_selection import GridSearchCV
 
-relpath = pypce.__file__[:-11] # ignore the __init__.py specification
+relpath = tesuract.__file__[:-11] # ignore the __init__.py specification
 print(relpath)
 
 def mse(a,b):
@@ -20,7 +20,7 @@ class TestPCERegression(unittest.TestCase):
 	def test_checking_predict_does_recompute_mindex(self):
 		# this test will ensure the model selector selector works 
 		X, y = make_friedman1(n_samples=50, n_features=10, random_state=0)
-		p = pypce.PCEReg(order=2)
+		p = tesuract.PCEReg(order=2)
 		p.fit(X,y)
 		p.predict(X)
 		Xnew = X[:,:-2]
@@ -31,7 +31,7 @@ class TestPCERegression(unittest.TestCase):
 	def test_checking_predict_does_not_recompute_mindex(self):
 		# this is a test to count the number of times mindex is computed
 		X, y = make_friedman1(n_samples=50, n_features=10, random_state=0)
-		p = pypce.PCEReg(order=2)
+		p = tesuract.PCEReg(order=2)
 		p.fit(X,y)
 		p.predict(X)
 		Xnew, ynew = X[10:], y[10:]
@@ -44,7 +44,7 @@ class TestPCERegression(unittest.TestCase):
 		X, y = make_friedman1(n_samples=50, n_features=10, random_state=0)
 		X = 2*X - 1 # scale to [-1,1]
 		kf = KFold(n_splits=5)
-		p = pypce.PCEReg()
+		p = tesuract.PCEReg()
 		for train_index, test_index in kf.split(X):
 			X_train, X_test = X[train_index], X[test_index]
 			y_train, y_test = y[train_index], y[test_index]
@@ -58,7 +58,7 @@ class TestPCERegression(unittest.TestCase):
 		X, y = make_friedman1(n_samples=50, n_features=10, random_state=0)
 		X = 2*X - 1 # scale to [-1,1]
 		params = {'order':[1,2,3]}
-		estimator = pypce.PCEReg(fit_type="LassoCV")
+		estimator = tesuract.PCEReg(fit_type="LassoCV")
 		grid = GridSearchCV(estimator, params)
 		grid.fit(X,y)
 		# print(grid.cv_results_)
@@ -68,7 +68,7 @@ class TestPCERegression(unittest.TestCase):
 		# this is a test to count the number of times mindex is computed
 		X, y = make_friedman1(n_samples=100, n_features=10, random_state=0)
 		X = 2*X - 1 # scale to [-1,1]
-		estimator = pypce.PCEReg(order=4,fit_type="LassoCV")
+		estimator = tesuract.PCEReg(order=4,fit_type="LassoCV")
 		estimator.fit(X,y)
 		fi = estimator.feature_importances_
 		print(fi > .05)
@@ -82,7 +82,7 @@ class TestPCERegression(unittest.TestCase):
 		# y = (1./8)*(35.*x**4 - 30*x**4 + 3)
 		y = (1./2)*(5*x**3 - 3*x)
 		params = {'order':[1,2,3,4]}
-		estimator = pypce.PCEReg(fit_type="LassoCV")
+		estimator = tesuract.PCEReg(fit_type="LassoCV")
 		start = T.time()
 		grid = GridSearchCV(estimator, params, cv=KFold(n_splits=5))
 		grid.fit(X,y)
@@ -103,7 +103,7 @@ class TestPCERegression(unittest.TestCase):
 		y = (1./8)*(35.*x**4 - 30*x**4 + 3)
 		# y = (1./2)*(5*x**3 - 3*x)
 		params = {'order':[1,2,3,4]}
-		estimator = pypce.PCEReg(fit_type="LassoCV")
+		estimator = tesuract.PCEReg(fit_type="LassoCV")
 		start = T.time()
 		grid = GridSearchCV(estimator, params, cv=KFold(n_splits=5))
 		grid.fit(X,y)

@@ -1,4 +1,4 @@
-import pypce
+import tesuract
 import unittest
 import numpy as np
 import warnings, pdb
@@ -10,7 +10,7 @@ from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.model_selection import GridSearchCV
 
-relpath = pypce.__file__[:-11] # ignore the __init__.py specification
+relpath = tesuract.__file__[:-11] # ignore the __init__.py specification
 print(relpath)
 
 
@@ -21,7 +21,7 @@ class TestPCERegression(unittest.TestCase):
 	# 	# this test will ensure the model selector selector works 
 	# 	X, y = make_friedman1(n_samples=50, n_features=68, random_state=0)
 	# 	customM = np.load("tests/customM_test.npy")
-	# 	ptest = pypce.PCEReg(customM=customM)
+	# 	ptest = tesuract.PCEReg(customM=customM)
 	# 	start = T.time()
 	# 	ptest._compile(X)
 	# 	print("time = ", T.time() - start)
@@ -29,7 +29,7 @@ class TestPCERegression(unittest.TestCase):
 	# 	# this test will ensure the model selector selector works 
 	# 	X, y = make_friedman1(n_samples=150, n_features=38, random_state=0)
 	# 	# customM = np.load("tests/customM_test.npy")
-	# 	ptest = pypce.PCEReg(order=4)
+	# 	ptest = tesuract.PCEReg(order=4)
 	# 	start = T.time()
 	# 	ptest._compile(X)
 	# 	end = T.time()

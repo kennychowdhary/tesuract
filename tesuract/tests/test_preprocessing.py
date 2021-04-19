@@ -1,11 +1,11 @@
-import pypce
+import tesuract
 import unittest
 import numpy as np
 import pytest
-from pypce.preprocessing import *
+from tesuract.preprocessing import *
 from sklearn.datasets import make_low_rank_matrix
 
-relpath = pypce.__file__[:-11] # ignore the __init__.py specification
+relpath = tesuract.__file__[:-11] # ignore the __init__.py specification
 print(relpath)
 
 class TestDomainScaler_old(unittest.TestCase):

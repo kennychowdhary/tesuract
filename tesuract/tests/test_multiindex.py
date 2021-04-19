@@ -1,9 +1,9 @@
-import pypce
+import tesuract
 import unittest
 import numpy as np
-from pypce.preprocessing import DomainScaler, MinMaxTargetScaler
+from tesuract.preprocessing import DomainScaler, MinMaxTargetScaler
 
-relpath = pypce.__file__[:-11] # ignore the __init__.py specification
+relpath = tesuract.__file__[:-11] # ignore the __init__.py specification
 print(relpath)
 
 
@@ -11,7 +11,7 @@ class TestTotalOrderMultiIndex(unittest.TestCase):
 	def setUp(self):
 		self.dim = 3
 		self.order = 5
-		self.M = pypce.MultiIndex(dim=self.dim,order=self.order)
+		self.M = tesuract.MultiIndex(dim=self.dim,order=self.order)
 		self.mtest = np.loadtxt(relpath + '/tests/data/multindex_d3_o5.txt')
 	def test_multindex(self):
 		abserr = np.sum(self.M.index - self.mtest)
@@ -35,7 +35,7 @@ class TestHyperbolicMultiIndex(unittest.TestCase):
 	def setUp(self):
 		self.dim = 3
 		self.order = 4
-		self.M = pypce.MultiIndex(dim=self.dim,order=self.order,mindex_type='hyperbolic')
+		self.M = tesuract.MultiIndex(dim=self.dim,order=self.order,mindex_type='hyperbolic')
 		self.mtest = np.loadtxt(relpath + '/tests/data/hypmultindex_d3_o4.txt')
 	def test_hyperbolic_multindex(self):
 		abserr = np.sum(self.M.index - self.mtest)

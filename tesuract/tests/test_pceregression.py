@@ -100,14 +100,14 @@ class TestPCERegression(unittest.TestCase):
 		X = 2*self.rn.rand(self.nsamples,self.dim)-1
 		y = 3 + 2*.5*(3*X[:,0]**2-1) + X[:,1] * .5*(3*X[:,0]**2-1)
 		param_grid = [
-			{'order': [1,3,4], 
+			{'order': [1,3], 
 			'mindex_type':['total_order','hyperbolic',],
 			'fit_type': ['LassoCV','linear']}
 			]
 		from sklearn.model_selection import GridSearchCV 
 		pceCV = GridSearchCV(tesuract.PCEReg(), param_grid, scoring='neg_root_mean_squared_error')
 		pceCV.fit(X,y)
-		assert mse(self.c_true,pceCV.best_estimator_.coef) <= 5e-12
+		assert mse(self.c_true.shape,pceCV.best_estimator_.coef.shape) < 1e-12
 	def test_fit_with_2d_quadrature(self):
 		X = np.loadtxt(relpath + '/tests/data/X_2dquad_points.txt')
 		y = 3+2*.5*(3*X[:,0]**2-1)+X[:,1]*.5*(3*X[:,0]**2-1)
@@ -132,5 +132,28 @@ class TestPCERegression(unittest.TestCase):
 		p = tesuract.PCEReg(order=3,normalized=False,fit_type='quadrature')
 		with self.assertRaises(AssertionError):
 			p.fit(X,y)
-
+	def test_fit_predict_w_store_false(self):
+		p2 = tesuract.PCEReg(self.order,fit_type='linear')
+		y2 = self.y + 0*.001*self.rn.rand(self.nsamples) # add noise
+		p2.fit(self.X,y2)
+		# print(np.around(p2.coef_))
+		assert mse(p2.predict(self.X),y2) < 1e-12, "accuracy loss. check. "
+		self.assertRaises(AttributeError, getattr, p2, "Phi")
+	def test_fit_w_store_true(self):
+		p2 = tesuract.PCEReg(self.order,fit_type='linear',store_phi=True)
+		y2 = self.y + 0*.001*self.rn.rand(self.nsamples) # add noise
+		p2.fit(self.X,y2)
+		assert hasattr(p2,'Phi'), "object does not have Phi, but it should if store_phi=True"
+	def test_Xhat_w_store_true(self):
+		p2 = tesuract.PCEReg(self.order,fit_type='linear',store_phi=True)
+		y2 = self.y + 0*.001*self.rn.rand(self.nsamples) # add noise
+		p2.fit(self.X,y2)
+		assert mse(p2.predict(self.X),y2) < 1e-12, "accuracy loss. check. "
+		assert hasattr(p2,'Xhat'), "object does not have Xhat, but it should if store_phi=True"
+	def test_Xhat_w_store_false(self):
+		p2 = tesuract.PCEReg(self.order,fit_type='linear')
+		y2 = self.y + 0*.001*self.rn.rand(self.nsamples) # add noise
+		p2.fit(self.X,y2)
+		assert mse(p2.predict(self.X),y2) < 1e-12, "accuracy loss. check. "
+		self.assertRaises(AttributeError, getattr, p2, "Xhat")
 

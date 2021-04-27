@@ -233,7 +233,7 @@ class PCEBuilder(BaseEstimator):
     >>> p = PCEBuilder(order=3,normalized=True)
     >>> print(p.mindex)
     '''
-    def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False):
+    def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False,store_phi=False):
         # self.dim = dim # no need to initialize with dim
         self.order = order
         self.dim = None
@@ -249,6 +249,7 @@ class PCEBuilder(BaseEstimator):
         self.mindex = None
         self.normalized = normalized
         self._mindex_compute_count_ = 0
+        self.store_phi = store_phi
     def compile(self,dim):
         """Setup for instantiating the basis class
 
@@ -421,8 +422,11 @@ class PCEBuilder(BaseEstimator):
         for di in range(self.dim): 
             # if di%2 == 0: print("main prod loop...", di)
             Phi = L_array[di][self.mindex[:,di]] * Phi
-            normsq = NormSq[di][self.mindex[:,di]] * normsq   
-        self.Phi = Phi.T 
+            normsq = NormSq[di][self.mindex[:,di]] * normsq
+        if self.store_phi is True:   
+            self.Phi = Phi.T 
+        else:
+            pass
         self.normsq = normsq # norm squared
         # print(time.time() - start)
         
@@ -431,7 +435,7 @@ class PCEBuilder(BaseEstimator):
         # else:
         #     return self.Phi
         # pdb.set_trace()
-        return self.Phi
+        return Phi.T
     def polyeval(self,X=None,c=None):
         """Method to evaluate the polynomial. 
 
@@ -798,7 +802,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
     >>> p = PCEReg(order=3)
     >>> p.fit(X,y)
     '''
-    def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',fit_params={},normalized=False):
+    def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',fit_params={},normalized=False,store_phi=False):
         # alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2
         self.order = order
         self.mindex_type = mindex_type
@@ -814,8 +818,9 @@ class PCEReg(PCEBuilder,RegressorMixin):
         # self.l1_ratio = l1_ratio # ElasticNet default
         # self.lasso_tol = lasso_tol
         # self.w = w
+        self.store_phi = store_phi
         self.normalized = normalized
-        super().__init__(order=self.order,customM=self.customM,mindex_type=self.mindex_type,coef=self.coef,a=self.a,b=self.b,polytype=self.polytype,normalized=self.normalized)
+        super().__init__(order=self.order,customM=self.customM,mindex_type=self.mindex_type,coef=self.coef,a=self.a,b=self.b,polytype=self.polytype,normalized=self.normalized,store_phi=self.store_phi)
     def _compile(self,X):
         '''Builds the multiindex using the PCEBuilder class. Private. 
         
@@ -934,6 +939,8 @@ class PCEReg(PCEBuilder,RegressorMixin):
             self.coef = regmodel.coef_
         self.coef_ = self.coef # backwards comaptible with sklearn API
         self.feature_importances_ = self.feature_importances()
+        if self.store_phi == False:
+            del self.Xhat
         return self
     def sensitivity_indices(self):
         assert self.coef is not None, "Must run fit or feed in coef array."

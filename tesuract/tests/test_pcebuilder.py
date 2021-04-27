@@ -3,9 +3,12 @@ import unittest
 import numpy as np
 import warnings
 from sklearn.metrics import mean_squared_error
+import os
+from joblib import dump, load
+import time
 
 relpath = tesuract.__file__[:-11] # ignore the __init__.py specification
-print(relpath)
+print("relpath:",relpath)
 
 def mse(a,b):
 	return mean_squared_error(a,b,squared=False)
@@ -54,7 +57,7 @@ class TestPCEBuilder(unittest.TestCase):
 		Xhat = p.fit_transform(X)
 		Xhat = p.fit_transform(X[0])
 	def test_polyeval_w_variable_coef_and_fixed_X(self):
-		p = tesuract.PCEBuilder(order=3)
+		p = tesuract.PCEBuilder(order=3,store_phi=True)
 		X = 2*self.rn.rand(30,self.dim)-1
 		y = 3 + 2*.5*(3*X[:,0]**2-1) + X[:,1] * .5*(3*X[:,0]**2-1)
 		c_true = np.array([3.,0.,0.,2.,0.,0.,0.,1.,0.,0.,])
@@ -140,18 +143,43 @@ class TestPCEBuilder(unittest.TestCase):
 		X = polyfeatures.fit_transform(x)
 
 		# Legendre features
-		import tesuract
 		pce = tesuract.PCEBuilder(order=P)
 		Xleg = pce.fit_transform(x)
-		print(Xleg.shape, Xleg)
-		# pce.compile(x)
-		# for i in range(pce.dim):
-		# 	# Compute Legendre objects and eval 1d basis
-		# 	Leg = tesuract.LegPoly()
-		# 	Li_max = Leg.Eval1dBasis(x=X[:,i],K=Max[i])
-		# 	L.append(Li_max) # list of size dim of Legendre polys
-		# 	NormSq.append(Leg.normsq(Max[i])) # norms up to K order
-		# # Xleg = pce.fit_transform(x)
+		# print(Xleg.shape, Xleg)
+	
+	def test_memory_footprint_w_attr_assert(self):
+		N = 2500 # number of x grid points
+		rn = np.random.RandomState(9)
+		X = 2*rn.rand(N,5)-1.0
+
+		# # define test functions
+		# runge = lambda x: 1./(1 + 16.*np.sum(x,axis=1)**2)
+		# gibbs = lambda x: np.sign(np.sin(np.pi*(np.sum(x,axis=1)-np.pi/2)))
+
+		pceb = tesuract.PCEBuilder(order=4) #store_phi=False default
+		pceb.fit_transform(X)
+		self.assertRaises(AttributeError, getattr, pceb, "Phi")
+
+		pceb = tesuract.PCEBuilder(order=4,store_phi=True)
+		pceb.fit_transform(X)
+		assert pceb.Phi.shape[0] == N, "Phi is kept but is NOT the right shape. "
+
+	def test_timing_for_repeated_transform(self):
+		N = 2500 # number of x grid points
+		rn = np.random.RandomState(9)
+		X = 2*rn.rand(N,5)-1.0
+
+		pceb = tesuract.PCEBuilder(order=4) #store_phi=False default
+		start1 = time.time()
+		pceb.fit_transform(X)
+		end1 = time.time() - start1
+		start2 = time.time()
+		pceb.fit_transform(X)
+		end2 = time.time() - start2
+		assert end2 < end1, "second fit transform should be faster since mindex is already computed."
+		assert pceb._mindex_compute_count_ == 1, "mindex is being computed more than once or none at all."
+
+
 
 
 

@@ -7,6 +7,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from .multiindex import RecursiveHypMultiIndex
 from .multiindex import MultiIndex
+from .preprocessing import DomainScaler
 
 from sklearn.utils.estimator_checks import check_estimator 
 from sklearn.utils.validation import check_X_y, check_array
@@ -233,7 +234,7 @@ class PCEBuilder(BaseEstimator):
     >>> p = PCEBuilder(order=3,normalized=True)
     >>> print(p.mindex)
     '''
-    def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False,store_phi=False):
+    def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False,store_phi=False,input_range=None):
         # self.dim = dim # no need to initialize with dim
         self.order = order
         self.dim = None
@@ -247,6 +248,7 @@ class PCEBuilder(BaseEstimator):
         self.normsq = np.array([])
         self.compile_flag = False
         self.mindex = None
+        self.input_range = input_range
         self.normalized = normalized
         self._mindex_compute_count_ = 0
         self.store_phi = store_phi
@@ -375,6 +377,12 @@ class PCEBuilder(BaseEstimator):
             returns the polynomial feature map that transforms each sample in :math:`X` of dimension :math:`d` to dimension :math:`nPCTerms`. 
 
         """
+        # Scale X if input range to (-1,1) if range is specified
+        if self.input_range is not None:
+            scaler = DomainScaler(dim=X.shape[1],input_range=self.input_range,output_range=(-1,1))
+            X_scaled = scaler.fit_transform(X)
+            X = X_scaled.copy()
+
         # only works for [-1,1] for far
         # compute multindex
         assert np.amin(X) >= -1 and np.amax(X) <= 1, "range for X must be between -1 and 1 for now. scale inputs accordingly. "
@@ -607,90 +615,6 @@ class PCEBuilder(BaseEstimator):
             self.var = prob_weight * np.sum(coef_[1:]**2)
         return self.mu, self.var
 
-class PCEReg_old(PCEBuilder,RegressorMixin):
-    def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2,normalized=False,w=None):
-        self.order = order
-        self.mindex_type = mindex_type
-        self.customM = customM
-        self.a = a
-        self.b = b
-        self.coef = coef
-        # self.c = self.coef # need to remove eventually
-        self.polytype = 'Legendre'
-        self.fit_type = fit_type
-        self.alphas = alphas # LassoCV default
-        self.l1_ratio = l1_ratio # ElasticNet default
-        self.lasso_tol = lasso_tol
-        self.w = w
-        self.normalized = normalized
-        super().__init__(order=self.order,customM=self.customM,mindex_type=self.mindex_type,coef=self.coef,a=self.a,b=self.b,polytype=self.polytype,normalized=self.normalized)
-    def _quad_fit(self,X,y,w):
-        # let us assume the weights are for [-1,1]
-        X,w = check_X_y(X,w) # make sure # quadrature points matces X
-        self._compile(X) # compute normalized or non-normalized Xhat
-        normsq = self.computeNormSq()
-        assert np.abs(np.sum(w) - 1) <= 1e-15, "quadrature weights must be scaled to integrate over [-1,1] with unit weight"
-        int_fact = 2**self._dim
-        if self.normalized == True:
-            self.coef = int_fact*np.dot(w*y,self.Xhat)/np.sqrt(normsq)
-        else:   
-            self.coef = int_fact*np.dot(w*y,self.Xhat)/normsq
-        return self
-    def _compile(self,X):
-        # build multindex and get Xhat
-        self._dim = X.shape[1]
-        super().compile(dim=self._dim) # use parent compile to produce the multiindex
-        self._M = self.mindex
-        self.Xhat = self.fit_transform(X)
-        return self
-    def fit(self,X,y,w=None):
-        X,y = check_X_y(X,y)
-        # get data attributes
-        self._n,self._dim = X.shape
-        self._compile(X) # build multindex and construct basis
-        # tesuract.PCEBuilder(dim=self.dim,self.order)
-        # run quadrature fit if weights are specified:
-        if self.coef is not None:
-            assert len(self.coef) == self._M.shape[0],"length of coefficient vector is not the same shape as the multindex!"
-        elif w is not None:
-            self._quad_fit(X,y,w)
-        elif self.w is not None:
-            self._quad_fit(X,y,self.w)
-        else:
-            # LINEAR fit
-            Xhat,y = check_X_y(self.Xhat,y)
-            if self.fit_type == 'linear':
-                regmodel = linear_model.LinearRegression(fit_intercept=False)
-                regmodel.fit(Xhat,y)
-            elif self.fit_type == 'LassoCV':
-                regmodel = linear_model.LassoCV(alphas=self.alphas,fit_intercept=False,max_iter=1000,tol=self.lasso_tol)
-                regmodel.fit(Xhat,y)
-                self.alpha_ = regmodel.alpha_
-            elif self.fit_type == 'OmpCV':
-                regmodel = linear_model.OrthogonalMatchingPursuitCV(fit_intercept=False)
-                regmodel.fit(Xhat,y)
-            elif self.fit_type == 'ElasticNetCV':
-                regmodel = linear_model.ElasticNetCV(l1_ratio=self.l1_ratio,fit_intercept=False,n_alphas=25,tol=1e-2)
-                regmodel.fit(Xhat,y)
-            self.coef = regmodel.coef_
-            # self.pce.coef_ = self.coef_ # set internal pce coef
-        return self
-    def sensitivity_indices(self):
-        assert self.coef is not None, "Must run fit or feed in coef array."
-        return self.computeSobol()
-    def multiindex(self):
-        assert self._M is not None, "Must run fit or feed in mindex array."
-        return self._M
-    def predict(self,X):
-        # check_is_fitted(self)
-        X = np.atleast_2d(X)
-        X = check_array(X)
-        # self._fit_transform(X)
-        # Phi = check_array(self._Phi)
-        # ypred = np.dot(Phi,self.coef_)
-        ypred = self.polyeval(X)
-        return ypred
-
 class PCEReg(PCEBuilder,RegressorMixin):
     ''' Class for performing multivariate polynomial regression 
 
@@ -802,7 +726,12 @@ class PCEReg(PCEBuilder,RegressorMixin):
     >>> p = PCEReg(order=3)
     >>> p.fit(X,y)
     '''
-    def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',fit_params={},normalized=False,store_phi=False):
+    # def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False,store_phi=False):
+    def __init__(self,*args,fit_type='linear',fit_params={},**kwargs):
+        pass
+        super(PCEReg,self).__init__(*args, **kwargs)
+        self._max_iter = max_iter
+    def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',fit_params={},normalized=False,store_phi=False,input_range=None):
         # alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2
         self.order = order
         self.mindex_type = mindex_type
@@ -819,8 +748,9 @@ class PCEReg(PCEBuilder,RegressorMixin):
         # self.lasso_tol = lasso_tol
         # self.w = w
         self.store_phi = store_phi
+        self.input_range = input_range
         self.normalized = normalized
-        super().__init__(order=self.order,customM=self.customM,mindex_type=self.mindex_type,coef=self.coef,a=self.a,b=self.b,polytype=self.polytype,normalized=self.normalized,store_phi=self.store_phi)
+        super().__init__(order=self.order,customM=self.customM,mindex_type=self.mindex_type,coef=self.coef,a=self.a,b=self.b,polytype=self.polytype,normalized=self.normalized,store_phi=self.store_phi,input_range=self.input_range)
     def _compile(self,X):
         '''Builds the multiindex using the PCEBuilder class. Private. 
         
@@ -994,6 +924,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
         # ypred = np.dot(Phi,self.coef)
         ypred = self.polyeval(X)
         return ypred
+
 
 # In development
 class PCESeries():

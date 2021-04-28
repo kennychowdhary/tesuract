@@ -10,6 +10,46 @@ print(relpath)
 def mse(a,b):
 	return mean_squared_error(a,b,squared=False)
 
+class TestPCERegressionArbDomain(unittest.TestCase):
+	@classmethod
+	def setUpClass(self):
+		self.dim = 2
+		self.order = 3
+		self.nsamples = 27
+		rn = np.random.RandomState(123)
+		X = 2*rn.rand(self.nsamples,self.dim)-1
+		self.ibounds = [(-1,1) for r in range(self.dim)]
+		y = 3.14 + 1.74*.5*(3*X[:,0]**2-1) + X[:,1] * .5*(3*X[:,0]**2-1)
+		self.c_true = np.array([3.14,0.,0.,1.74,0.,0.,0.,1.,0.,0.,])
+		self.X,self.y = X,y
+		self.rn = rn
+	def domain_setup(self,a=0,b=5):
+		# on (0,5) domain
+		X = (b-a)*self.rn.rand(self.nsamples,self.dim) + a
+		ibounds = [(a,b) for r in range(self.dim)]
+		y = 3 + 2*.5*(3*X[:,0]**2-1) + X[:,1] * .5*(3*X[:,0]**2-1)
+		# self.c_true = np.array([3.14,0.,0.,1.74,0.,0.,0.,1.,0.,0.,])
+		return X, y, ibounds
+	def test_pcereg_w_canonical_domain(self):
+		X,y,ibounds = self.X, self.y, self.ibounds
+		pce = tesuract.PCEReg(order=3,input_range=ibounds)
+		pce.fit(X,y)
+		assert mse(y,pce.predict(X)) <= 1e-14
+		# print(np.around(pce.coef_,3))
+		assert mse(np.around(pce.coef_,3),self.c_true) <= 1e-16
+	def test_pcereg_w_non_unit_domain(self):
+		X,y,ibounds = self.domain_setup()
+		pce = tesuract.PCEReg(order=3,input_range=ibounds)
+		pce.fit(X,y)
+		assert mse(y,pce.predict(X)) <= 1e-12, "predict is not working properly for input ranges that are not on [-1,1]."
+	def test_pcereg_w_unit_domain(self):
+		X,y,ibounds = self.domain_setup(a=0,b=5)
+		pce = tesuract.PCEReg(order=3,input_range=ibounds)
+		pce.fit(X,y)
+		assert mse(y,pce.predict(X)) <= 1e-12, "predict is not working properly for input ranges that are not on [-1,1]."
+
+
+
 class TestPCERegression(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):

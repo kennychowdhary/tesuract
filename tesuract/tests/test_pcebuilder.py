@@ -13,6 +13,57 @@ print("relpath:",relpath)
 def mse(a,b):
 	return mean_squared_error(a,b,squared=False)
 
+class TestPCEBuilderOnArbDomain(unittest.TestCase):
+	@classmethod
+	def setUpClass(self):
+		self.n, self.d = 7,3
+		self.rn = np.random.RandomState(23)
+		self.X = 5*self.rn.rand(self.n,self.d)
+		self.ibounds = [(0,5) for r in range(self.d)]
+	def test_full_domain_scaling(self):
+		n, d, X, ibounds = self.n, self.d, self.X, self.ibounds
+		scaler = tesuract.preprocessing.DomainScaler(dim=d,input_range=ibounds,output_range=(-1,1))
+		
+		# print(X)
+		X_scaled = scaler.fit_transform(X)
+		pce = tesuract.PCEBuilder(order=4)
+		Xhat_ref = pce.fit_transform(X_scaled)
+		# X_scaled = scaler.transform(X)
+		# print(X_scaled)
+		scaler._range_check(X_scaled,[(-1,1) for r in range(d)])
+		scaler._range_check(X,[(0,5) for r in range(d)])
+		return Xhat_ref
+	def test_pcebuild_raise_bound_assertion(self):
+		n, d, X, ibounds = self.n, self.d, self.X, self.ibounds
+		pce = tesuract.PCEBuilder(order=4)
+		self.assertRaises(AssertionError, pce.fit_transform, X)
+	def test_pcebuild_with_input_range(self):
+		n, d, X, ibounds = self.n, self.d, self.X, self.ibounds
+		pce = tesuract.PCEBuilder(order=4,input_range=ibounds)
+		Xhat = pce.fit_transform(X)
+		Xhat_ref = self.test_full_domain_scaling()
+		assert mse(Xhat_ref,Xhat) <= 1e-16, "mismatch between expected poly transform and actual poly transform"
+	def test_pcebuild_polyeval_with_input_range(self):
+		n, d, X, ibounds = self.n, self.d, self.X, self.ibounds
+		pce = tesuract.PCEBuilder(order=4,input_range=ibounds)
+		pce.compile(X.shape[1])
+		coef = np.zeros(35)
+		coef[0] = 1.0
+		ypred = pce.polyeval(X,coef)
+		assert np.all(ypred == 1), "vector must be all ones. Something may have gone wrong with polyeval and input bounds."
+	def test_pcebuild_polyeval_assert_error_wo_input_range(self):
+		n, d, X, ibounds = self.n, self.d, self.X, self.ibounds
+		pce = tesuract.PCEBuilder(order=4)
+		pce.compile(X.shape[1])
+		coef = np.zeros(35)
+		coef[0] = 1.0
+		self.assertRaises(AssertionError, pce.polyeval, X, coef)
+		
+		
+
+
+
+
 class TestPCEBuilder(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):

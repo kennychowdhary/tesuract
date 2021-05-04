@@ -59,9 +59,6 @@ class TestPCEBuilderOnArbDomain(unittest.TestCase):
 		coef[0] = 1.0
 		self.assertRaises(AssertionError, pce.polyeval, X, coef)
 		
-		
-
-
 
 
 class TestPCEBuilder(unittest.TestCase):

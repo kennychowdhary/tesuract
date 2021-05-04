@@ -17,6 +17,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.neural_network import MLPRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.kernel_ridge import KernelRidge
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.svm import SVR
 
 from alive_progress import alive_bar
 		
@@ -55,6 +57,10 @@ class RegressionWrapperCV(BaseEstimator):
 			return GaussianProcessRegressor()
 		if regressor == 'krr':
 			return KernelRidge()
+		if regressor == 'knn':
+			return KNeighborsRegressor()
+		if regressor == 'svr':
+			return SVR()
 	def fit(self,X,y):
 		self._setup_cv()
 		if isinstance(self.regressor,str):
@@ -220,3 +226,8 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			fi = estimator.feature_importances_
 			FI_.append(fi)
 		return np.array(FI_)
+	def score(self,X,Y):
+		Ypred = self.predict(X)
+		assert Ypred.shape == Y.shape, "predict and Y shape do not match."
+		MSPREs = [np.mean((1.0 - Ypred[t]/Y[t])**2) for t in range(Y.shape[0])]
+		return np.mean(MSPREs)

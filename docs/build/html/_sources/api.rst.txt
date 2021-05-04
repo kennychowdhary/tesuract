@@ -6,20 +6,20 @@ API
 .. MultiIndex Classes
 .. ------------------
 
-.. .. automodule:: pypce.multiindex
+.. .. automodule:: tesuract.multiindex
 .. 	:members:
 
 PCE Base Class
 --------------
 
-.. autoclass:: pypce.PCEBuilder
+.. autoclass:: tesuract.PCEBuilder
 	:members:
 	:exclude-members: get_params, set_params, computeNormSq
 
 PCE Regression Class
 --------------------
 
-.. autoclass:: pypce.PCEReg
+.. autoclass:: tesuract.PCEReg
 	:members: 
 	:exclude-members: get_params, set_params, compile, eval, polyeval, score, fit_transform, computeMoments, computeSobol, computeNormSq, sensitivity_indices, multiindex
 	:private-members: _compile, _quad_fit
@@ -27,13 +27,13 @@ PCE Regression Class
 .. Preprocessing Utilities
 .. -----------------------
 
-.. .. automodule:: pypce.preprocessing
+.. .. automodule:: tesuract.preprocessing
 .. 	:members:
 
 .. Quadrature
 .. -----------------------
 
-.. .. autoclass:: pypce.QuadGen
+.. .. autoclass:: tesuract.QuadGen
 .. 	:members:
 
 .. The ``shape`` module

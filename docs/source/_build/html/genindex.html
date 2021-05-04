@@ -36,7 +36,9 @@
 
     
     <link rel="index" title="Index" href="#" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link href="_static/style.css" rel="stylesheet" type="text/css">
+
 </head>
 
 <body class="wy-body-for-nav">
@@ -82,10 +84,33 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guide.html">Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">The pypce tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Main features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html">Introduction to polynomial regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#setup-the-problem">Setup the problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#fit-a-polynomial">Fit a polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#feature-importance">Feature importance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#prediction">Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorials/tutorial01.html#scale-error">Scale error</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#different-fit-algorithms">Different fit algorithms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html">Some other usage cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#defining-custom-coefficient-array">Defining custom coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-array">Custom multiindex array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-and-coefficient-array">Custom multiindex and coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#using-normalized-legendre-basis">Using normalized Legendre basis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-base-class">PCE Base Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-regression-class">PCE Regression Class</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -153,26 +178,35 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#C"><strong>C</strong></a>
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#C"><strong>C</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
- | <a href="#G"><strong>G</strong></a>
  | <a href="#P"><strong>P</strong></a>
- | <a href="#S"><strong>S</strong></a>
  
 </div>
-<h2 id="C">C</h2>
+<h2 id="_">_</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#pypce.PCEBuilder.compile">compile() (pypce.PCEBuilder method)</a>
-</li>
-      <li><a href="api.html#pypce.PCEBuilder.computeMoments">computeMoments() (pypce.PCEBuilder method)</a>
+      <li><a href="api.html#tesuract.PCEReg._compile">_compile() (tesuract.PCEReg method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#pypce.PCEBuilder.computeNormSq">computeNormSq() (pypce.PCEBuilder method)</a>
+      <li><a href="api.html#tesuract.PCEReg._quad_fit">_quad_fit() (tesuract.PCEReg method)</a>
 </li>
-      <li><a href="api.html#pypce.PCEBuilder.computeSobol">computeSobol() (pypce.PCEBuilder method)</a>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#tesuract.PCEBuilder.compile">compile() (tesuract.PCEBuilder method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api.html#tesuract.PCEBuilder.computeMoments">computeMoments() (tesuract.PCEBuilder method)</a>
+</li>
+      <li><a href="api.html#tesuract.PCEBuilder.computeSobol">computeSobol() (tesuract.PCEBuilder method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -180,7 +214,7 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#pypce.PCEBuilder.eval">eval() (pypce.PCEBuilder method)</a>
+      <li><a href="api.html#tesuract.PCEBuilder.eval">eval() (tesuract.PCEBuilder method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -188,15 +222,13 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#pypce.PCEBuilder.fit_transform">fit_transform() (pypce.PCEBuilder method)</a>
+      <li><a href="api.html#tesuract.PCEReg.feature_importances">feature_importances() (tesuract.PCEReg method)</a>
 </li>
   </ul></td>
-</tr></table>
-
-<h2 id="G">G</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#pypce.PCEBuilder.get_params">get_params() (pypce.PCEBuilder method)</a>
+      <li><a href="api.html#tesuract.PCEReg.fit">fit() (tesuract.PCEReg method)</a>
+</li>
+      <li><a href="api.html#tesuract.PCEBuilder.fit_transform">fit_transform() (tesuract.PCEBuilder method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -204,19 +236,15 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#pypce.PCEBuilder">PCEBuilder (class in pypce)</a>
+      <li><a href="api.html#tesuract.PCEBuilder">PCEBuilder (class in tesuract)</a>
+</li>
+      <li><a href="api.html#tesuract.PCEReg">PCEReg (class in tesuract)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#pypce.PCEBuilder.polyeval">polyeval() (pypce.PCEBuilder method)</a>
+      <li><a href="api.html#tesuract.PCEBuilder.polyeval">polyeval() (tesuract.PCEBuilder method)</a>
 </li>
-  </ul></td>
-</tr></table>
-
-<h2 id="S">S</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#pypce.PCEBuilder.set_params">set_params() (pypce.PCEBuilder method)</a>
+      <li><a href="api.html#tesuract.PCEReg.predict">predict() (tesuract.PCEReg method)</a>
 </li>
   </ul></td>
 </tr></table>

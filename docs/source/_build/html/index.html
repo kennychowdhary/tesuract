@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>pypce &mdash; pypce 1.0 documentation</title>
+  <title>tesuract &mdash; pypce 1.0 documentation</title>
   
 
   
@@ -38,7 +38,9 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Introduction" href="introduction.html" /> 
+    <link rel="next" title="Main features" href="introduction.html" />
+    <link href="_static/style.css" rel="stylesheet" type="text/css">
+
 </head>
 
 <body class="wy-body-for-nav">
@@ -84,10 +86,33 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guide.html">Guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">The pypce tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Main features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html">Introduction to polynomial regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#setup-the-problem">Setup the problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#fit-a-polynomial">Fit a polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#feature-importance">Feature importance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#prediction">Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tutorials/tutorial01.html#scale-error">Scale error</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial01.html#different-fit-algorithms">Different fit algorithms</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html">Some other usage cases</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#defining-custom-coefficient-array">Defining custom coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-array">Custom multiindex array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#custom-multiindex-and-coefficient-array">Custom multiindex and coefficient array</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tutorials/tutorial02.html#using-normalized-legendre-basis">Using normalized Legendre basis</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-base-class">PCE Base Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-regression-class">PCE Regression Class</a></li>
+</ul>
+</li>
 </ul>
 
             
@@ -134,7 +159,7 @@
     
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
-      <li><strong>pypce</strong></li>
+      <li><strong>tesuract</strong></li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -153,39 +178,46 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="pypce">
-<span id="main"></span><h1><strong>pypce</strong><a class="headerlink" href="#pypce" title="Permalink to this headline">¶</a></h1>
-<p><strong>pypce</strong> is a pure Python Uncertainty Quantification (UQ) software library.
+  <div class="section" id="tesuract">
+<span id="main"></span><h1><strong>tesuract</strong><a class="headerlink" href="#tesuract" title="Permalink to this headline">¶</a></h1>
+<p><strong>tesuract</strong> is a pure Python Uncertainty Quantification (UQ) software library.
 <a class="footnote-reference brackets" href="#id5" id="id1">1</a> It is built with object oriented design principals in mind and is thus
 modular.</p>
-<p>The pypce library contains modules for building multivariate polynomial
+<p>The tesuract library contains modules for building multivariate polynomial
 regression models (built with the scikit-learn API in mind), constructing
 quadrature rules for high-dimensional numerical integration, performing
 sensitivity analysis or feature importance, preprocessing utilities for
 transforming feature and target spaces, e.g. PCA, and custom pipelines for
 fitting multi-target regression models and comparing different machine learning
 (ML) methods.</p>
+<p>These classical and non-classical UQ methods integrate seamlessly with
+estimators in scikit-learn’s toolbox, thus allowing integration and testing
+within the prolific machine learning library.  For example, the user can utilize
+the cross validation utilities to easily compare multi-variate polynomial
+estimators with sklearn’s random forest regression methods. In fact, we provide
+classes that have this ability baked in so that the user can perform efficient
+and easy model selection to find the best model for the job.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>The code is super easy to install. Make sure you have <code class="docutils literal notranslate"><span class="pre">numpy</span></code> and
-<code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code>. Then, after downloading, cd into the <code class="docutils literal notranslate"><span class="pre">pypce</span></code> directory, i.e.
+<p>The code is super easy to install with <code class="docutils literal notranslate"><span class="pre">pip</span></code>. Make sure you have <code class="docutils literal notranslate"><span class="pre">numpy</span></code> and
+<code class="docutils literal notranslate"><span class="pre">scikit-learn</span></code>. Then, after downloading, cd into the <code class="docutils literal notranslate"><span class="pre">tesuract</span></code> directory, i.e.
 the folder with the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>, and run</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
 </pre></div>
 </div>
-<p>You can also run a suite of unittests before installation with</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">s</span> <span class="n">pypce</span><span class="o">/</span><span class="n">tests</span>
+<p>You can also run a suite of unit tests and regression tests before installation with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">-</span><span class="n">m</span> <span class="n">pytest</span> <span class="o">-</span><span class="n">v</span> <span class="o">-</span><span class="n">s</span> <span class="n">tesuract</span><span class="o">/</span><span class="n">tests</span>
 </pre></div>
 </div>
-<p>to check the library works. That’s it! Now you are ready to use <strong>pypce</strong>.</p>
+<p>to check that the library works. That’s it! Now you are ready to use <strong>tesuract</strong>.</p>
 </div>
 <div class="section" id="quickstart">
 <h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
 <p>Let’s see how easy it is to create a multivariate polynomial regression model.
 Let’s create a <span class="math notranslate nohighlight">\(4^{th}\)</span> order polynomial regression model <a class="footnote-reference brackets" href="#id6" id="id2">2</a> on the
 <span class="math notranslate nohighlight">\([-1,1]^5\)</span> hypercube, with a simple least squares fitting. <a class="footnote-reference brackets" href="#id7" id="id3">3</a></p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">pypce</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">pypce</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tesuract</span>
+<span class="n">p</span> <span class="o">=</span> <span class="n">tesuract</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>That’s it! In order to perform the regression, just run <code class="code docutils literal notranslate"><span class="pre">p.fit(X,y)</span></code> and
@@ -195,18 +227,15 @@ Let’s create a <span class="math notranslate nohighlight">\(4^{th}\)</span> or
 <h2>User Guide<a class="headerlink" href="#user-guide" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="introduction.html#main-features-of-pypce">Main features of pypce</a></li>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Main features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html">Introduction to polynomial regression</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html">Some other usage cases</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="guide.html">Guide</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="guides/PCEReg_guide.html">Guide to PCE Regression</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">The pypce tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#polynomial-classes">Polynomial Classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#quadrature">Quadrature</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-base-class">PCE Base Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-regression-class">PCE Regression Class</a></li>
 </ul>
 </li>
 </ul>
@@ -222,7 +251,7 @@ Let’s create a <span class="math notranslate nohighlight">\(4^{th}\)</span> or
 </ul>
 <dl class="footnote brackets">
 <dt class="label" id="id5"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
-<dd><p>Python 3+ is required and pypce has only been tested for
+<dd><p>Python 3+ is required and tesuract has only been tested for
 3.7.6 so far.</p>
 </dd>
 <dt class="label" id="id6"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
@@ -247,7 +276,7 @@ of the data matrix columns.</p>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="introduction.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="introduction.html" class="btn btn-neutral float-right" title="Main features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
     </div>

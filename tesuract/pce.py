@@ -726,11 +726,6 @@ class PCEReg(PCEBuilder,RegressorMixin):
     >>> p = PCEReg(order=3)
     >>> p.fit(X,y)
     '''
-    # def __init__(self,order=1,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',normalized=False,store_phi=False):
-    def __init__(self,*args,fit_type='linear',fit_params={},**kwargs):
-        pass
-        super(PCEReg,self).__init__(*args, **kwargs)
-        self._max_iter = max_iter
     def __init__(self,order=2,customM=None,mindex_type='total_order',coef=None,a=None,b=None,polytype='Legendre',fit_type='linear',fit_params={},normalized=False,store_phi=False,input_range=None):
         # alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2
         self.order = order
@@ -740,7 +735,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
         self.b = b
         self.coef = coef
         # self.c = self.coef # need to remove eventually
-        self.polytype = 'Legendre'
+        self.polytype = polytype
         self.fit_type = fit_type
         self.fit_params = fit_params
         # self.alphas = alphas # LassoCV default

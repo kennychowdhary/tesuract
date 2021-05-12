@@ -1,37 +1,3 @@
-"""Example Google style docstrings.
-
-This module demonstrates documentation as specified by the `Google Python
-Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-with a section header and a colon followed by a block of indented text.
-
-Example:
-	Examples can be given using either the ``Example`` or ``Examples``
-	sections. Sections support any reStructuredText formatting, including
-	literal blocks::
-
-		$ python example_google.py
-
-Section breaks are created by resuming unindented text. Section breaks
-are also implicitly created anytime a new section starts.
-
-Attributes:
-	module_level_variable1 (int): Module level variables may be documented in
-		either the ``Attributes`` section of the module docstring, or in an
-		inline docstring immediately following the variable.
-
-		Either form is acceptable, but the two should not be mixed. Choose
-		one convention to document module level variables and be consistent
-		with it.
-
-Todo:
-	* For module TODOs
-	* You have to also use ``sphinx.ext.todo`` extension
-
-.. _Google Python Style Guide:
-   https://google.github.io/styleguide/pyguide.html
-
-"""
-
 import numpy as np
 import warnings, pdb 
 
@@ -70,52 +36,6 @@ class scale:
 		# self.intf = np.prod(.5*(self.b - self.a)/(self.b - self.a)) # (b-a) canceled by prod prob weight
 	def __getitem__(self,key):
 		return self.__scaled[key]
-
-class DomainScaler_old:
-	# need to add checks and add functionality
-	def __init__(self,dim=None,a=None,b=None,domain_range=(-1,1)):
-		if a is None:
-			assert dim is not None, "Must defined dimension if a or b is None."
-			self.dim = dim
-		else:
-			self.dim = len(a)
-			assert len(a) == len(b), "Mismatch between a and b"
-		self.a = a
-		self.b = b
-		self.dr_a,self.dr_b = domain_range
-	def _compile(self):
-		self.dr_w = self.dr_b - self.dr_a
-		if self.a is None and self.b is None:
-			# default bounds
-			self.a = self.dr_a*np.ones(self.dim)
-			self.b = self.dr_b*np.ones(self.dim)
-		else:
-			self.w = self.b - self.a
-		# integration factor ([a,b] -> [-1,1])
-		# self.intf = np.prod(.5*(self.b - self.a))
-		# self.intf = np.prod((1./self.dr_w)*(self.b - self.a)/(self.b - self.a)) # (b-a) canceled by prod prob weight
-	def fit(self,X):
-		self._compile() # get domain width
-		X = np.atleast_2d(X)
-		assert self.dim == X.shape[1], "Size of data matrix features does not match dimensions." 
-		# scale to -1 -> 1
-		# self.X_scaled_ = 2*(self.X - self.a)/self.w - 1.0
-		return self
-	def transform(self,X):
-		X = np.atleast_2d(X)
-		assert self.dim == X.shape[1], "Size of data matrix features does not match dimensions." 
-		# scale to -1 -> 1
-		X_scaled_ = self.dr_w*(X - self.a)/self.w + self.dr_a
-		return X_scaled_
-	def fit_transform(self,X):
-		self.fit(X)
-		return self.transform(X)
-	def inverse_transform(self,Xhat):
-		Xhat = np.atleast_2d(Xhat)
-		assert self.dim == Xhat.shape[1], "Size of data matrix features does not match dimensions." 
-		X = (1./self.dr_w)*(Xhat - self.dr_a) 
-		X = self.a + self.w*X
-		return X
 
 # domain test
 class DomainScaler:
@@ -241,11 +161,12 @@ class MinMaxTargetScaler:
 		return Y
 
 class PCATargetTransform(BaseEstimator, TransformerMixin):
-    def __init__(self, n_components=2, cutoff=1e-2, svd_solver='arpack'):
+    def __init__(self, n_components=2, cutoff=1e-2, svd_solver='arpack',whiten=False):
         self.n_components = n_components
         self.cutoff = cutoff
         self.svd_solver = svd_solver
         self.K = None
+        self.whiten = whiten # return scaled projections w var=1
     def fit(self, Y, target=None):
         self.n, self.d = Y.shape
         if self.n_components == 'auto':
@@ -258,8 +179,12 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
                 self.n_components = self.d
         assert self.K is not None, "K components is not defined or being set properly."
         
-        self.pca = PCA(n_components=self.K, svd_solver=self.svd_solver)
+        self.pca = PCA(n_components=self.K, svd_solver=self.svd_solver,whiten=self.whiten)
         self.pca.fit(Y)
+        self.components_ = self.pca.components_
+        self.n_components_ = self.pca.n_components_
+        self.singular_values_ = self.pca.singular_values_
+        self.variances_ = self.singular_values_**2/self.n
         self.cumulative_error = self.cumulative_error_full[:self.K]
         return self
     def fit_transform(self, Y):

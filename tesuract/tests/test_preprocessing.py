@@ -8,39 +8,6 @@ from sklearn.datasets import make_low_rank_matrix
 relpath = tesuract.__file__[:-11] # ignore the __init__.py specification
 print(relpath)
 
-class TestDomainScaler_old(unittest.TestCase):
-	@classmethod
-	def setUpClass(self):
-		self.rn = np.random.RandomState(3123)
-	def test_scale_features_uniform_ab(self):
-		X = 3.5*self.rn.rand(30,3) + 2
-		a = np.array([2,2,2.])
-		b = 3.5+a
-		scaler = DomainScaler_old(a=a,b=b)
-		Xhat = scaler.fit_transform(X)
-		assert np.amin(Xhat) >= -1.0 and np.amax(Xhat) <= 1.0, "Scaler is not working properly"
-	def test_scale_features_nonuniform_ab(self):
-		a = np.array([2,3,0.])
-		b = 3.5+a
-		X = (b-a)*self.rn.rand(30,3) + a
-		scaler = DomainScaler_old(a=a,b=b)
-		Xhat = scaler.fit_transform(X)
-		assert np.amin(Xhat) >= -1.0 and np.amax(Xhat) <= 1.0, "Scaler is not working properly"
-	def test_scale_features_inverse_nonuniform_ab(self):
-		a = np.array([2,3,0.])
-		b = np.array([2.5,1.,1.])+a
-		X = (b-a)*self.rn.rand(30,3) + a
-		scaler = DomainScaler_old(a=a,b=b)
-		Xhat = scaler.fit_transform(X)
-		assert np.sum(scaler.inverse_transform(Xhat) - X) == 0, "Inverse transform not working properly."
-	def test_scale_features_inverse_uniform_ab(self):
-		X = 3.5*self.rn.rand(30,3) + 2
-		a = np.array([2,2,2.])
-		b = 3.5+np.array([2,2,2.])
-		scaler = DomainScaler_old(a=a,b=b)
-		Xhat = scaler.fit_transform(X)
-		assert np.sum(scaler.inverse_transform(Xhat) - X) == 0, "Inverse transform not working properly."
-
 class Test_Target_Scaler(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):

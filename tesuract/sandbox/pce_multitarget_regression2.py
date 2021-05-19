@@ -232,3 +232,129 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		MSPREs = [np.mean((1.0 - Ypred[t]/Y[t])**2) for t in range(Y.shape[0])]
 		return np.mean(MSPREs)
 	# add def for fitting multiple for each component for faster fitting
+
+class MPCEReg(BaseEstimator, RegressorMixin):
+	def __init__(self, 
+				regressor='pce', reg_params={'order':2},
+				target_transform=None,
+				target_transform_params={},
+				scorer='neg_root_mean_squared_error',
+				n_jobs=4,cv=None,
+				mixed=True,
+				verbose=1):
+		self.regressor = regressor
+		self.reg_params = reg_params
+		self.scorer = scorer
+		self.n_jobs = n_jobs
+		self.cv = cv
+		self.target_transform = target_transform
+		self.target_transform_params = target_transform_params
+		self.mixed = mixed # to control whether mixed surrogate for each target TBD
+		self.verbose = verbose
+	def _setupCV(self, shuffle=False, randstate=13):
+		if self.cv == None:
+			self.cv = KFold(n_splits=5)  # ,shuffle=True,random_state=13)
+	def _fit_target_transform(self,Y):
+		if self.target_transform is None:
+			self.TT = FunctionTransformer(lambda Y: Y)
+		else:
+			if isinstance(self.target_transform,Pipeline):
+				print("Target Transform is a pipeline object. Cannot set internal parameters just yet.")
+				self.TT = self.target_transform
+			else:
+				self.TT = self.target_transform(**self.target_transform_params)
+		self.TT.fit(Y)
+		return self
+	def fit(self,X,Y):
+		self.n, self.dim = X.shape
+		self._setupCV()
+		self._fit_target_transform(Y)
+		Yhat = self.TT.transform(Y)
+		if Yhat.ndim == 1: Yhat = np.atleast_2d(Yhat).T
+		assert len(Yhat) == self.n, "mistmatch in no of samples btwn X and Y."
+		self.ntargets = Yhat.shape[1]
+		self._setupCV()
+		if isinstance(self.regressor,str):
+			# fits the same regressor to each latent var
+			self.res = self.fit_single_reg(X,Yhat)
+		elif isinstance(self.regressor,list) and self.mixed == True:
+			# fits different regressor to each latent var
+			assert len(self.regressor) == self.ntargets, "number of regressors must be same as the targets."
+			assert len(self.reg_params) == self.ntargets, "number of regressors must be same as the targets."
+			self.res = self.fit_single_reg(X,Yhat)
+		# elif isinstance(self.regressor,list) and self.mixed == True:
+		# 	self.res = self.fit_single_reg(X,Yhat)
+		return self
+	def fit_single_reg(self, X, Y, regressor=None,reg_params=None):
+		if regressor == None:
+			regressor = self.regressor
+			reg_params = self.reg_params
+		if isinstance(regressor,str):
+			# if single string is provided, repeat it for each target
+			regressor = [regressor for i in range(self.ntargets)]
+			reg_params = [reg_params for i in range(self.ntargets)]
+		res = defaultdict(list)
+		with alive_bar(self.ntargets) as bar:
+			for i in range(self.ntargets):
+				reg = RegressionWrapperCV(
+					regressor=[regressor[i]],reg_params=[reg_params[i]],
+					n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
+				reg.fit(X, Y[:, i])
+				res['best_estimators_'].append(reg.best_estimator_)
+				res['best_params_'].append(reg.best_params_)
+				res['best_scores_'].append(reg.best_score_)
+				res['best_overfit_error_'].append(reg.best_overfit_error_)
+				res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
+				res['best_index_'].append(reg.best_index_) # index of best score
+				# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
+				bar()
+		self.__dict__.update(res)
+		return res
+	def fit_multiple_reg(self, X, Y):
+		# wont execute if mixed is True
+		if isinstance(self.regressor,list):
+			mres = []
+			for i,r in enumerate(self.regressor):
+				res = self.fit_single_reg(X,Y,
+								regressor=r,
+								reg_params=self.reg_params[i])
+				mres.append(res)
+		return mres
+	def predict(self,X):
+		assert hasattr(self,'res'), "Must run fit."
+		if isinstance(self.res,dict):
+			Ypred = self._predict_single(X,res=self.res)
+		elif isinstance(self.res,list):
+			Ypred = self._predict_multiple(X,res=self.res)
+		return Ypred
+	def _predict_single(self,X,res=None):
+		# assert isinstance(self.res,dict), "Must pass string as regressor OR list with mixed=True, otherwise, predict is ambiguous"
+		assert isinstance(res,dict), "for single prediction, results must be a dictionary."
+		Yhatpred_list = []
+		for estimator in self.best_estimators_:
+			if X.ndim == 1:
+				X = np.atleast_2d(X)
+			Yhatpred_list.append(estimator.predict(X))
+		Yhatpred = np.array(Yhatpred_list).T
+		Ypred = self.TT.inverse_transform(Yhatpred)
+		return Ypred
+	def _predict_multiple(self,X,res=None):
+		# assert isinstance(self.res,dict), "Must pass string as regressor OR list with mixed=True, otherwise, predict is ambiguous"
+		assert isinstance(res,list), "for multiple predictions, results must be a list of dictionaries."
+		predictions = []
+		for r in res:
+			predictions.append(self._predict_single(X,r))
+		return np.squeeze(np.array(predictions))
+	def feature_importances_(self):
+		assert hasattr(self,'res'), "Must run .fit() first!"
+		FI_ = []
+		for estimator in self.best_estimators_:
+			fi = estimator.feature_importances_
+			FI_.append(fi)
+		return np.array(FI_)
+	def score(self,X,Y):
+		Ypred = self.predict(X)
+		assert Ypred.shape == Y.shape, "predict and Y shape do not match."
+		MSPREs = [np.mean((1.0 - Ypred[t]/Y[t])**2) for t in range(Y.shape[0])]
+		return np.mean(MSPREs)
+	# add def for fitting multiple for each component for faster fitting

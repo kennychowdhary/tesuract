@@ -236,6 +236,21 @@ def gen_scale_pipeline(log=True,scale=True,pca=True,**kwargs):
 	pipe = Pipeline(estimators)
 	return pipe
 
+def target_pipeline(log=False,scale=False,pca=True,**kwargs):
+	target_range = kwargs.get('target_range',(0,1))
+	n_components = kwargs.get('n_components',4)
+	svd_solver = kwargs.get('svd_solver','arpack')
+	whiten = kwargs.get('whiten',False)
+	estimators = []
+	if log: 
+		estimators.append(('log',LogTransform()))
+	if scale: 
+		estimators.append(('scaler',MinMaxTargetScaler(target_range=target_range)))
+	if pca: 
+		estimators.append(('pca',PCA(n_components=n_components,svd_solver=svd_solver,whiten=whiten)))
+	pipe = Pipeline(estimators)
+	return pipe
+
 
 
 

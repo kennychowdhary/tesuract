@@ -13,7 +13,7 @@ from sklearn.utils.estimator_checks import check_estimator
 from sklearn.utils.validation import check_X_y, check_array
 from sklearn import linear_model
 
-from numba import jit
+# from numba import jit
 
 # Polynomials classes
 class PolyBase:
@@ -845,7 +845,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
             regmodel.fit(Xhat,y)
         if self.fit_type == 'LassoCV':
             if not self.fit_params: # if empty dictionary
-                self.fit_params={'alphas':np.logspace(-12,2,25),'max_iter':1000,'tol':1e-2}
+                self.fit_params={'alphas':np.logspace(-12,2,25),'max_iter':2500,'tol':1e-2}
                 # self.fit_params={}
             regmodel = linear_model.LassoCV(fit_intercept=False,**self.fit_params)
             regmodel.fit(Xhat,y)

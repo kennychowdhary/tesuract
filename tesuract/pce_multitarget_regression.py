@@ -87,7 +87,7 @@ class RegressionWrapperCV(BaseEstimator):
 			assert isinstance(self.reg_params,list), "parameters must also be a list"
 			assert len(self.reg_params) == n_regressors, "length of parameters and regressors must match."
 			for i,R in enumerate(self.regressor):
-				print("Fitting regressor ", R)
+				# print("Fitting regressor ", R)
 				model = self._model_factory(regressor=R)
 				reg_params_cv = self._reformat_grid(self.reg_params[i])
 				GridSCV = GridSearchCV(model, reg_params_cv, scoring=self.scorer, n_jobs=self.n_jobs, cv=self.cv, verbose=self.verbose, return_train_score=True)
@@ -141,7 +141,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			self.TT = FunctionTransformer(lambda Y: Y)
 		else:
 			if isinstance(self.target_transform,Pipeline):
-				print("Target Transform is a pipeline object. Cannot set internal parameters just yet.")
+				# print("Target Transform is a pipeline object. Cannot set internal parameters just yet.")
 				self.TT = self.target_transform
 			else:
 				self.TT = self.target_transform(**self.target_transform_params)
@@ -259,7 +259,7 @@ class MPCEReg(BaseEstimator, RegressorMixin):
 			self.TT = FunctionTransformer(lambda Y: Y)
 		else:
 			if isinstance(self.target_transform,Pipeline):
-				print("Target Transform is a pipeline object. Cannot set internal parameters just yet.")
+				# print("Target Transform is a pipeline object. Cannot set internal parameters just yet.")
 				self.TT = self.target_transform
 			else:
 				self.TT = self.target_transform(**self.target_transform_params)

@@ -171,5 +171,5 @@ class Test_PCA_Target_Transform(unittest.TestCase):
 		pca2.fit(Y)
 		ce1 = np.cumsum(pca1.explained_variance_ratio_)[:pca2.K]
 		ce2 = pca2.cumulative_error
-		assert np.linalg.norm(ce1-ce2)/np.linalg.norm(ce1) <= 1e-15
+		assert np.linalg.norm(ce1-ce2)/np.linalg.norm(ce1) <= 1e-12
 

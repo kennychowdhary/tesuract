@@ -13,7 +13,7 @@ from sklearn.utils.estimator_checks import check_estimator
 from sklearn.utils.validation import check_X_y, check_array
 from sklearn import linear_model
 
-from numba import jit
+# from numba import jit
 
 # Polynomials classes
 class PolyBase:

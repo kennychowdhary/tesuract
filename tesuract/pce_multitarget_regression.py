@@ -177,6 +177,8 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 				res['best_estimators_'].append(reg.best_estimator_)
 				res['best_params_'].append(reg.best_params_)
 				res['best_scores_'].append(reg.best_score_)
+				dict_scores_ = {regressor[i]:reg_best_scores_[i] for i in range(len(regressor))}
+				res['best_scores_all_'].append(dict_scores_)
 				res['best_overfit_error_'].append(reg.best_overfit_error_)
 				res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
 				res['best_index_'].append(reg.best_index_) # index of best score

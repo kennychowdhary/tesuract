@@ -228,6 +228,17 @@ class TestPCEBuilder(unittest.TestCase):
 		assert pceb._mindex_compute_count_ == 1, "mindex is being computed more than once or none at all."
 
 
+# code to test the joint Sobol function in PCEBuilder
+class TestJointSobol(unittest.TestCase):
+	def test_initialize_joint_sensitivity(self):
+		p = tesuract.PCEBuilder(order=2)
+		dim = 2
+		p.compile(dim=dim)
+		nterms, ndim = p.mindex.shape
+		dummy_coef = np.ones(nterms)
+		assert ndim == dim, "dimensions don't match"
+		S2 = p.jointSobol(c=dummy_coef)
+		print("\n",S2)
 
 
 

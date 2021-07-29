@@ -563,6 +563,47 @@ class PCEBuilder(BaseEstimator):
                 s = np.sum(totvar_vec[si[new_index]])/totvar
                 S.append(s)
         return S
+    def jointSobol(self,c=None):
+        if self.mindex is None:
+            self.compile(dim=self.dim)
+        # assert self.compile_flag == True, "Must compile to set mindex. Avoids having to recompute multiindex everytime we run SA."
+        if len(self.normsq) == 0: 
+            normsq = self.computeNormSq() # if c and M specified in constructor
+        else:
+            normsq = self.normsq # from fit transform
+        # compute Sobol indices using coefficient vector
+        if c is None:
+            assert len(self.coef) != 0, "must specify coefficient array or feed it in the constructor."
+            coef_ = self.coef
+        else:
+            coef_ = c
+
+        assert len(coef_) == self.mindex.shape[0], "Coefficient vector must match the no of rows of the multiindex."
+
+        new_index = (np.sum(self.mindex,1)!=0) # boolean array that doesn't include mean mindex
+        if self.normalized:
+            totvar_vec = coef_[new_index]**2
+            self.coefsq = coef_**2
+        else:
+            totvar_vec = normsq[new_index]*coef_[new_index]**2
+            self.coefsq = normsq*coef_**2
+        totvar = np.sum(totvar_vec)
+
+                # assert totvar > 0, "Coefficients are all zero!"
+        S2 = np.zeros((self.dim,self.dim))
+        # S = []
+        # # in case elements have nan in them
+        # if np.all(coef_[new_index] == 0): # ignore the mean
+        #     # print("Returning equal weights!")
+        #     S = np.ones(self.dim)/self.dim # return equal weights
+        # else:
+        # for i in range(self.dim):
+        #     for j in range(i+1):
+        #     si = self.mindex[:,i] > 0 # boolean
+        #     s = np.sum(totvar_vec[si[new_index]])/totvar
+        #     S.append(s)
+        return S2
+
     def computeMoments(self,c=None):
         """Methods to compute the mean and variance of the resulting polynomial
 

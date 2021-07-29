@@ -13,6 +13,8 @@ from sklearn.utils.estimator_checks import check_estimator
 from sklearn.utils.validation import check_X_y, check_array
 from sklearn import linear_model
 
+from itertools import combinations
+
 # from numba import jit
 
 # Polynomials classes
@@ -563,7 +565,7 @@ class PCEBuilder(BaseEstimator):
                 s = np.sum(totvar_vec[si[new_index]])/totvar
                 S.append(s)
         return S
-    def jointSobol(self,c=None):
+    def computeJointSobol(self,c=None):
         if self.mindex is None:
             self.compile(dim=self.dim)
         # assert self.compile_flag == True, "Must compile to set mindex. Avoids having to recompute multiindex everytime we run SA."
@@ -580,29 +582,28 @@ class PCEBuilder(BaseEstimator):
 
         assert len(coef_) == self.mindex.shape[0], "Coefficient vector must match the no of rows of the multiindex."
 
-        new_index = (np.sum(self.mindex,1)!=0) # boolean array that doesn't include mean mindex
+        # new_index = (np.sum(self.mindex,1)!=0) # boolean array that doesn't include mean mindex
         if self.normalized:
-            totvar_vec = coef_[new_index]**2
+            totvar_vec = coef_**2
             self.coefsq = coef_**2
         else:
-            totvar_vec = normsq[new_index]*coef_[new_index]**2
+            totvar_vec = normsq*coef_**2
             self.coefsq = normsq*coef_**2
         totvar = np.sum(totvar_vec)
 
-                # assert totvar > 0, "Coefficients are all zero!"
-        S2 = np.zeros((self.dim,self.dim))
-        # S = []
-        # # in case elements have nan in them
-        # if np.all(coef_[new_index] == 0): # ignore the mean
-        #     # print("Returning equal weights!")
-        #     S = np.ones(self.dim)/self.dim # return equal weights
-        # else:
-        # for i in range(self.dim):
-        #     for j in range(i+1):
-        #     si = self.mindex[:,i] > 0 # boolean
-        #     s = np.sum(totvar_vec[si[new_index]])/totvar
-        #     S.append(s)
-        return S2
+        # fill in joint sensitivities
+        S2 = np.zeros((self.dim,self.dim))          # joint sobol matrix
+        dim_list = list(range(self.dim))            # list of dimensions
+        pairs = list(combinations(dim_list,2))      # all unique pairs of dimensions
+        for pair in pairs:
+            # For each pair of dimensions, compute the total variance of the iteraction terms
+            i,j = pair[0], pair[1]
+            s2i = self.mindex[:,i] > 0         # index where first dim in pair > 0 
+            s2j = self.mindex[:,j] > 0         # index where first dim in pair > 0 
+            pindex_temp = [a and b for a, b in zip(s2i, s2j)] # index where both dimensions in pair as nonzero
+            js = np.sum(totvar_vec[pindex_temp])/totvar # compute tot var if elements in pair
+            S2[pair[0],pair[1]] = js           # fill in joint sensitivity matrix which will be upper diagonal, with zero for diagonal entries
+        return S2.T                             # return transpose of upper diagonal to get lower diagonal matrix 
 
     def computeMoments(self,c=None):
         """Methods to compute the mean and variance of the resulting polynomial

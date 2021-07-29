@@ -232,12 +232,13 @@ class TestPCEBuilder(unittest.TestCase):
 class TestJointSobol(unittest.TestCase):
 	def test_initialize_joint_sensitivity(self):
 		p = tesuract.PCEBuilder(order=2)
-		dim = 2
+		dim = 3
 		p.compile(dim=dim)
+		print(p.mindex)
 		nterms, ndim = p.mindex.shape
 		dummy_coef = np.ones(nterms)
 		assert ndim == dim, "dimensions don't match"
-		S2 = p.jointSobol(c=dummy_coef)
+		S2 = p.computeJointSobol(c=dummy_coef)
 		print("\n",S2)
 
 

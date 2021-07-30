@@ -589,8 +589,9 @@ class PCEBuilder(BaseEstimator):
         else:
             totvar_vec = normsq*coef_**2
             self.coefsq = normsq*coef_**2
+        totvar_vec[0] = 0.
         totvar = np.sum(totvar_vec)
-
+        
         # fill in joint sensitivities
         S2 = np.zeros((self.dim,self.dim))          # joint sobol matrix
         dim_list = list(range(self.dim))            # list of dimensions
@@ -931,6 +932,24 @@ class PCEReg(PCEBuilder,RegressorMixin):
         S = S/S.sum()
         self.feature_importances_ = S
         return self.feature_importances_
+    def joint_effects(self):
+        '''
+        Compute Sobol joint effect sensitivity indices. 
+
+        Parameters
+        ----------
+
+        Returns
+        -------
+
+        joint_effects_    : numpy.ndarray of shape (dim,dim)
+
+            the lower triangular part of the array contains the joint effect sensitivity indices. 
+
+        '''
+        S2 = self.computeJointSobol()
+        self.joint_effects_ = S2
+        return self.joint_effects_
     def multiindex(self):
         assert self._M is not None, "Must run fit or feed in mindex array."
         return self._M

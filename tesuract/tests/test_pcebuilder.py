@@ -240,6 +240,14 @@ class TestJointSobol(unittest.TestCase):
 		assert ndim == dim, "dimensions don't match"
 		S2 = p.computeJointSobol(c=dummy_coef)
 		print("\n",S2)
-
-
-
+	def test_joint_sensitivity_2D_3rd(self):
+		pce = tesuract.PCEReg(order=3)
+		rn  = np.random.RandomState(123)
+		X   = 2*rn.rand(30,2)-1
+		y   = 3 + 2*.5*(3*X[:,0]**2-1) + X[:,1] * .5*(3*X[:,0]**2-1)
+		pce.fit(X,y)
+		coef_sum  = np.sum([pce.normsq[i]*pce.coef[i]**2 for i in range(len(pce.coef)) if ( (pce.mindex[i,0]>0) and (pce.mindex[i,1]>0) )])
+		index     = pce.joint_effects()[1,0]
+		var_temp  = coef_sum / index
+		var_tot   = np.sum([pce.normsq[i]*pce.coef[i]**2 for i in range(len(pce.coef)) if (np.sum(pce.mindex[i,:])>0)])
+		assert var_temp == var_tot, "dimensions don't match"

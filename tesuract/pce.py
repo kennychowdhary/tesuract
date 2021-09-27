@@ -560,9 +560,11 @@ class PCEBuilder(BaseEstimator):
             # print("Returning equal weights!")
             S = np.ones(self.dim)/self.dim # return equal weights
         else:
+            self.sobol_variances = []
             for i in range(self.dim):
                 si = self.mindex[:,i] > 0 # boolean
                 s = np.sum(totvar_vec[si[new_index]])/totvar
+                self.sobol_variances.append(totvar*s)
                 S.append(s)
         return S
     def computeJointSobol(self,c=None):

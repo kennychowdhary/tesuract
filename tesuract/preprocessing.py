@@ -186,6 +186,7 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         self.singular_values_ = self.pca.singular_values_
         self.variances_ = self.singular_values_**2/self.n
         self.cumulative_error = self.cumulative_error_full[:self.K]
+        self.explained_variance_ratio_ = self.pca.explained_variance_ratio_
         return self
     def fit_transform(self, Y):
         self.fit(Y)

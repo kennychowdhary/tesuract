@@ -35,6 +35,8 @@ class RegressionWrapperCV(BaseEstimator):
 		if self.cv == None:
 			self.cv = KFold(n_splits=5)
 	def _reformat_grid(self,params):
+		if isinstance(self.regressor,str):
+			self.regressor = [self.regressor]
 		try: 
 			# if parameter grid is in the form of grid search cv
 			ParameterGrid(params)
@@ -84,7 +86,10 @@ class RegressionWrapperCV(BaseEstimator):
 			self.best_scores_ = np.zeros(n_regressors)
 			self.best_overfit_errors_ = [None]*n_regressors
 			self.all_cv_results_ = [None]*n_regressors
-			assert isinstance(self.reg_params,list), "parameters must also be a list"
+			# potentially depricated
+			# assert isinstance(self.reg_params,list), "parameters must also be a list"
+			if isinstance(self.reg_params,list) is False:
+				self.reg_params = [self.reg_params]
 			assert len(self.reg_params) == n_regressors, "length of parameters and regressors must match."
 			for i,R in enumerate(self.regressor):
 				# print("Fitting regressor ", R)
@@ -121,11 +126,12 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 				target_transform=None,
 				target_transform_params={},
 				scorer='neg_root_mean_squared_error',
-				n_jobs=4,cv=None,
-				mixed=True,
+				n_jobs=-1,cv=None,
+				mixed=True, give_list_reg_params=False,
 				verbose=1):
 		self.regressor = regressor
 		self.reg_params = reg_params
+		self.give_list_reg_params = give_list_reg_params
 		self.scorer = scorer
 		self.n_jobs = n_jobs
 		self.cv = cv
@@ -152,6 +158,8 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		self._setupCV()
 		self._fit_target_transform(Y)
 		Yhat = self.TT.transform(Y)
+		# compute total variance for feature importances
+		self.TotVar = Y.var(axis=0).mean()# total variance averaged over all space
 		if Yhat.ndim == 1: Yhat = np.atleast_2d(Yhat).T
 		assert len(Yhat) == self.n, "mistmatch in no of samples btwn X and Y."
 		self.ntargets = Yhat.shape[1]
@@ -166,18 +174,24 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 	def fit_single_reg(self, X, Y, regressor=None,reg_params=None):
 		if regressor == None:
 			regressor = self.regressor
+			if isinstance(regressor,str):
+				regressor = [regressor]
 			reg_params = self.reg_params
+		if self.give_list_reg_params:
+			assert len(reg_params) == self.ntargets, "params list does not match number of targets."
+		elif len(reg_params) == 1:
+			reg_params = [reg_params]*self.ntargets
 		res = defaultdict(list)
 		with alive_bar(self.ntargets) as bar:
 			for i in range(self.ntargets):
 				reg = RegressionWrapperCV(
-					regressor=regressor,reg_params=reg_params,
+					regressor=regressor,reg_params=reg_params[i],
 					n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
 				reg.fit(X, Y[:, i])
 				res['best_estimators_'].append(reg.best_estimator_)
 				res['best_params_'].append(reg.best_params_)
 				res['best_scores_'].append(reg.best_score_)
-				dict_scores_ = {regressor[i]:reg.best_scores_[i] for i in range(len(regressor))}
+				dict_scores_ = {regressor[j]:reg.best_scores_[j] for j in range(len(regressor))}
 				res['best_scores_all_'].append(dict_scores_)
 				res['best_overfit_error_'].append(reg.best_overfit_error_)
 				res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
@@ -221,13 +235,39 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		for r in res:
 			predictions.append(self._predict_single(X,r))
 		return np.squeeze(np.array(predictions))
-	def feature_importances_(self):
+	@property
+	def feature_importances_(self,):
 		assert hasattr(self,'res'), "Must run .fit() first!"
 		FI_ = []
+		self.SV_ = []
 		for estimator in self.best_estimators_:
 			fi = estimator.feature_importances_
 			FI_.append(fi)
-		return np.array(FI_)
+			self.SV_.append(estimator.sobol_variances)
+		FI_ = np.array(FI_)
+
+		# estimate sobol variances projected back onto original space
+		# compute sobol variances in original space 
+		Ls = self.TT.named_steps.pca.singular_values_**2
+		V = self.TT.named_steps.pca.components_
+		VV = np.dot(V.T**2,np.diag(Ls))
+
+		Cs = np.array(self.SV_)
+		SI = []
+		for i in range(self.dim):
+			SI.append(np.mean(np.dot(VV,np.diag(Cs[:,i])).sum(axis=1)))
+		sobol_indices_Y = np.array(SI)/self.TotVar
+		sobol_indices_Y /= np.sum(sobol_indices_Y)
+		self.sobol_transformed = sobol_indices_Y
+
+		# weighted average of sobol weighted by error AND explained variance
+		var_weight = self.TT.named_steps.pca.explained_variance_ratio_
+		error_weight = 1 - np.array(self.best_scores_)**2
+		weight = var_weight*error_weight
+		self.sobol_weighted = np.sum(FI_*weight[:,np.newaxis],axis=0)
+		self.sobol_weighted /= np.sum(self.sobol_weighted)
+
+		return FI_
 	def score(self,X,Y):
 		Ypred = self.predict(X)
 		assert Ypred.shape == Y.shape, "predict and Y shape do not match."

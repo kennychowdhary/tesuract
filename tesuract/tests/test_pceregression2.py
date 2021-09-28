@@ -122,7 +122,7 @@ class TestPCERegression(unittest.TestCase):
 
 		
 
-
+# regression test for multi output pca regressor
 class TestMRegressionWrapper(unittest.TestCase):
 	@classmethod
 	def setUpClass(self):
@@ -132,8 +132,48 @@ class TestMRegressionWrapper(unittest.TestCase):
 
 		from sklearn.model_selection import KFold
 		self.kf = KFold(n_splits=2)
+	def test_simplified_model_fit_with_single_param_for_each_comp(self):
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(4,7)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = ['pce']
+		param_list = [pce_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components='auto',whiten=True,cutoff=.5)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=target_transform,
+							target_transform_params={},
+							n_jobs=-1,scorer=custom_scorer)
+		regmodel.fit(X,Y)
+		start = T.time()
+		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+		print("total time is ", T.time() - start)
 
+		n_components = len(regmodel.best_params_)
+		reg_custom_list = ['pce' for i in range(n_components)]
+		reg_param_list = regmodel.best_params_
+		target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components=n_components,whiten=True)
+		regmodel_opt = tesuract.MRegressionWrapperCV(
+			regressor=reg_custom_list,
+			reg_params=reg_param_list,
+			custom_params = True,
+			target_transform=target_transform,
+			target_transform_params={},
+			n_jobs=-1,scorer=custom_scorer)
+		start = T.time()
+		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+		print("total time is ", T.time() - start)	
 	def test_multi_target_init_with_custom_param_list(self):
+		# uses the best params as the new set of param grid space
+		# not efficient but can be faster than original space
 		X,Y = self.X, self.Y
 		pce_grid = [{'order': list(range(1,3)),
 					'mindex_type': ['total_order'],

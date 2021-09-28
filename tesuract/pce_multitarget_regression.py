@@ -124,6 +124,7 @@ from tqdm import tqdm
 class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 	def __init__(self, 
 				regressor='pce', reg_params={'order':2},
+				custom_params = False,
 				target_transform=None,
 				target_transform_params={},
 				scorer='neg_root_mean_squared_error',
@@ -132,6 +133,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 				verbose=1):
 		self.regressor = regressor
 		self.reg_params = reg_params
+		self.custom_params = custom_params
 		self.scorer = scorer
 		self.n_jobs = n_jobs
 		self.cv = cv
@@ -187,19 +189,37 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		res = defaultdict(list)
 		with alive_bar(self.ntargets) as bar:
 			for i in range(self.ntargets):
-				reg = RegressionWrapperCV(
-					regressor=regressor,reg_params=reg_params,
-					n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
-				reg.fit(X, Y[:, i])
-				res['best_estimators_'].append(reg.best_estimator_)
-				res['best_params_'].append(reg.best_params_)
-				res['best_scores_'].append(reg.best_score_)
-				dict_scores_ = {regressor[j]:reg.best_scores_[j] for j in range(len(regressor))}
-				res['best_scores_all_'].append(dict_scores_)
-				res['best_overfit_error_'].append(reg.best_overfit_error_)
-				res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
-				res['best_index_'].append(reg.best_index_) # index of best score
-				# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
+				if self.custom_params:
+					# fit a single regressor to each target
+					assert len(regressor) == len(reg_params)
+					assert len(regressor) == self.ntargets
+					reg = RegressionWrapperCV(
+						regressor=[regressor[i]],reg_params=[reg_params[i]],
+						n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
+					reg.fit(X, Y[:, i])
+					res['best_estimators_'].append(reg.best_estimator_)
+					res['best_params_'].append(reg.best_params_)
+					res['best_scores_'].append(reg.best_score_)
+					dict_scores_ = {regressor[i]:reg.best_scores_}
+					res['best_scores_all_'].append(dict_scores_)
+					res['best_overfit_error_'].append(reg.best_overfit_error_)
+					res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
+					res['best_index_'].append(reg.best_index_) # index of best score
+					# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
+				else:
+					reg = RegressionWrapperCV(
+						regressor=regressor,reg_params=reg_params,
+						n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
+					reg.fit(X, Y[:, i])
+					res['best_estimators_'].append(reg.best_estimator_)
+					res['best_params_'].append(reg.best_params_)
+					res['best_scores_'].append(reg.best_score_)
+					dict_scores_ = {regressor[j]:reg.best_scores_[j] for j in range(len(regressor))}
+					res['best_scores_all_'].append(dict_scores_)
+					res['best_overfit_error_'].append(reg.best_overfit_error_)
+					res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
+					res['best_index_'].append(reg.best_index_) # index of best score
+					# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
 				bar()
 		self.__dict__.update(res)
 		return res

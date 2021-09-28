@@ -9,6 +9,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import KFold
 from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import make_scorer
+from sklearn.model_selection import cross_val_score
 
 relpath = tesuract.__file__[:-11] # ignore the __init__.py specification
 print(relpath)
@@ -119,3 +121,122 @@ class TestPCERegression(unittest.TestCase):
 
 
 		
+
+
+class TestMRegressionWrapper(unittest.TestCase):
+	@classmethod
+	def setUpClass(self):
+		self.X = np.loadtxt(relpath + "/tests/data/rom_test_X.txt")
+		self.Y = np.loadtxt(relpath + "/tests/data/rom_test_Y.txt")
+		X, Y = self.X, self.Y
+
+		from sklearn.model_selection import KFold
+		self.kf = KFold(n_splits=2)
+
+	def test_multi_target_init_with_custom_param_list(self):
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(1,3)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = ['pce']
+		param_list = [pce_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components='auto',whiten=True,cutoff=.5)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=target_transform,
+							target_transform_params={},
+							n_jobs=-1,scorer=custom_scorer)
+		regmodel.fit(X,Y)
+		start = T.time()
+		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+		print("total time is ", T.time() - start)
+
+		new_params = regmodel.best_params_
+		new_regressors = ['pce' for i in range(len(new_params))]
+		regmodel_opt = tesuract.MRegressionWrapperCV(
+						regressor=new_regressors,
+						reg_params=new_params,
+						target_transform=target_transform,
+						target_transform_params={},
+						n_jobs=-1,scorer=custom_scorer)
+		start = T.time()
+		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+		print("total time is ", T.time() - start)
+	def test_rom_w_single_regressor_as_list(self):
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(1,3)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = ['pce']
+		param_list = [pce_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components=4,whiten=True)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=target_transform,
+							target_transform_params={},
+							n_jobs=-1,scorer=custom_scorer)
+		regmodel.fit(X,Y)
+		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=-1)
+		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+	def test_rom_w_single_regressor_as_str(self):
+			X,Y = self.X, self.Y
+			pce_grid = [{'order': list(range(1,3)),
+						'mindex_type': ['total_order'],
+						'fit_type': ['LassoCV']}]
+			regressors = 'pce'
+			param_list = pce_grid
+			def my_scorer(ytrue,ypred):
+				mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+				return -mse	
+			custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+			target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components=3,whiten=True,cutoff=.25)
+			regmodel = tesuract.MRegressionWrapperCV(
+								regressor=regressors,
+								reg_params=param_list,
+								target_transform=target_transform,
+								target_transform_params={},
+								n_jobs=-1,scorer=custom_scorer)
+			regmodel.fit(X,Y)
+	def test_rom_w_multiple_regressors(self):
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(1,3)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		# random forest fit
+		rf_grid = {
+			'n_estimators': [50,100],
+			'max_features': ['auto'],
+			'max_depth': [5,10]
+		}
+		regressors = ['pce','rf']
+		param_list = [pce_grid, rf_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components='auto',whiten=True,cutoff=.25)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=target_transform,
+							target_transform_params={},
+							n_jobs=-1,scorer=custom_scorer)
+		regmodel.fit(X,Y)
+
+
+
+
+
+

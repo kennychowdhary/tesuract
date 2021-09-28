@@ -90,6 +90,7 @@ class RegressionWrapperCV(BaseEstimator):
 			# assert isinstance(self.reg_params,list), "parameters must also be a list"
 			if isinstance(self.reg_params,list) is False:
 				self.reg_params = [self.reg_params]
+			# print(len(self.reg_params), n_regressors)
 			assert len(self.reg_params) == n_regressors, "length of parameters and regressors must match."
 			for i,R in enumerate(self.regressor):
 				# print("Fitting regressor ", R)
@@ -127,11 +128,10 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 				target_transform_params={},
 				scorer='neg_root_mean_squared_error',
 				n_jobs=-1,cv=None,
-				mixed=True, give_list_reg_params=False,
+				mixed=True,
 				verbose=1):
 		self.regressor = regressor
 		self.reg_params = reg_params
-		self.give_list_reg_params = give_list_reg_params
 		self.scorer = scorer
 		self.n_jobs = n_jobs
 		self.cv = cv
@@ -177,15 +177,18 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			if isinstance(regressor,str):
 				regressor = [regressor]
 			reg_params = self.reg_params
-		if self.give_list_reg_params:
-			assert len(reg_params) == self.ntargets, "params list does not match number of targets."
-		elif len(reg_params) == 1:
-			reg_params = [reg_params]*self.ntargets
+		# elif len(reg_params) == 1:
+		# 	reg_params = [[reg_params] for i in range(self.ntargets)]
+		# if isinstance(regressor,list):	
+		# 	# if regressor is a list and mixed is True, repeat regressor params
+		# 	# this is to keep consistent the case when we custom input regressors for each target	
+		# 	reg_params = [reg_params for i in range(len(regressor))]
+		# 	print(reg_params, regressor)
 		res = defaultdict(list)
 		with alive_bar(self.ntargets) as bar:
 			for i in range(self.ntargets):
 				reg = RegressionWrapperCV(
-					regressor=regressor,reg_params=reg_params[i],
+					regressor=regressor,reg_params=reg_params,
 					n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
 				reg.fit(X, Y[:, i])
 				res['best_estimators_'].append(reg.best_estimator_)

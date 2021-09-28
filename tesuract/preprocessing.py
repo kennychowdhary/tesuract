@@ -198,7 +198,8 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         return self.pca.inverse_transform(Yhat)
     def _compute_K(self, Y, max_n_components=50):
         ''' automatically compute number of PCA terms '''
-        skpca = PCA(n_components=min(max_n_components, self.d), svd_solver=self.svd_solver)
+        max_n_components=min(50,min(Y.shape[0],Y.shape[1]))
+        skpca = PCA(n_components=min(max_n_components, self.d), svd_solver='auto')
         skpca.fit(Y)
         self.cumulative_error_full = np.cumsum(skpca.explained_variance_ratio_)
         # print(cumulative_error)

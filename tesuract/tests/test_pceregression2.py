@@ -121,6 +121,9 @@ class TestPCERegression(unittest.TestCase):
 
 
 		
+from warnings import simplefilter
+from sklearn.exceptions import ConvergenceWarning
+simplefilter("ignore", category=ConvergenceWarning)
 
 # regression test for multi output pca regressor
 class TestMRegressionWrapper(unittest.TestCase):
@@ -134,7 +137,7 @@ class TestMRegressionWrapper(unittest.TestCase):
 		self.kf = KFold(n_splits=2)
 	def test_simplified_model_fit_with_single_param_for_each_comp(self):
 		X,Y = self.X, self.Y
-		pce_grid = [{'order': list(range(4,7)),
+		pce_grid = [{'order': list(range(1,3)),
 					'mindex_type': ['total_order'],
 					'fit_type': ['LassoCV']}]
 		regressors = ['pce']
@@ -149,7 +152,8 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer)
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
 		regmodel.fit(X,Y)
 		start = T.time()
 		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=-1)
@@ -166,7 +170,8 @@ class TestMRegressionWrapper(unittest.TestCase):
 			custom_params = True,
 			target_transform=target_transform,
 			target_transform_params={},
-			n_jobs=-1,scorer=custom_scorer)
+			n_jobs=-1,scorer=custom_scorer,
+			verbose=0)
 		start = T.time()
 		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
@@ -190,7 +195,8 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer)
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
 		regmodel.fit(X,Y)
 		start = T.time()
 		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=-1)
@@ -204,7 +210,8 @@ class TestMRegressionWrapper(unittest.TestCase):
 						reg_params=new_params,
 						target_transform=target_transform,
 						target_transform_params={},
-						n_jobs=-1,scorer=custom_scorer)
+						n_jobs=-1,scorer=custom_scorer,
+						verbose=0)
 		start = T.time()
 		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
@@ -226,7 +233,8 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer)
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
 		regmodel.fit(X,Y)
 		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=-1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
@@ -247,7 +255,8 @@ class TestMRegressionWrapper(unittest.TestCase):
 								reg_params=param_list,
 								target_transform=target_transform,
 								target_transform_params={},
-								n_jobs=-1,scorer=custom_scorer)
+								n_jobs=-1,scorer=custom_scorer,
+								verbose=0)
 			regmodel.fit(X,Y)
 	def test_rom_w_multiple_regressors(self):
 		X,Y = self.X, self.Y
@@ -272,7 +281,8 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer)
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
 		regmodel.fit(X,Y)
 
 

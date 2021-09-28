@@ -188,7 +188,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		# 	print(reg_params, regressor)
 		res = defaultdict(list)
 		with alive_bar(self.ntargets) as bar:
-			for i in range(self.ntargets):
+			for i in range(self.ntargets): #tqdm(range(self.ntargets)):
 				if self.custom_params:
 					# fit a single regressor to each target
 					assert len(regressor) == len(reg_params)

@@ -161,7 +161,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		self._fit_target_transform(Y)
 		Yhat = self.TT.transform(Y)
 		# compute total variance for feature importances
-		self.TotVar = Y.var(axis=0).mean()# total variance averaged over all space
+		self.TotVar = np.var(Y) #.var(axis=0).mean()# total variance averaged over all space
 		if Yhat.ndim == 1: Yhat = np.atleast_2d(Yhat).T
 		assert len(Yhat) == self.n, "mistmatch in no of samples btwn X and Y."
 		self.ntargets = Yhat.shape[1]
@@ -262,32 +262,34 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 	def feature_importances_(self):
 		assert hasattr(self,'res'), "Must run .fit() first!"
 		FI_ = []
-		self.SV_ = []
+		self.SI_ = []
 		for estimator in self.best_estimators_:
-			fi = estimator.computeSobol() #estimator.feature_importances_
+			fi = estimator.feature_importances_
 			FI_.append(fi)
-			self.SV_.append(estimator.sobol_variances)
+			self.SI_.append(estimator.computeSobol())
 		FI_ = np.array(FI_)
 
-		# estimate sobol variances projected back onto original space
-		# compute sobol variances in original space 
-		Ls = self.TT.named_steps.pca.singular_values_**2
-		V = self.TT.named_steps.pca.components_
-		VV = np.dot(V.T**2,np.diag(Ls))
+		# # estimate sobol variances projected back onto original space
+		# # compute sobol variances in original space 
+		# Ls = self.TT.named_steps.pca.singular_values_**2
+		# V = self.TT.named_steps.pca.components_
+		# VV = np.dot(V.T**2,np.diag(Ls))
 
-		Cs = np.array(self.SV_)
-		SI = []
-		for i in range(self.dim):
-			SI.append(np.mean(np.dot(VV,np.diag(Cs[:,i])).sum(axis=1)))
-		sobol_indices_Y = np.array(SI)/self.TotVar
-		# sobol_indices_Y /= np.sum(sobol_indices_Y)
-		self.sobol_transformed = sobol_indices_Y
+		# Cs = np.array(self.SV_)
+		# SI = []
+		# for i in range(self.dim):
+		# 	SI.append(np.mean(np.dot(VV,np.diag(Cs[:,i])).sum(axis=1)))
+		# sobol_indices_Y = np.array(SI)/self.TotVar
+		# # sobol_indices_Y /= np.sum(sobol_indices_Y)
+		# self.sobol_transformed = sobol_indices_Y
 
 		# weighted average of sobol weighted by error AND explained variance
+		# formula for each dim = sum(sobol weight fraction of each component estimator * explain variance ratio for each component)
 		var_weight = self.TT.named_steps.pca.explained_variance_ratio_
-		error_weight = 1 - np.array(self.best_scores_)**2
-		weight = var_weight*error_weight
-		self.sobol_weighted = np.sum(FI_*weight[:,np.newaxis],axis=0)
+		# var_per_component = self.TT.named_steps.pca.explained_variance_
+		# error_weight = 1 - np.array(self.best_scores_)**2
+		# weight = var_weight #*error_weight
+		self.sobol_weighted = np.sum(self.SI_*var_weight[:,np.newaxis],axis=0)
 		# self.sobol_weighted /= np.sum(self.sobol_weighted)
 
 		return FI_

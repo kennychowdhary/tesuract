@@ -290,6 +290,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		# error_weight = 1 - np.array(self.best_scores_)**2
 		# weight = var_weight #*error_weight
 		self.sobol_weighted = np.sum(self.SI_*var_weight[:,np.newaxis],axis=0)
+		# ***array doesn't have to sum to 1 since the total variance is not captured by the finite set of PCA compoents**. Moreover, it's sum is doubly counted since the sobol indices can sum to more than 1. Thus, the total variance is potentiall greater than the 1-cutoff and less than 1. 
 		# self.sobol_weighted /= np.sum(self.sobol_weighted)
 
 		return FI_

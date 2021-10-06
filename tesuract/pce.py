@@ -564,8 +564,9 @@ class PCEBuilder(BaseEstimator):
             for i in range(self.dim):
                 si = self.mindex[:,i] > 0 # boolean
                 s = np.sum(totvar_vec[si[new_index]])/totvar
-                self.sobol_variances.append(totvar*s)
+                self.sobol_variances.append(totvar*s) # just the variance
                 S.append(s)
+            # note that s does not have to sum to 1
         return S
     def computeJointSobol(self,c=None):
         if self.mindex is None:

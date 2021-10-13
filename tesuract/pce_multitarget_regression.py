@@ -268,31 +268,19 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			FI_.append(fi)
 			self.SI_.append(estimator.computeSobol())
 		FI_ = np.array(FI_)
-
-		# # estimate sobol variances projected back onto original space
-		# # compute sobol variances in original space 
-		# Ls = self.TT.named_steps.pca.singular_values_**2
-		# V = self.TT.named_steps.pca.components_
-		# VV = np.dot(V.T**2,np.diag(Ls))
-
-		# Cs = np.array(self.SV_)
-		# SI = []
-		# for i in range(self.dim):
-		# 	SI.append(np.mean(np.dot(VV,np.diag(Cs[:,i])).sum(axis=1)))
-		# sobol_indices_Y = np.array(SI)/self.TotVar
-		# # sobol_indices_Y /= np.sum(sobol_indices_Y)
-		# self.sobol_transformed = sobol_indices_Y
+		self.SI_ = np.array(self.SI_)
 
 		# weighted average of sobol weighted by error AND explained variance
 		# formula for each dim = sum(sobol weight fraction of each component estimator * explain variance ratio for each component)
-		var_weight = self.TT.named_steps.pca.explained_variance_ratio_
-		# var_per_component = self.TT.named_steps.pca.explained_variance_
-		# error_weight = 1 - np.array(self.best_scores_)**2
-		# weight = var_weight #*error_weight
-		self.sobol_weighted = np.sum(self.SI_*var_weight[:,np.newaxis],axis=0)
+		try:
+			var_weight = self.TT.named_steps.pca.explained_variance_ratio_
+		except:
+			var_weight = np.ones(self.ntargets)/self.ntargets
+		var_weight = var_weight[:,np.newaxis]
+		print(self.SI_.shape,var_weight.shape)
+		self.sobol_weighted = np.sum(self.SI_*var_weight,axis=0)
 		# ***array doesn't have to sum to 1 since the total variance is not captured by the finite set of PCA compoents**. Moreover, it's sum is doubly counted since the sobol indices can sum to more than 1. Thus, the total variance is potentiall greater than the 1-cutoff and less than 1. 
 		# self.sobol_weighted /= np.sum(self.sobol_weighted)
-
 		return FI_
 	def score(self,X,Y):
 		Ypred = self.predict(X)

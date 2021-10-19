@@ -160,6 +160,12 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		self._setupCV()
 		self._fit_target_transform(Y)
 		Yhat = self.TT.transform(Y)
+		# save explained variance ratio if using PCA
+		# otherwise, return equal weights
+		try:
+			self.explained_variance_ratio_ = self.TT.named_steps.pca.explained_variance_ratio_
+		except:
+			self.explained_variance_ratio_ = np.ones(Yhat.shape[1])/Yhat.shape[1]
 		# compute total variance for feature importances
 		self.TotVar = np.var(Y) #.var(axis=0).mean()# total variance averaged over all space
 		if Yhat.ndim == 1: Yhat = np.atleast_2d(Yhat).T
@@ -259,7 +265,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			predictions.append(self._predict_single(X,r))
 		return np.squeeze(np.array(predictions))
 	@property
-	def feature_importances_(self, weighted_sobol=True):
+	def feature_importances_(self):
 		assert hasattr(self,'res'), "Must run .fit() first!"
 		FI_ = []
 		self.SI_ = []
@@ -271,17 +277,15 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 
 		# weighted average of sobol weighted by error AND explained variance
 		# formula for each dim = sum(sobol weight fraction of each component estimator * explain variance ratio for each component)
-		var_weight = self.TT.named_steps.pca.explained_variance_ratio_
-		# var_per_component = self.TT.named_steps.pca.explained_variance_
-		# error_weight = 1 - np.array(self.best_scores_)**2
-		# weight = var_weight #*error_weight
-		self.sobol_weighted_ = np.sum(self.SI_*var_weight[:,np.newaxis],axis=0)
+		try:
+			var_weight = self.TT.named_steps.pca.explained_variance_ratio_
+		except:
+			var_weight = np.ones(self.ntargets)/self.ntargets
+		var_weight = var_weight[:,np.newaxis]
+		self.sobol_weighted_ = np.sum(self.SI_*var_weight,axis=0)
 		# ***array doesn't have to sum to 1 since the total variance is not captured by the finite set of PCA compoents**. Moreover, it's sum is doubly counted since the sobol indices can sum to more than 1. Thus, the total variance is potentiall greater than the 1-cutoff and less than 1. 
 		# self.sobol_weighted /= np.sum(self.sobol_weighted)
-		if weighted_sobol:
-			return self.sobol_weighted_ # return weighted sobol (does not sum to 1)
-		else:
-			return FI_ # return feature importance for each component pce
+		return FI_ # return feature importance for each component pce
 	def score(self,X,Y):
 		Ypred = self.predict(X)
 		assert Ypred.shape == Y.shape, "predict and Y shape do not match."

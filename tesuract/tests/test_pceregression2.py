@@ -238,26 +238,55 @@ class TestMRegressionWrapper(unittest.TestCase):
 		regmodel.fit(X,Y)
 		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=-1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+	def test_rom_w_single_regressor_as_list_wo_pca(self):
+		X,Y = self.X, self.Y[:,::100] # shorten output
+		pce_grid = [{'order': list(range(2)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = ['pce']
+		param_list = [pce_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		# target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=False,n_components=4,whiten=True)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=None,
+							target_transform_params={},
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
+		regmodel.fit(X,Y)
+		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=-1)
+		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+		# get feature importances and weighted versions
+		fi = regmodel.feature_importances_
+		ws = regmodel.sobol_weighted_
+		assert ws.ndim == 1, "weighted sobol must be a single vector"
+		# get explained variance ratio
+		evr = regmodel.explained_variance_ratio_
+		print(evr)
 	def test_rom_w_single_regressor_as_str(self):
-			X,Y = self.X, self.Y
-			pce_grid = [{'order': list(range(1,3)),
-						'mindex_type': ['total_order'],
-						'fit_type': ['LassoCV']}]
-			regressors = 'pce'
-			param_list = pce_grid
-			def my_scorer(ytrue,ypred):
-				mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
-				return -mse	
-			custom_scorer = make_scorer(my_scorer, greater_is_better=True)
-			target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components=3,whiten=True,cutoff=.25)
-			regmodel = tesuract.MRegressionWrapperCV(
-								regressor=regressors,
-								reg_params=param_list,
-								target_transform=target_transform,
-								target_transform_params={},
-								n_jobs=-1,scorer=custom_scorer,
-								verbose=0)
-			regmodel.fit(X,Y)
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(1,3)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = 'pce'
+		param_list = pce_grid
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components=3,whiten=True,cutoff=.25)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=target_transform,
+							target_transform_params={},
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
+		regmodel.fit(X,Y)
 	def test_rom_w_multiple_regressors(self):
 		X,Y = self.X, self.Y
 		pce_grid = [{'order': list(range(1,3)),

@@ -164,6 +164,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		# otherwise, return equal weights
 		try:
 			self.explained_variance_ratio_ = self.TT.named_steps.pca.explained_variance_ratio_
+			self.cumsum_explained_variance_ratio_ = self.TT.named_steps.pca.cumulative_error_full
 		except:
 			self.explained_variance_ratio_ = np.ones(Yhat.shape[1])/Yhat.shape[1]
 		# compute total variance for feature importances

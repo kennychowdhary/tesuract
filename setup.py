@@ -19,6 +19,7 @@ setup(name='tesuract',
           'numpy',
           'sklearn',
           'tqdm',
+          'alive-progress'
       ],
       include_package_data=True,
       zip_safe=False)

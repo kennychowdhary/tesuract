@@ -239,7 +239,7 @@ class TestMRegressionWrapper(unittest.TestCase):
 		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=-1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 	def test_rom_w_single_regressor_as_list_wo_pca(self):
-		X,Y = self.X, self.Y[:,::100] # shorten output
+		X,Y = self.X, self.Y[:,::75] # shorten output
 		pce_grid = [{'order': list(range(2)),
 					'mindex_type': ['total_order'],
 					'fit_type': ['LassoCV']}]
@@ -266,7 +266,8 @@ class TestMRegressionWrapper(unittest.TestCase):
 		assert ws.ndim == 1, "weighted sobol must be a single vector"
 		# get explained variance ratio
 		evr = regmodel.explained_variance_ratio_
-		print(evr)
+		assert np.amin(evr) == np.amax(evr), "The explained variance ratio when target transform = None should be equal."
+		# print("explained var ratio when target transform is None: ", evr)
 	def test_rom_w_single_regressor_as_str(self):
 		X,Y = self.X, self.Y
 		pce_grid = [{'order': list(range(1,3)),
@@ -287,6 +288,13 @@ class TestMRegressionWrapper(unittest.TestCase):
 							n_jobs=-1,scorer=custom_scorer,
 							verbose=0)
 		regmodel.fit(X,Y)
+		# test feature importance and explained var ratio for pca
+		fi = regmodel.feature_importances_
+		ws = regmodel.sobol_weighted_
+		assert ws.ndim == 1, "weighted sobol must be a single vector"
+		# get explained variance ratio
+		evr = regmodel.explained_variance_ratio_
+		print("explained variance ratio when using pca:", evr)
 	def test_rom_w_multiple_regressors(self):
 		X,Y = self.X, self.Y
 		pce_grid = [{'order': list(range(1,3)),

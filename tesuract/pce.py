@@ -490,7 +490,7 @@ class PCEBuilder(BaseEstimator):
     def eval(self,X=None,c=None):
         """Duplicate of polyeval
         """
-        return self.polyeval(X=None,c=None)
+        return self.polyeval(X=None,c=c)
     def computeSobol(self,c=None):
         """Compute Sobol total order variance based sensitivity indices
 
@@ -900,6 +900,11 @@ class PCEReg(PCEBuilder,RegressorMixin):
             if not self.fit_params: # if empty dictionary
                 self.fit_params={'l1_ratio':[.001,.5,.75,.95,.999,1],'n_alphas':25,'tol':1e-2}
             regmodel = linear_model.ElasticNetCV(fit_intercept=False,**self.fit_params)
+            regmodel.fit(Xhat,y)
+        if self.fit_type == 'RidgeCV':
+            if not self.fit_params: # if empty dictionary
+                self.fit_params={'alphas':np.logspace(-3,3,100)}
+            regmodel = linear_model.RidgeCV(fit_intercept=False,**self.fit_params)
             regmodel.fit(Xhat,y)
         elif self.fit_type == 'OmpCV':
             if not self.fit_params: # if empty dictionary

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>API &mdash; pypce 1.0 documentation</title>
+  <title>API &mdash; tesuract 1.0 documentation</title>
   
 
   
@@ -54,7 +54,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> pypce
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> tesuract
           
 
           
@@ -128,7 +128,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">pypce</a>
+          <a href="index.html">tesuract</a>
         
       </nav>
 
@@ -279,6 +279,17 @@ an option in the this class.</p>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#tesuract.PCEBuilder.polyeval" title="tesuract.PCEBuilder.polyeval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polyeval</span></code></a>([X, c])</p></td>
 <td><p>Method to evaluate the polynomial.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 68%" />
+<col style="width: 32%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>computeJointSobol</strong></p></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -526,8 +537,22 @@ an option in the this class.</p>
 <tr class="row-even"><td><p><a class="reference internal" href="#tesuract.PCEReg.fit" title="tesuract.PCEReg.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(X, y)</p></td>
 <td><p>Fit the polynomial using linear regression or quadrature solvers</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#tesuract.PCEReg.predict" title="tesuract.PCEReg.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(X)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#tesuract.PCEReg.joint_effects" title="tesuract.PCEReg.joint_effects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">joint_effects</span></code></a>()</p></td>
+<td><p>Compute Sobol joint effect sensitivity indices.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#tesuract.PCEReg.predict" title="tesuract.PCEReg.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(X)</p></td>
 <td><p>After fitting, evaluates the polynomial for a single feature space sample or array of samples.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 68%" />
+<col style="width: 32%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><strong>computeJointSobol</strong></p></td>
+<td></td>
 </tr>
 </tbody>
 </table>
@@ -599,6 +624,20 @@ an option in the this class.</p>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><dl class="simple">
 <dt><strong>feature_importances_</strong><span class="classifier">numpy.ndarray of shape (dim,)</span></dt><dd><p>array representing normalized Sobol total order indices.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="tesuract.PCEReg.joint_effects">
+<code class="sig-name descname">joint_effects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg.joint_effects" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute Sobol joint effect sensitivity indices.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>joint_effects_</strong><span class="classifier">numpy.ndarray of shape (dim,dim)</span></dt><dd><p>the lower triangular part of the array contains the joint effect sensitivity indices.</p>
 </dd>
 </dl>
 </dd>

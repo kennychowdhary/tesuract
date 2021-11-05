@@ -3,25 +3,23 @@
 **tesuract**
 =========
 
-**tesuract** is a pure Python Uncertainty Quantification (UQ) software library.
-[#]_ It is built with object oriented design principals in mind and is thus
-modular. 
+**tesuract**, which stands for **te**\ nsor **sur**\ rogate **a**\ utomation and **c**\ ompu\ **t**\ ation, is a software library to perform automated supervised (and semi-unsupervised via data-driven reduced order modeling) machine learning tasks with single and multi-target output data.\ [#]_ One of the key features is that it is fully compatible with scikit-learn's API, e.g., their *set, fit, predict* functionality, allowing flexibility and modularity. It also contains tools to quickly and easily implement multi-variate Legendre polynomial (the original universal approximator!) regression models. 
 
-The tesuract library contains modules for building multivariate polynomial
-regression models (built with the scikit-learn API in mind), constructing
-quadrature rules for high-dimensional numerical integration, performing
-sensitivity analysis or feature importance, preprocessing utilities for
-transforming feature and target spaces, e.g. PCA, and custom pipelines for
-fitting multi-target regression models and comparing different machine learning
-(ML) methods.
+.. The tesuract library contains modules for building multivariate polynomial
+.. regression models (built with the scikit-learn API in mind), constructing
+.. quadrature rules for high-dimensional numerical integration, performing
+.. sensitivity analysis or feature importance, preprocessing utilities for
+.. transforming feature and target spaces, e.g. PCA, and custom pipelines for
+.. fitting multi-target regression models and comparing different machine learning
+.. (ML) methods.
 
-These classical and non-classical UQ methods integrate seamlessly with
-estimators in scikit-learn's toolbox, thus allowing integration and testing
-within the prolific machine learning library.  For example, the user can utilize
-the cross validation utilities to easily compare multi-variate polynomial
-estimators with sklearn's random forest regression methods. In fact, we provide
-classes that have this ability baked in so that the user can perform efficient
-and easy model selection to find the best model for the job. 
+.. These classical and non-classical UQ methods integrate seamlessly with
+.. estimators in scikit-learn's toolbox, thus allowing integration and testing
+.. within the prolific machine learning library.  For example, the user can utilize
+.. the cross validation utilities to easily compare multi-variate polynomial
+.. estimators with sklearn's random forest regression methods. In fact, we provide
+.. classes that have this ability baked in so that the user can perform efficient
+.. and easy model selection to find the best model for the job. 
 
 Installation
 ------------
@@ -42,12 +40,12 @@ You can also run a suite of unit tests and regression tests before installation 
 
 to check that the library works. That's it! Now you are ready to use **tesuract**. 
 
-Quickstart
+(Super-) Quickstart
 ----------------
 
 Let's see how easy it is to create a multivariate polynomial regression model. 
-Let's create a :math:`4^{th}` order polynomial regression model [#]_ on the 
-:math:`[-1,1]^5` hypercube, with a simple least squares fitting. [#]_
+Let's create a :math:`4^{th}` order polynomial regression model\ [#]_ on the 
+:math:`[-1,1]^5` hypercube, with a simple least squares fitting.\ [#]_
 
 .. code-block:: python
 

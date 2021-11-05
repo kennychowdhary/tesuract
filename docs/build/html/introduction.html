@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Main features &mdash; pypce 1.0 documentation</title>
+  <title>Main features &mdash; tesuract 1.0 documentation</title>
   
 
   
@@ -55,7 +55,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home" alt="Documentation Home"> pypce
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> tesuract
           
 
           
@@ -129,7 +129,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">pypce</a>
+          <a href="index.html">tesuract</a>
         
       </nav>
 
@@ -181,12 +181,12 @@
             
   <div class="section" id="main-features">
 <span id="intro"></span><h1>Main features<a class="headerlink" href="#main-features" title="Permalink to this headline">¶</a></h1>
-<p>pypce’s main feature is constructing multivariate polynomial regression models
+<p>tesuract’s main feature is constructing multivariate polynomial regression models
 using classic orthogonal polynomial constructions, e.g. Legendre polynomials. We
 use the scikit-learn API to build these estimators, which allows easy and seamless integration with the scikit-learn. Here is a list of the main features of this library.</p>
 <ul>
 <li><dl class="simple">
-<dt><strong>Integration with scikit-learn</strong></dt><dd><p>Both <code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEBuilder</span></code> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEReg</span></code> classes for
+<dt><strong>Integration with scikit-learn</strong></dt><dd><p>Both <a class="reference internal" href="api.html#tesuract.PCEBuilder" title="tesuract.PCEBuilder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEBuilder</span></code></a> and <a class="reference internal" href="api.html#tesuract.PCEReg" title="tesuract.PCEReg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEReg</span></code></a> classes for
 constructing multivariate polynomial interpolation inherit the BaseEstimator class from scikit-learn. This means both these object integrate seamlessly with the scikit-learn environment, which, for example, allows one to use the grid search cross-validation wrapper or even third party libraries like skopt on top of these polynomial estimator classes.</p>
 </dd>
 </dl>
@@ -201,7 +201,7 @@ existing linear regression algorithms in scikit-learn to train the model.</p>
 </li>
 <li><p><strong>Hyper-parameter search for best model fit</strong></p>
 <blockquote>
-<div><p>pypce provides methods to perform hyper-parameter search for finding the
+<div><p>tesuract provides methods to perform hyper-parameter search for finding the
 best fit polynomial model. Moreover, we provide methods to compare these
 methods to other popular machine learning regression models like random
 forest regression and multi-layer perceptron models. <a class="footnote-reference brackets" href="#id3" id="id1">1</a></p>
@@ -241,7 +241,7 @@ transforms, e.g., PCA.</p>
 <dd><p>In the future, we will be able to compare methods in tensorflow. The machinery is there for connecting tensorflow to sklearn, but it just needs to be done!</p>
 </dd>
 <dt class="label" id="id4"><span class="brackets"><a class="fn-backref" href="#id2">2</a></span></dt>
-<dd><p>This is an advanced usage for pypce.</p>
+<dd><p>This is an advanced usage for tesuract.</p>
 </dd>
 </dl>
 </div>

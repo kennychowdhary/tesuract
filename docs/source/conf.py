@@ -10,7 +10,7 @@ import doc
 
 # -- Project information -----------------------------------------------------
 
-project = 'pypce'
+project = 'tesuract'
 copyright = '2020, K. Chowdhary'
 author = 'K. Chowdhary'
 
@@ -82,4 +82,4 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_short_title = 'pypce'
+html_short_title = 'tesuract'

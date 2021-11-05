@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>tesuract &mdash; pypce 1.0 documentation</title>
+  <title>tesuract &mdash; tesuract 1.0 documentation</title>
   
 
   
@@ -54,7 +54,7 @@
           
 
           
-            <a href="#" class="icon icon-home" alt="Documentation Home"> pypce
+            <a href="#" class="icon icon-home" alt="Documentation Home"> tesuract
           
 
           
@@ -128,7 +128,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">pypce</a>
+          <a href="#">tesuract</a>
         
       </nav>
 
@@ -180,23 +180,7 @@
             
   <div class="section" id="tesuract">
 <span id="main"></span><h1><strong>tesuract</strong><a class="headerlink" href="#tesuract" title="Permalink to this headline">¶</a></h1>
-<p><strong>tesuract</strong> is a pure Python Uncertainty Quantification (UQ) software library.
-<a class="footnote-reference brackets" href="#id5" id="id1">1</a> It is built with object oriented design principals in mind and is thus
-modular.</p>
-<p>The tesuract library contains modules for building multivariate polynomial
-regression models (built with the scikit-learn API in mind), constructing
-quadrature rules for high-dimensional numerical integration, performing
-sensitivity analysis or feature importance, preprocessing utilities for
-transforming feature and target spaces, e.g. PCA, and custom pipelines for
-fitting multi-target regression models and comparing different machine learning
-(ML) methods.</p>
-<p>These classical and non-classical UQ methods integrate seamlessly with
-estimators in scikit-learn’s toolbox, thus allowing integration and testing
-within the prolific machine learning library.  For example, the user can utilize
-the cross validation utilities to easily compare multi-variate polynomial
-estimators with sklearn’s random forest regression methods. In fact, we provide
-classes that have this ability baked in so that the user can perform efficient
-and easy model selection to find the best model for the job.</p>
+<p><strong>tesuract</strong>, which stands for <strong>te</strong>nsor <strong>sur</strong>rogate <strong>a</strong>utomation and <strong>c</strong>ompu<strong>t</strong>ation, is a software library to perform automated supervised (and semi-unsupervised via data-driven reduced order modeling) machine learning tasks with single and multi-target output data.<a class="footnote-reference brackets" href="#id5" id="id1">1</a> One of the key features is that it is fully compatible with scikit-learn’s API, e.g., their <em>set, fit, predict</em> functionality, allowing flexibility and modularity. It also contains tools to quickly and easily implement multi-variate Legendre polynomial (the original universal approximator!) regression models.</p>
 <div class="section" id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
 <p>The code is super easy to install with <code class="docutils literal notranslate"><span class="pre">pip</span></code>. Make sure you have <code class="docutils literal notranslate"><span class="pre">numpy</span></code> and
@@ -211,11 +195,11 @@ the folder with the <code class="docutils literal notranslate"><span class="pre"
 </div>
 <p>to check that the library works. That’s it! Now you are ready to use <strong>tesuract</strong>.</p>
 </div>
-<div class="section" id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="super-quickstart">
+<h2>(Super-) Quickstart<a class="headerlink" href="#super-quickstart" title="Permalink to this headline">¶</a></h2>
 <p>Let’s see how easy it is to create a multivariate polynomial regression model.
-Let’s create a <span class="math notranslate nohighlight">\(4^{th}\)</span> order polynomial regression model <a class="footnote-reference brackets" href="#id6" id="id2">2</a> on the
-<span class="math notranslate nohighlight">\([-1,1]^5\)</span> hypercube, with a simple least squares fitting. <a class="footnote-reference brackets" href="#id7" id="id3">3</a></p>
+Let’s create a <span class="math notranslate nohighlight">\(4^{th}\)</span> order polynomial regression model<a class="footnote-reference brackets" href="#id6" id="id2">2</a> on the
+<span class="math notranslate nohighlight">\([-1,1]^5\)</span> hypercube, with a simple least squares fitting.<a class="footnote-reference brackets" href="#id7" id="id3">3</a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tesuract</span>
 <span class="n">p</span> <span class="o">=</span> <span class="n">tesuract</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>

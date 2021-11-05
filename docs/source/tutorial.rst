@@ -1,4 +1,4 @@
-The pypce tutorial
+The tesuract tutorial
 =========================
 
 .. 	“There is no royal road to geometry.” — Euclid

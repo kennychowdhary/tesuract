@@ -3,12 +3,12 @@
 Main features
 =============
 
-pypce's main feature is constructing multivariate polynomial regression models
+tesuract's main feature is constructing multivariate polynomial regression models
 using classic orthogonal polynomial constructions, e.g. Legendre polynomials. We
 use the scikit-learn API to build these estimators, which allows easy and seamless integration with the scikit-learn. Here is a list of the main features of this library. 
 
 * **Integration with scikit-learn**
-    Both :mod:`~pypce.PCEBuilder` and :mod:`~pypce.PCEReg` classes for
+    Both :mod:`~tesuract.PCEBuilder` and :mod:`~tesuract.PCEReg` classes for
     constructing multivariate polynomial interpolation inherit the BaseEstimator class from scikit-learn. This means both these object integrate seamlessly with the scikit-learn environment, which, for example, allows one to use the grid search cross-validation wrapper or even third party libraries like skopt on top of these polynomial estimator classes. 
 
 * **Multivariate polynomial regression**
@@ -19,7 +19,7 @@ use the scikit-learn API to build these estimators, which allows easy and seamle
 
 * **Hyper-parameter search for best model fit**
     
-    pypce provides methods to perform hyper-parameter search for finding the
+    tesuract provides methods to perform hyper-parameter search for finding the
     best fit polynomial model. Moreover, we provide methods to compare these
     methods to other popular machine learning regression models like random
     forest regression and multi-layer perceptron models. [#]_ 
@@ -53,7 +53,7 @@ use the scikit-learn API to build these estimators, which allows easy and seamle
 
 .. [#] In the future, we will be able to compare methods in tensorflow. The machinery is there for connecting tensorflow to sklearn, but it just needs to be done!
 
-.. [#] This is an advanced usage for pypce.
+.. [#] This is an advanced usage for tesuract.
 
 .. Special triangles
 .. -----------------

@@ -275,6 +275,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			FI_.append(fi)
 			self.SI_.append(estimator.computeSobol())
 		FI_ = np.array(FI_)
+		self.SI_ = np.array(self.SI_)
 
 		# weighted average of sobol weighted by error AND explained variance
 		# formula for each dim = sum(sobol weight fraction of each component estimator * explain variance ratio for each component)

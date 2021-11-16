@@ -104,6 +104,14 @@ class TestPCEBuilder(unittest.TestCase):
 		X = 2*self.rn.rand(1,self.dim)-1
 		Xhat = p.fit_transform(X)
 		Xhat = p.fit_transform(X[0])
+	def test_pcebuilder_poleval_w_custom_coef(self):
+		# define the mean solution as a PCE
+	    coef = np.array([0.,-.25,1./3,np.sqrt(2)])#,-.05*np.sqrt(2)])
+	    pce = tesuract.PCEBuilder(order=3)
+	    pce.compile(dim=1) # must compile to compute the multiindex
+	    polyfun = lambda x: pce.polyeval(x,c=coef)
+	    x = np.linspace(-1,1,10)
+	    y = polyfun(x)
 	def test_polyeval_w_variable_coef_and_fixed_X(self):
 		p = tesuract.PCEBuilder(order=3,store_phi=True)
 		X = 2*self.rn.rand(30,self.dim)-1

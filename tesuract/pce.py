@@ -884,6 +884,8 @@ class PCEReg(PCEBuilder,RegressorMixin):
         Xhat,y = check_X_y(self.Xhat,y)
             # assert len(self.coef) == self.multiindex.shape[0],"length of coefficient vector is not the same shape as the multindex!"
         # run quadrature fit if weights are specified:
+        sample_weights = 1./np.abs(y)
+        sample_weights /= np.sum(sample_weights)
         if self.fit_type == "quadrature":
             self._quad_fit(X,y)
         if self.fit_type == 'linear':
@@ -901,6 +903,11 @@ class PCEReg(PCEBuilder,RegressorMixin):
                 self.fit_params={'l1_ratio':[.001,.5,.75,.95,.999,1],'n_alphas':25,'tol':1e-2}
             regmodel = linear_model.ElasticNetCV(fit_intercept=False,**self.fit_params)
             regmodel.fit(Xhat,y)
+        if self.fit_type == 'ElasticNetCV_weighted':
+            if not self.fit_params: # if empty dictionary
+                self.fit_params={'l1_ratio':[.001,.5,.75,.95,.999,1],'n_alphas':25,'tol':1e-2}
+            regmodel = linear_model.ElasticNetCV(fit_intercept=False,**self.fit_params)
+            regmodel.fit(Xhat,y,sample_weight=sample_weights)
         if self.fit_type == 'RidgeCV':
             if not self.fit_params: # if empty dictionary
                 self.fit_params={'alphas':np.logspace(-3,3,100)}

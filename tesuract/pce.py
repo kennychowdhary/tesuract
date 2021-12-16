@@ -898,6 +898,13 @@ class PCEReg(PCEBuilder,RegressorMixin):
             regmodel = linear_model.LassoCV(fit_intercept=False,**self.fit_params)
             regmodel.fit(Xhat,y)
             self.alpha_ = regmodel.alpha_
+        if self.fit_type == 'LassoCV_weighted':
+            if not self.fit_params: # if empty dictionary
+                self.fit_params={'alphas':np.logspace(-12,2,25),'max_iter':2500,'tol':1e-2}
+                # self.fit_params={}
+            regmodel = linear_model.LassoCV(fit_intercept=False,**self.fit_params)
+            regmodel.fit(Xhat,y,sample_weight=sample_weights)
+            self.alpha_ = regmodel.alpha_
         if self.fit_type == 'ElasticNetCV':
             if not self.fit_params: # if empty dictionary
                 self.fit_params={'l1_ratio':[.001,.5,.75,.95,.999,1],'n_alphas':25,'tol':1e-2}

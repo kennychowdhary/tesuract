@@ -340,10 +340,15 @@ def construct_lookup(orders, dim, rules='gaussian'):
 		w_lookup.append([])
 		for order in range(max_order+1):
 			if growth == True:
-				order_adj = 2**(order)+1
+				if order == 0:
+					order_adj = 1
+				else:
+					order_adj = 2**(order)+1
 			else:
 				order_adj = order + 1
 			abscissas, weights = Q.get1dQuad(order_adj)
+			abscissas[np.abs(abscissas) <= 1e-16] = 0.0
+			weights[np.abs(weights) <= 1e-16] = 0.0
 			x_lookup[-1].append(abscissas)
 			w_lookup[-1].append(weights)
 	return x_lookup, w_lookup
@@ -379,6 +384,8 @@ def construct_collection(orders, dim, x_lookup, w_lookup
 from collections import defaultdict
 from itertools import product
 
+# for gaussian, since quad points are as high accuracy as chaospy, slight differences
+
 class QuadGen(object):
 	def __init__(self,dim,order=2,rule='legendre_gauss',sparse=True):
 		self.dim = dim
@@ -396,6 +403,7 @@ class QuadGen(object):
 			self.x_lookup, self.w_lookup = construct_lookup(orders=order,dim=self.dim,rules=self.rule)
 			self.collection = construct_collection(orders=order,dim=self.dim,
 								x_lookup=self.x_lookup,w_lookup=self.w_lookup)
+			# self.collection = _construct_collection_custom(self.order, self.dim, self.x_lookup, self.w_lookup)
 			# scale and renormalize to over [0,1] and unit weight
 			x = sorted(self.collection)
 			w = np.array([self.collection[key] for key in x])
@@ -405,13 +413,5 @@ class QuadGen(object):
 		assert np.all(x >= 0.0) and np.all(x <= 1.0), "Points are outside the range [0,1]^d"
 		self.points, self.weights = x,w
 		return self.points, self.weights
-
-
-
-
-
-
-
-
 
 

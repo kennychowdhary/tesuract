@@ -5,6 +5,7 @@
 
 **tesuract**, which stands for **te**\ nsor **sur**\ rogate **a**\ utomation and **c**\ ompu\ **t**\ ation, is a software library to perform automated supervised (and semi-unsupervised via data-driven reduced order modeling) machine learning tasks with single and multi-target output data.\ [#]_ One of the key features is that it is fully compatible with scikit-learn's API, e.g., their *set, fit, predict* functionality, allowing flexibility and modularity. It also contains tools to quickly and easily implement multi-variate Legendre polynomial (the original universal approximator!) regression models. 
 
+
 Installation
 ------------
 

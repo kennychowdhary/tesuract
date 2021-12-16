@@ -5,22 +5,6 @@
 
 **tesuract**, which stands for **te**\ nsor **sur**\ rogate **a**\ utomation and **c**\ ompu\ **t**\ ation, is a software library to perform automated supervised (and semi-unsupervised via data-driven reduced order modeling) machine learning tasks with single and multi-target output data.\ [#]_ One of the key features is that it is fully compatible with scikit-learn's API, e.g., their *set, fit, predict* functionality, allowing flexibility and modularity. It also contains tools to quickly and easily implement multi-variate Legendre polynomial (the original universal approximator!) regression models. 
 
-.. The tesuract library contains modules for building multivariate polynomial
-.. regression models (built with the scikit-learn API in mind), constructing
-.. quadrature rules for high-dimensional numerical integration, performing
-.. sensitivity analysis or feature importance, preprocessing utilities for
-.. transforming feature and target spaces, e.g. PCA, and custom pipelines for
-.. fitting multi-target regression models and comparing different machine learning
-.. (ML) methods.
-
-.. These classical and non-classical UQ methods integrate seamlessly with
-.. estimators in scikit-learn's toolbox, thus allowing integration and testing
-.. within the prolific machine learning library.  For example, the user can utilize
-.. the cross validation utilities to easily compare multi-variate polynomial
-.. estimators with sklearn's random forest regression methods. In fact, we provide
-.. classes that have this ability baked in so that the user can perform efficient
-.. and easy model selection to find the best model for the job. 
-
 Installation
 ------------
 
@@ -28,9 +12,10 @@ The code is super easy to install with ``pip``. Make sure you have ``numpy`` and
 ``scikit-learn``. Then, after downloading, cd into the ``tesuract`` directory, i.e.
 the folder with the ``setup.py``, and run
 
-::
+.. code-block:: python
 
 	pip install .
+
 
 You can also run a suite of unit tests and regression tests before installation with 
 
@@ -55,15 +40,18 @@ Let's create a :math:`4^{th}` order polynomial regression model\ [#]_ on the
 That's it! In order to perform the regression, just run :code:`p.fit(X,y)` and
 :code:`p.predict(X)` for any data/ target pair :math:`(X,y)`. [#]_ 
 
-User Guide
-----------
+.. toctree::
+   :maxdepth: 2
+   :caption: User Guide
+   
+   introduction
+   api
 
 .. toctree::
    :maxdepth: 2
+   :caption: Tutorials
    
-   introduction
    guide
-   api
 
 
 

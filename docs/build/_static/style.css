@@ -1,0 +1,246 @@
+.wy-nav-content {
+  max-width: 1000px !important;
+}
+.wy-nav-left {
+  max-width: 300px !important;
+}
+
+/* api docs */
+
+.class > dt, .function > dt, .method > dt {
+  padding: 0.5rem;
+  background-color: #f8f8f8;
+  font-weight: normal;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  border-left: 2px solid #ff9c34;
+  overflow: auto;
+  margin-bottom: 1rem;
+}
+
+.class > dt::after, .function > dt::after, .method > dt::after {
+  overflow: auto;
+}
+
+code.descname {
+  font-weight: bold;
+  background-color: transparent;
+  padding: 0;
+}
+
+code.descclassname {
+  background-color: transparent;
+}
+
+.viewcode-link {
+  float: right;
+}
+
+dl.field-list {
+  display: flex;
+  flex-wrap: wrap;
+  overflow-x: scroll;
+}
+
+dl.field-list > dt {
+  flex-basis: 100%;
+  font-weight: bold;
+  word-break: break-word;
+}
+
+dl.field-list > dd {
+  flex-basis: 100%;
+  margin-bottom: 0;
+}
+
+
+
+@media screen and (min-width: 768px) {
+  dl.field-list > dt {
+    flex-basis: 110px;
+  }
+  dl.field-list > dd {
+    flex: 1 0 calc(100% - 110px);
+    max-width: calc(100% - 110px);
+  }
+
+}
+
+dt.field-odd, dt.field-even {
+  background-color: #F0F7FA;
+  padding-left: 0.25rem;
+}
+
+.field-odd, .field-even {
+  margin-top: 0;
+  border-bottom: 1px solid #ddd;
+  border-top: 1px solid #ddd;
+  box-sizing: border-box;
+}
+
+dl.field-list > dt:after {
+  content: ":";
+}
+
+.classifier {
+  font-style: italic;
+}
+
+.classifier::before {
+  font-style: normal;
+  margin: 0.3em;
+  content: ":";
+}
+
+dd {
+  padding-left: 1rem;
+}
+
+dl.class > dd {
+  padding-left: 0;
+}
+
+@media screen and (min-width: 768px) {
+  dl.class > dd {
+    padding-left: 1rem;
+  }
+}
+
+.rubric {
+  font-weight: bold;
+  margin-top: 1rem;
+}
+
+ul.simple li p, ol.simple li p {
+  margin-bottom: 0;
+}
+
+ul.simple, ol.simple {
+  padding-left: 1.5rem;
+}
+
+/* info boxes */
+
+div.topic {
+  padding: 0.5rem;
+  background-color: #eee;
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+  border: 1px solid #CCC;
+}
+
+div.topic p {
+  margin-bottom: 0.25rem;
+}
+
+div.topic dd {
+  margin-bottom: 0.25rem;
+}
+
+p.topic-title {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+div.topic > ul.simple {
+  margin-bottom: 0.25rem;
+}
+
+p.admonition-title {
+  margin-right: 0.5rem;
+  font-weight: bold;
+  display: inline;
+}
+
+p.admonition-title:after {
+  content: ":";
+}
+
+div.admonition p.admonition-title + p, div.deprecated p {
+  display: inline;
+}
+
+div.admonition, div.deprecated {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: 1px solid #ddd;
+  margin-bottom: 1rem;
+}
+
+div.admonition {
+  background-color: #eee;
+}
+
+div.admonition p, div.admonition dl, div.admonition dd {
+  margin-bottom: 0
+}
+
+div.deprecated {
+  color: #b94a48;
+  background-color: #F3E5E5;
+  border: 1px solid #eed3d7;
+}
+
+div.seealso {
+  background-color: #FFFBE8;
+  border: 1px solid #fbeed5;
+  color: #AF8A4B;
+}
+
+div.versionchanged {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #FFFBE8;
+  border: 1px solid #fbeed5;
+  border-radius: 0.5rem;
+}
+
+div.versionchanged p {
+  margin-bottom: 0;
+}
+
+dt.label {
+  float: left;
+  padding-right: 0.5rem;
+}
+
+
+/* copy button */
+div.highlight:hover span.copybutton {
+  background-color: #3F556B;
+  color: white;
+}
+
+div.highlight:hover span.copybutton:hover {
+    background-color: #20252B;
+}
+
+div.body img {
+    max-width: 100%;
+    height: unset!important; /* Needed because sphinx sets the height */
+}
+
+div.body dd > p {
+    hyphens: none;
+}
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+img.align-right, .figure.align-right, object.align-right {
+  clear: right;
+  float: right;
+  margin-left: 1em;
+}
+
+a.brackets::after, span.brackets > a::after {
+  content: "]";
+}
+
+a.brackets::before, span.brackets > a::before {
+    content: "[";
+}

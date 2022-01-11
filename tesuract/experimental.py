@@ -96,6 +96,7 @@ def check_array_within_bounds(x,bounds):
 	bounds_check = ((x >= low) & (x <= high)).all()
 	return bounds_check
 
+# import emcee
 class GPReg:
 	def __init__(self,kernel,order=2,poly_alg='monomials',input_range=None,alpha=None,n_restarts_optimizer=0,random_state=None,fit_params=None,fit_type='RidgeCV'):
 		self.kernel = kernel

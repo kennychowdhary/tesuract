@@ -24,8 +24,6 @@
     
     <link rel="stylesheet" href="_static/sphinx-book-theme.css?digest=c3fdc42140077d1ad13ad2f1588a4309" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
     <link rel="stylesheet" href="_static/style.css" type="text/css" />
     
   <link rel="preload" as="script" href="_static/js/index.be7d3bbb2ef33a8344ce.js">
@@ -35,15 +33,11 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/language_data.js"></script>
-    <script src="_static/togglebutton.js"></script>
-    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Tutorials" href="guide.html" />
-    <link rel="prev" title="Main features" href="introduction.html" />
+    <link rel="prev" title="Introduction to polynomial regression" href="test_nb.html" />
     <link href="_static/style.css" rel="stylesheet" type="text/css">
 
   </head>
@@ -82,18 +76,6 @@
    Main features
   </a>
  </li>
- <li class="toctree-l1 current active">
-  <a class="current reference internal" href="#">
-   API
-  </a>
- </li>
-</ul>
-<p class="caption">
- <span class="caption-text">
-  Tutorials
- </span>
-</p>
-<ul class="nav bd-sidenav">
  <li class="toctree-l1 has-children">
   <a class="reference internal" href="guide.html">
    Tutorials
@@ -105,16 +87,16 @@
   </label>
   <ul>
    <li class="toctree-l2">
-    <a class="reference internal" href="tutorials/tutorial01.html">
+    <a class="reference internal" href="test_nb.html">
      Introduction to polynomial regression
     </a>
    </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="tutorials/tutorial02.html">
-     Some other usage cases
-    </a>
-   </li>
   </ul>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   API
+  </a>
  </li>
 </ul>
 
@@ -227,15 +209,13 @@
 <h2>PCE Base Class<a class="headerlink" href="#pce-base-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="tesuract.PCEBuilder">
-<em class="property">class </em><code class="sig-prename descclassname">tesuract.</code><code class="sig-name descname">PCEBuilder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">customM</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mindex_type</span><span class="o">=</span><span class="default_value">'total_order'</span></em>, <em class="sig-param"><span class="n">coef</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">polytype</span><span class="o">=</span><span class="default_value">'Legendre'</span></em>, <em class="sig-param"><span class="n">normalized</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">store_phi</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">input_range</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEBuilder" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tesuract.</code><code class="sig-name descname">PCEBuilder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">customM</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mindex_type</span><span class="o">=</span><span class="default_value">'total_order'</span></em>, <em class="sig-param"><span class="n">coef</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">polytype</span><span class="o">=</span><span class="default_value">'Legendre'</span></em>, <em class="sig-param"><span class="n">normalized</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">store_phi</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">input_range</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEBuilder" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for building a multivariate polynomial basis.</p>
 <p>This class creates a multi-variate polynomial object, aka as a polynomial
 chaos model. The expansion looks like</p>
 <div class="math notranslate nohighlight">
 \[\sum_{i=1}^N c_i \Phi_i(\mathbf{x})\]</div>
-<p>where <span class="math notranslate nohighlight">\(N\)</span> is the number of polynomial terms, and
-<span class="math notranslate nohighlight">\(\Phi_i:\mathbf{x} \in \mathbb{R}^d \mapsto \mathbb{R}\)</span> is the
-multivariate basis function which takes the form</p>
+<p>where <span class="math notranslate nohighlight">\(N\)</span> is the number of polynomial terms, and <span class="math notranslate nohighlight">\(\Phi_i:\mathbf{x} \in \mathbb{R}^d \mapsto \mathbb{R}\)</span> is the multivariate basis function which takes the form</p>
 <div class="math notranslate nohighlight">
 \[\Phi_i = \prod_{j=1}^d L_{\alpha_j^{(i)}}(x_i),\]</div>
 <p>where <span class="math notranslate nohighlight">\(\alpha_j\)</span> is an integer tuple of size <span class="math notranslate nohighlight">\(d\)</span> which
@@ -248,9 +228,7 @@ attributes and returns.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>order</strong><span class="classifier">int, default=1</span></dt><dd><p>Description of the order of the polynomials in the
-expansion. For total order, the order is the maximum polynomial order
-for each basis function per dimension.</p>
+<dt><strong>order</strong><span class="classifier">int, default=1</span></dt><dd><p>Description of the order of the polynomials in the expansion. For total order, the order is the maximum polynomial order for each basis function per dimension.</p>
 </dd>
 <dt><strong>customM</strong><span class="classifier">numpy.ndarray, default=None</span></dt><dd><p>An integer numpy aray of size (# of basis functions, # of dimensions). Each
 row represents the basis function and each column represents the order of
@@ -299,46 +277,23 @@ an option in the this class.</p>
 </pre></div>
 </div>
 <p class="rubric">Methods</p>
-<table class="longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#tesuract.PCEBuilder.compile" title="tesuract.PCEBuilder.compile"><code class="xref py py-obj docutils literal notranslate"><span class="pre">compile</span></code></a>(dim)</p></td>
-<td><p>Setup for instantiating the basis class</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#tesuract.PCEBuilder.computeMoments" title="tesuract.PCEBuilder.computeMoments"><code class="xref py py-obj docutils literal notranslate"><span class="pre">computeMoments</span></code></a>([c])</p></td>
-<td><p>Methods to compute the mean and variance of the resulting polynomial</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#tesuract.PCEBuilder.computeSobol" title="tesuract.PCEBuilder.computeSobol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">computeSobol</span></code></a>([c])</p></td>
-<td><p>Compute Sobol total order variance based sensitivity indices</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#tesuract.PCEBuilder.eval" title="tesuract.PCEBuilder.eval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval</span></code></a>([X, c])</p></td>
-<td><p>Duplicate of polyeval</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#tesuract.PCEBuilder.fit_transform" title="tesuract.PCEBuilder.fit_transform"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit_transform</span></code></a>(X)</p></td>
-<td><p>Fit and transform the given <span class="math notranslate nohighlight">\(X\)</span> coordinates to the polynomial space.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#tesuract.PCEBuilder.polyeval" title="tesuract.PCEBuilder.polyeval"><code class="xref py py-obj docutils literal notranslate"><span class="pre">polyeval</span></code></a>([X, c])</p></td>
-<td><p>Method to evaluate the polynomial.</p></td>
-</tr>
-</tbody>
-</table>
 <table class="table">
 <colgroup>
-<col style="width: 68%" />
-<col style="width: 32%" />
+<col style="width: 27%" />
+<col style="width: 73%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><strong>computeJointSobol</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><strong>compile:</strong></p></td>
+<td><p>pre-processing for fit, e.g., multiindex generation</p></td>
+</tr>
+<tr class="row-even"><td><p><strong>computeMoments:</strong></p></td>
+<td><p>compute means and variances using PCE coefficients</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt id="tesuract.PCEBuilder.compile">
-<code class="sig-name descname">compile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dim</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEBuilder.compile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">compile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dim</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEBuilder.compile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEBuilder.compile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Setup for instantiating the basis class</p>
 <p>Constructs the multi-dimensional multi-index which defines the
 polynomial basis elements. Note that this is only done once during the
@@ -369,7 +324,7 @@ quadratic Legendre polynomial.</p>
 
 <dl class="py method">
 <dt id="tesuract.PCEBuilder.fit_transform">
-<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEBuilder.fit_transform" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit_transform</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEBuilder.fit_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEBuilder.fit_transform" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit and transform the given <span class="math notranslate nohighlight">\(X\)</span> coordinates to the polynomial
 space.</p>
 <p>This method essentially performs a high dimensional kernel mapping onto
@@ -396,7 +351,7 @@ uncorrelated.</p>
 
 <dl class="py method">
 <dt id="tesuract.PCEBuilder.polyeval">
-<code class="sig-name descname">polyeval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEBuilder.polyeval" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">polyeval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEBuilder.polyeval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEBuilder.polyeval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method to evaluate the polynomial.</p>
 <p>Evaluates the polynomial for a given set of coefficients and data
 points.</p>
@@ -420,13 +375,13 @@ points.</p>
 
 <dl class="py method">
 <dt id="tesuract.PCEBuilder.eval">
-<code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEBuilder.eval" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEBuilder.eval"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEBuilder.eval" title="Permalink to this definition">¶</a></dt>
 <dd><p>Duplicate of polyeval</p>
 </dd></dl>
 
 <dl class="py method">
 <dt id="tesuract.PCEBuilder.computeSobol">
-<code class="sig-name descname">computeSobol</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEBuilder.computeSobol" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">computeSobol</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEBuilder.computeSobol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEBuilder.computeSobol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute Sobol total order variance based sensitivity indices</p>
 <p>Depending on the Legendre polynomial type (normalized vs non-normalized)
 the formula will be different. The total order sensitivity is given by</p>
@@ -457,7 +412,7 @@ least the <span class="math notranslate nohighlight">\(i^{th}\)</span> dimension
 
 <dl class="py method">
 <dt id="tesuract.PCEBuilder.computeMoments">
-<code class="sig-name descname">computeMoments</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEBuilder.computeMoments" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">computeMoments</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">c</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEBuilder.computeMoments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEBuilder.computeMoments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Methods to compute the mean and variance of the resulting polynomial</p>
 <p>Assuming a uniform distribution over <span class="math notranslate nohighlight">\([-1,1]\)</span>, this method
 computes the mean and variance. The mean is the coefficient of the
@@ -493,13 +448,12 @@ function for the uniform distribution on the previously stated domain.</p>
 <h2>PCE Regression Class<a class="headerlink" href="#pce-regression-class" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="tesuract.PCEReg">
-<em class="property">class </em><code class="sig-prename descclassname">tesuract.</code><code class="sig-name descname">PCEReg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">customM</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mindex_type</span><span class="o">=</span><span class="default_value">'total_order'</span></em>, <em class="sig-param"><span class="n">coef</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">polytype</span><span class="o">=</span><span class="default_value">'Legendre'</span></em>, <em class="sig-param"><span class="n">fit_type</span><span class="o">=</span><span class="default_value">'linear'</span></em>, <em class="sig-param"><span class="n">fit_params</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">normalized</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">store_phi</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">input_range</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">tesuract.</code><code class="sig-name descname">PCEReg</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">order</span><span class="o">=</span><span class="default_value">2</span></em>, <em class="sig-param"><span class="n">customM</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">mindex_type</span><span class="o">=</span><span class="default_value">'total_order'</span></em>, <em class="sig-param"><span class="n">coef</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">a</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">b</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">polytype</span><span class="o">=</span><span class="default_value">'Legendre'</span></em>, <em class="sig-param"><span class="n">fit_type</span><span class="o">=</span><span class="default_value">'linear'</span></em>, <em class="sig-param"><span class="n">fit_params</span><span class="o">=</span><span class="default_value">{}</span></em>, <em class="sig-param"><span class="n">normalized</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">store_phi</span><span class="o">=</span><span class="default_value">False</span></em>, <em class="sig-param"><span class="n">input_range</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEReg" title="Permalink to this definition">¶</a></dt>
 <dd><p>Class for performing multivariate polynomial regression</p>
 <p>This class fits the coefficients of a a multivariate polynomial object, aka
 as a polynomial chaos model, using different linear regression algorithms
 from sklearn. Given labeled data pairs <span class="math notranslate nohighlight">\((x_j,y_j)\)</span> for
-<span class="math notranslate nohighlight">\(j=1,\dots,n\)</span>, where <span class="math notranslate nohighlight">\(x_j \in \mathbb{R}^d\)</span> and <span class="math notranslate nohighlight">\(y_j \in
-\mathbb{R}\)</span>, we look for</p>
+<span class="math notranslate nohighlight">\(j=1,\dots,n\)</span>, where <span class="math notranslate nohighlight">\(x_j \in \mathbb{R}^d\)</span> and <span class="math notranslate nohighlight">\(y_j \in \mathbb{R}\)</span>, we look for</p>
 <div class="math notranslate nohighlight">
 \[\text{arg} \min_{c} \sum_{j}d\left(f(\mathbf{x}_j;c),y_j\right) + \text{Regularizer}(c)\]</div>
 <p>where <span class="math notranslate nohighlight">\(f\)</span> is the polynomial model with unknown coefficient parameters, i.e.,</p>
@@ -568,40 +522,20 @@ an option in the this class.</p>
 </pre></div>
 </div>
 <p class="rubric">Methods</p>
-<table class="longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#tesuract.PCEReg.feature_importances" title="tesuract.PCEReg.feature_importances"><code class="xref py py-obj docutils literal notranslate"><span class="pre">feature_importances</span></code></a>()</p></td>
-<td><p>Compute feature importances which are equivalent to the normalized Sobol total order sensitivity indices.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#tesuract.PCEReg.fit" title="tesuract.PCEReg.fit"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fit</span></code></a>(X, y)</p></td>
-<td><p>Fit the polynomial using linear regression or quadrature solvers</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#tesuract.PCEReg.joint_effects" title="tesuract.PCEReg.joint_effects"><code class="xref py py-obj docutils literal notranslate"><span class="pre">joint_effects</span></code></a>()</p></td>
-<td><p>Compute Sobol joint effect sensitivity indices.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#tesuract.PCEReg.predict" title="tesuract.PCEReg.predict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">predict</span></code></a>(X)</p></td>
-<td><p>After fitting, evaluates the polynomial for a single feature space sample or array of samples.</p></td>
-</tr>
-</tbody>
-</table>
 <table class="table">
 <colgroup>
-<col style="width: 68%" />
-<col style="width: 32%" />
+<col style="width: 30%" />
+<col style="width: 70%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><strong>computeJointSobol</strong></p></td>
-<td></td>
+<tr class="row-odd"><td><p><strong>feature_importances:</strong></p></td>
+<td><p>compute Sobol total order indices, normalized to sum to 1</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt id="tesuract.PCEReg._compile">
-<code class="sig-name descname">_compile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg._compile" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">_compile</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg._compile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEReg._compile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Builds the multiindex using the PCEBuilder class. Private.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -621,7 +555,7 @@ an option in the this class.</p>
 
 <dl class="py method">
 <dt id="tesuract.PCEReg._quad_fit">
-<code class="sig-name descname">_quad_fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg._quad_fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">_quad_fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg._quad_fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEReg._quad_fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit the coefficients of the polynomial model using quadrature points and weights</p>
 <p>It is expected that the data matrix X represent the quadrature point and the weights are given in the fit_params dictionary with the key name ‘w’.</p>
 <dl class="field-list simple">
@@ -638,7 +572,7 @@ an option in the this class.</p>
 
 <dl class="py method">
 <dt id="tesuract.PCEReg.fit">
-<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg.fit" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">fit</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em>, <em class="sig-param"><span class="n">y</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg.fit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEReg.fit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fit the polynomial using linear regression or quadrature solvers</p>
 <p>The algorithm is determined by the fit_type option in the initialization and the options in fit_params.</p>
 <dl class="field-list simple">
@@ -652,7 +586,7 @@ an option in the this class.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><dl class="simple">
-<dt><strong>self</strong><span class="classifier">self object</span></dt><dd><p>sets the internal coefficient array <a href="#id4"><span class="problematic" id="id5">self.coef_</span></a></p>
+<dt><strong>self</strong><span class="classifier">self object</span></dt><dd><p>sets the internal coefficient array self.coef_</p>
 </dd>
 </dl>
 </dd>
@@ -661,7 +595,7 @@ an option in the this class.</p>
 
 <dl class="py method">
 <dt id="tesuract.PCEReg.feature_importances">
-<code class="sig-name descname">feature_importances</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg.feature_importances" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">feature_importances</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg.feature_importances"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEReg.feature_importances" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute feature importances which are equivalent to the normalized Sobol total order sensitivity indices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -675,7 +609,7 @@ an option in the this class.</p>
 
 <dl class="py method">
 <dt id="tesuract.PCEReg.joint_effects">
-<code class="sig-name descname">joint_effects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg.joint_effects" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">joint_effects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg.joint_effects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEReg.joint_effects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute Sobol joint effect sensitivity indices.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -689,12 +623,12 @@ an option in the this class.</p>
 
 <dl class="py method">
 <dt id="tesuract.PCEReg.predict">
-<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg.predict" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">predict</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">X</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg.predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tesuract.PCEReg.predict" title="Permalink to this definition">¶</a></dt>
 <dd><p>After fitting, evaluates the polynomial for a single feature space sample or array of samples.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><dl class="simple">
-<dt><strong>X</strong><span class="classifier">numpy.ndarray of shape (nsamples, dim)</span></dt><dd><p>Samples to evaluate the fit polynomial. Must have <a href="#id6"><span class="problematic" id="id7">self.coef_</span></a> set or defined already. Can take 1d or 2d array of samples.</p>
+<dt><strong>X</strong><span class="classifier">numpy.ndarray of shape (nsamples, dim)</span></dt><dd><p>Samples to evaluate the fit polynomial. Must have self.coef_ set or defined already. Can take 1d or 2d array of samples.</p>
 </dd>
 </dl>
 </dd>
@@ -718,19 +652,12 @@ an option in the this class.</p>
         
             <!-- Previous / next buttons -->
 <div class='prev-next-area'> 
-    <a class='left-prev' id="prev-link" href="introduction.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="test_nb.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Main features</p>
+            <p class="prev-next-title">Introduction to polynomial regression</p>
         </div>
-    </a>
-    <a class='right-next' id="next-link" href="guide.html" title="next page">
-    <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Tutorials</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
     </a>
 </div>
         

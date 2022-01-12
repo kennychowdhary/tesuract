@@ -24,8 +24,6 @@
     
     <link rel="stylesheet" href="_static/sphinx-book-theme.css?digest=c3fdc42140077d1ad13ad2f1588a4309" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" type="text/css" href="_static/togglebutton.css" />
-    <link rel="stylesheet" type="text/css" href="_static/mystnb.css" />
     <link rel="stylesheet" href="_static/style.css" type="text/css" />
     
   <link rel="preload" as="script" href="_static/js/index.be7d3bbb2ef33a8344ce.js">
@@ -35,11 +33,8 @@
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/language_data.js"></script>
-    <script src="_static/togglebutton.js"></script>
-    <script >var togglebuttonSelector = '.toggle, .admonition.dropdown, .tag_hide_input div.cell_input, .tag_hide-input div.cell_input, .tag_hide_output div.cell_output, .tag_hide-output div.cell_output, .tag_hide_cell.cell, .tag_hide-cell.cell';</script>
     <script src="_static/sphinx-book-theme.12a9622fbb08dcb3a2a40b2c02b83a57.js"></script>
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Main features" href="introduction.html" />
@@ -81,18 +76,6 @@
    Main features
   </a>
  </li>
- <li class="toctree-l1">
-  <a class="reference internal" href="api.html">
-   API
-  </a>
- </li>
-</ul>
-<p class="caption">
- <span class="caption-text">
-  Tutorials
- </span>
-</p>
-<ul class="nav bd-sidenav">
  <li class="toctree-l1 has-children">
   <a class="reference internal" href="guide.html">
    Tutorials
@@ -104,16 +87,16 @@
   </label>
   <ul>
    <li class="toctree-l2">
-    <a class="reference internal" href="tutorials/tutorial01.html">
+    <a class="reference internal" href="test_nb.html">
      Introduction to polynomial regression
     </a>
    </li>
-   <li class="toctree-l2">
-    <a class="reference internal" href="tutorials/tutorial02.html">
-     Some other usage cases
-    </a>
-   </li>
   </ul>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="api.html">
+   API
+  </a>
  </li>
 </ul>
 
@@ -212,11 +195,9 @@
     </a>
    </li>
    <li class="toc-h2 nav-item toc-entry">
-    <a class="reference internal nav-link" href="#super-quickstart">
-     (Super-) Quickstart
+    <a class="reference internal nav-link" href="#quickstart">
+     Quickstart
     </a>
-    <ul class="nav section-nav flex-column">
-    </ul>
    </li>
   </ul>
  </li>
@@ -253,34 +234,41 @@ the folder with the <code class="docutils literal notranslate"><span class="pre"
 </div>
 <p>to check that the library works. That’s it! Now you are ready to use <strong>tesuract</strong>.</p>
 </div>
-<div class="section" id="super-quickstart">
-<h2>(Super-) Quickstart<a class="headerlink" href="#super-quickstart" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="quickstart">
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
 <p>Let’s see how easy it is to create a multivariate polynomial regression model.
 Let’s create a <span class="math notranslate nohighlight">\(4^{th}\)</span> order polynomial regression model<a class="footnote-reference brackets" href="#id6" id="id2">2</a> on the
-<span class="math notranslate nohighlight">\([-1,1]^5\)</span> hypercube, with a simple least squares fitting.<a class="footnote-reference brackets" href="#id7" id="id3">3</a></p>
+<span class="math notranslate nohighlight">\([-1,1]^5\)</span> hypercube, using sklearn’s LassoCV (<span class="math notranslate nohighlight">\(\ell_1\)</span> sparsity constraint) fitting.<a class="footnote-reference brackets" href="#id7" id="id3">3</a></p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">tesuract</span>
-<span class="n">p</span> <span class="o">=</span> <span class="n">tesuract</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_friedman1</span>
+
+<span class="n">X</span><span class="p">,</span><span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span><span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">pce</span> <span class="o">=</span> <span class="n">tesuract</span><span class="o">.</span><span class="n">PCEReg</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">fit_type</span><span class="o">=</span><span class="s1">&#39;LassoCV&#39;</span><span class="p">)</span> <span class="c1"># create an 8th order polynomial</span>
+<span class="n">pce</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>That’s it! In order to perform the regression, just run <code class="code docutils literal notranslate"><span class="pre">p.fit(X,y)</span></code> and
-<code class="code docutils literal notranslate"><span class="pre">p.predict(X)</span></code> for any data/ target pair <span class="math notranslate nohighlight">\((X,y)\)</span>. <a class="footnote-reference brackets" href="#id8" id="id4">4</a></p>
+<p>That’s it! <a class="footnote-reference brackets" href="#id8" id="id4">4</a> You’ve fit your first polynomial chaos expansion (PCE) using tesuract (with a linear least squares solver). You can try changing the type of solver, e.g., LassoCV or ElasticNetCV, getting feature importances, etc.</p>
 <div class="toctree-wrapper compound">
 <p class="caption"><span class="caption-text">User Guide</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction.html">Main features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#pce-base-class">PCE Base Class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="api.html#pce-regression-class">PCE Regression Class</a></li>
+<li class="toctree-l1"><a class="reference internal" href="guide.html">Tutorials</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="test_nb.html">Introduction to polynomial regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="test_nb.html#setup-the-problem">Setup the problem</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_nb.html#fit-a-polynomial">Fit a polynomial</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_nb.html#feature-importance">Feature importance</a></li>
+<li class="toctree-l3"><a class="reference internal" href="test_nb.html#prediction">Prediction</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="test_nb.html#scale-error">Scale error</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="test_nb.html#different-fit-algorithms">Different fit algorithms</a></li>
 </ul>
 </li>
 </ul>
-</div>
-<div class="toctree-wrapper compound">
-<p class="caption"><span class="caption-text">Tutorials</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="guide.html">Tutorials</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial01.html">Introduction to polynomial regression</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tutorials/tutorial02.html">Some other usage cases</a></li>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-base-class">PCE Base Class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#pce-regression-class">PCE Regression Class</a></li>
 </ul>
 </li>
 </ul>

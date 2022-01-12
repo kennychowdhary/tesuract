@@ -39,8 +39,8 @@ extensions = [
 	'sphinx.ext.doctest',
     'sphinx.ext.intersphinx',
     'sphinx.ext.imgconverter',
-    "sphinx.ext.mathjax",
-    "myst_nb"
+    'sphinx.ext.mathjax',
+    'sphinx.ext.viewcode'
 ]
 
 # napoleon_google_docstring = False
@@ -79,7 +79,7 @@ exclude_patterns = []
 html_theme = 'sphinx_book_theme'
 
 html_theme_options = {
-    'collapse_navigation': True,
+    'collapse_navigation': False,
     "repository_url": "https://github.com/kennychowdhary/tesuract",
     "use_repository_button": True,
 }

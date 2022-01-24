@@ -8,25 +8,37 @@
 Installation
 ------------
 
-The code is super easy to install with ``pip``. Make sure you have ``numpy`` and
-``scikit-learn``. Then, after downloading, cd into the ``tesuract`` directory, i.e.
-the folder with the ``setup.py``, and run
+The code is easy to install with ``pip``. Simply run 
 
-.. code-block:: python
+.. code-block:: bash
+   
+   pip install tesuract
+
+and this will install the pypi version of tesuract. For the latest development build, just clone and install the repo. Make sure you have ``numpy`` and
+``scikit-learn``. You might also need the ``alive-progress`` bar library. Then
+
+.. code-block:: bash
+
+   git clone git@github.com:kennychowdhary/tesuract.git
+   cd tesuract
+
+and simple run
+
+.. code-block:: bash
 
 	pip install .
 
 
-You can also run a suite of unit tests and regression tests before installation with 
+You can also run a suite of unit tests and regression tests before installation by typing 
 
 ::
 
    python -m pytest -v -s tesuract/tests
 
-to check that the library works. That's it! Now you are ready to use **tesuract**. 
+to check that the library works. Note that the `python -m` allows you to automatically add the current path to the Python path, without having to change any environmental variables. That's it! Now you are ready to use **tesuract**. 
 
-Quickstart
-----------------
+Usage/ Quickstart
+-----------------
 
 Let's see how easy it is to create a multivariate polynomial regression model. 
 Let's create a :math:`4^{th}` order polynomial regression model\ [#]_ on the 
@@ -44,18 +56,29 @@ Let's create a :math:`4^{th}` order polynomial regression model\ [#]_ on the
 That's it! [#]_ You've fit your first polynomial chaos expansion (PCE) using tesuract (with a linear least squares solver). You can try changing the type of solver, e.g., LassoCV or ElasticNetCV, getting feature importances, etc. 
 
 .. toctree::
-   :maxdepth: 4
-   :caption: User Guide
+   :maxdepth: 2
+   :caption: Introduction
+   :titlesonly:
    
    introduction
-   guide
-   api
+   install
 
-.. .. toctree::
-..    :maxdepth: 2
-..    :caption: Tutorials
+.. toctree::
+   :maxdepth: 2
+   :caption: User Guide
    
-..    guide
+   tutorials/Polynomial_fitting
+   tutorials/Model_comparison
+   tutorials/Hyperparameter_tuning
+   tutorials/Feature_importances
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: API
+
+   api
+   api2
 
 
 

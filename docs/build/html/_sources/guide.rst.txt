@@ -1,18 +1,13 @@
 ..  _usage:
 
 
-Tutorials
-=========
+Polynomial regression
+=====================
 
-Here we layout some useful basic usage guides for the user. We start with an
-introduction to the :mod:`~tesuract.PCEBuilder` and the :mod:`~tesuract.PCEReg`
-classes, which are the building blocks of **tesuract**. They construct the
-multi-variate polynomial object and fit the coefficients using existing
-regression algorithms in scikit-learn. 
+Guide to polynomial fitting of single scalar targets. 
 
 .. toctree::
-   :maxdepth: 2
-   :titlesonly:
+   :maxdepth: 1
    
-   test_nb
+   tutorials/Polynomial_fitting
 

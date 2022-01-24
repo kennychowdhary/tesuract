@@ -151,8 +151,12 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			if isinstance(self.target_transform,Pipeline):
 				# print("Target Transform is a pipeline object. Cannot set internal parameters just yet.")
 				self.TT = self.target_transform
+			elif isinstance(self.target_transform,PCA):
+				# if instantiated PCA object, ok to set to target transform
+				self.TT = self.target_transform
 			else:
-				self.TT = self.target_transform(**self.target_transform_params)
+				# for uninstantiated input to target transform
+				self.TT = self.target_transform(**self.target_transform_params) 
 		self.TT.fit(Y)
 		return self
 	def fit(self,X,Y):

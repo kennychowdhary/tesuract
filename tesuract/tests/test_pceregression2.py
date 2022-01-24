@@ -12,6 +12,8 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import make_scorer
 from sklearn.model_selection import cross_val_score
 
+from sklearn.decomposition import PCA
+
 relpath = tesuract.__file__[:-11] # ignore the __init__.py specification
 print(relpath)
 
@@ -66,7 +68,7 @@ class TestPCERegression(unittest.TestCase):
 		# print(grid.cv_results_)
 		print("# times computed...", grid.best_estimator_._mindex_compute_count_)
 		assert grid.best_estimator_._mindex_compute_count_ == 1, "Best estimator should only compute mindex once!"
-	def test_feature_importance_friendman_example(self):
+	def test_feature_importance_friedman_example(self):
 		# this is a test to count the number of times mindex is computed
 		X, y = make_friedman1(n_samples=100, n_features=10, random_state=0)
 		X = 2*X - 1 # scale to [-1,1]
@@ -147,6 +149,48 @@ class TestMRegressionWrapper(unittest.TestCase):
 			return -mse	
 		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
 		target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components='auto',whiten=True,cutoff=.5)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=target_transform,
+							target_transform_params={},
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
+		regmodel.fit(X,Y)
+		start = T.time()
+		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+		print("total time is ", T.time() - start)
+
+		n_components = len(regmodel.best_params_)
+		reg_custom_list = ['pce' for i in range(n_components)]
+		reg_param_list = regmodel.best_params_
+		target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components=n_components,whiten=True)
+		regmodel_opt = tesuract.MRegressionWrapperCV(
+			regressor=reg_custom_list,
+			reg_params=reg_param_list,
+			custom_params = True,
+			target_transform=target_transform,
+			target_transform_params={},
+			n_jobs=-1,scorer=custom_scorer,
+			verbose=0)
+		start = T.time()
+		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
+		print("total time is ", T.time() - start)	
+	def test_simplified_model_fit_with_instantiated_PCA_target_transform(self):
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(1,3)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = ['pce']
+		param_list = [pce_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		# target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components='auto',whiten=True,cutoff=.5)
+		target_transform = PCA(n_components=2)
 		regmodel = tesuract.MRegressionWrapperCV(
 							regressor=regressors,
 							reg_params=param_list,

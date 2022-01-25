@@ -295,8 +295,9 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 	def score(self,X,Y):
 		Ypred = self.predict(X)
 		assert Ypred.shape == Y.shape, "predict and Y shape do not match."
-		MSPREs = [np.mean((1.0 - Ypred[t]/Y[t])**2) for t in range(Y.shape[0])]
-		return np.mean(MSPREs)
+		# MSPREs = [np.mean((1.0 - Ypred[t]/Y[t])**2) for t in range(Y.shape[0])]
+		MSPREs = [np.mean((Y[t] - Ypred[t])**2)/np.mean(Y[t]**2) for t in range(Y.shape[0])]
+		return -1*np.mean(MSPREs)
 	# add def for fitting multiple for each component for faster fitting
 
 class MPCEReg(BaseEstimator, RegressorMixin):

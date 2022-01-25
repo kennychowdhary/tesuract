@@ -112,6 +112,11 @@
    Feature Importances
   </a>
  </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="tutorials/Tensor_surrogates.html">
+   Tensor or field surrogates
+  </a>
+ </li>
 </ul>
 <p aria-level="2" class="caption" role="heading">
  <span class="caption-text">
@@ -122,6 +127,11 @@
  <li class="toctree-l1">
   <a class="reference internal" href="api.html">
    PCE Base Class
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="api2.html">
+   PCE Regression Class
   </a>
  </li>
 </ul>
@@ -228,7 +238,7 @@ using classic orthogonal polynomial constructions, e.g. Legendre polynomials. We
 use the scikit-learn API to build these estimators, which allows easy and seamless integration with the scikit-learn. Here is a list of the main features of this library.</p>
 <ul>
 <li><dl class="simple">
-<dt><strong>Integration with scikit-learn</strong></dt><dd><p>Both <a class="reference internal" href="api.html#tesuract.PCEBuilder" title="tesuract.PCEBuilder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEBuilder</span></code></a> and <a class="reference internal" href="api.html#tesuract.PCEReg" title="tesuract.PCEReg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEReg</span></code></a> classes for
+<dt><strong>Integration with scikit-learn</strong></dt><dd><p>Both <a class="reference internal" href="api.html#tesuract.PCEBuilder" title="tesuract.PCEBuilder"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEBuilder</span></code></a> and <a class="reference internal" href="api2.html#tesuract.PCEReg" title="tesuract.PCEReg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PCEReg</span></code></a> classes for
 constructing multivariate polynomial interpolation inherit the BaseEstimator class from scikit-learn. This means both these object integrate seamlessly with the scikit-learn environment, which, for example, allows one to use the grid search cross-validation wrapper or even third party libraries like skopt on top of these polynomial estimator classes.</p>
 </dd>
 </dl>

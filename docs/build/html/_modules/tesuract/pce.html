@@ -110,6 +110,11 @@
    Feature Importances
   </a>
  </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../tutorials/Tensor_surrogates.html">
+   Tensor or field surrogates
+  </a>
+ </li>
 </ul>
 <p aria-level="2" class="caption" role="heading">
  <span class="caption-text">
@@ -120,6 +125,11 @@
  <li class="toctree-l1">
   <a class="reference internal" href="../../api.html">
    PCE Base Class
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../../api2.html">
+   PCE Regression Class
   </a>
  </li>
 </ul>
@@ -870,7 +880,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">var</span> <span class="o">=</span> <span class="n">prob_weight</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">coef_</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">var</span></div></div>
 
-<div class="viewcode-block" id="PCEReg"><a class="viewcode-back" href="../../api.html#tesuract.PCEReg">[docs]</a><span class="k">class</span> <span class="nc">PCEReg</span><span class="p">(</span><span class="n">PCEBuilder</span><span class="p">,</span><span class="n">RegressorMixin</span><span class="p">):</span>
+<div class="viewcode-block" id="PCEReg"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg">[docs]</a><span class="k">class</span> <span class="nc">PCEReg</span><span class="p">(</span><span class="n">PCEBuilder</span><span class="p">,</span><span class="n">RegressorMixin</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Class for performing multivariate polynomial regression </span>
 
 <span class="sd">    This class fits the coefficients of a a multivariate polynomial object, aka</span>
@@ -1005,7 +1015,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">input_range</span> <span class="o">=</span> <span class="n">input_range</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">=</span> <span class="n">normalized</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span><span class="n">customM</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">customM</span><span class="p">,</span><span class="n">mindex_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mindex_type</span><span class="p">,</span><span class="n">coef</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">coef</span><span class="p">,</span><span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span><span class="n">polytype</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">polytype</span><span class="p">,</span><span class="n">normalized</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">,</span><span class="n">store_phi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">store_phi</span><span class="p">,</span><span class="n">input_range</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_range</span><span class="p">)</span>
-<div class="viewcode-block" id="PCEReg._compile"><a class="viewcode-back" href="../../api.html#tesuract.PCEReg._compile">[docs]</a>    <span class="k">def</span> <span class="nf">_compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
+<div class="viewcode-block" id="PCEReg._compile"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg._compile">[docs]</a>    <span class="k">def</span> <span class="nf">_compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Builds the multiindex using the PCEBuilder class. Private. </span>
 <span class="sd">        </span>
 <span class="sd">        Parameters</span>
@@ -1029,7 +1039,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiindex</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Xhat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span></div>
-<div class="viewcode-block" id="PCEReg._quad_fit"><a class="viewcode-back" href="../../api.html#tesuract.PCEReg._quad_fit">[docs]</a>    <span class="k">def</span> <span class="nf">_quad_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="PCEReg._quad_fit"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg._quad_fit">[docs]</a>    <span class="k">def</span> <span class="nf">_quad_fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Fit the coefficients of the polynomial model using quadrature points and weights</span>
 
@@ -1058,7 +1068,7 @@
         <span class="k">else</span><span class="p">:</span>   
             <span class="bp">self</span><span class="o">.</span><span class="n">coef</span> <span class="o">=</span> <span class="n">int_fact</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span><span class="o">*</span><span class="n">y</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Xhat</span><span class="p">)</span><span class="o">/</span><span class="n">normsq</span>
         <span class="k">return</span> <span class="bp">self</span></div>
-<div class="viewcode-block" id="PCEReg.fit"><a class="viewcode-back" href="../../api.html#tesuract.PCEReg.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
+<div class="viewcode-block" id="PCEReg.fit"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg.fit">[docs]</a>    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">y</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Fit the polynomial using linear regression or quadrature solvers</span>
 
@@ -1148,7 +1158,7 @@
     <span class="k">def</span> <span class="nf">sensitivity_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">coef</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Must run fit or feed in coef array.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">computeSobol</span><span class="p">()</span>
-<div class="viewcode-block" id="PCEReg.feature_importances"><a class="viewcode-back" href="../../api.html#tesuract.PCEReg.feature_importances">[docs]</a>    <span class="k">def</span> <span class="nf">feature_importances</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PCEReg.feature_importances"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg.feature_importances">[docs]</a>    <span class="k">def</span> <span class="nf">feature_importances</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Compute feature importances which are equivalent to the normalized Sobol total order sensitivity indices. </span>
 
@@ -1167,7 +1177,7 @@
         <span class="n">S</span> <span class="o">=</span> <span class="n">S</span><span class="o">/</span><span class="n">S</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">feature_importances_</span> <span class="o">=</span> <span class="n">S</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">feature_importances_</span></div>
-<div class="viewcode-block" id="PCEReg.joint_effects"><a class="viewcode-back" href="../../api.html#tesuract.PCEReg.joint_effects">[docs]</a>    <span class="k">def</span> <span class="nf">joint_effects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="PCEReg.joint_effects"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg.joint_effects">[docs]</a>    <span class="k">def</span> <span class="nf">joint_effects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Compute Sobol joint effect sensitivity indices. </span>
 
@@ -1188,7 +1198,7 @@
     <span class="k">def</span> <span class="nf">multiindex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Must run fit or feed in mindex array.&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_M</span>
-<div class="viewcode-block" id="PCEReg.predict"><a class="viewcode-back" href="../../api.html#tesuract.PCEReg.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
+<div class="viewcode-block" id="PCEReg.predict"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg.predict">[docs]</a>    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">X</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39; </span>
 <span class="sd">        After fitting, evaluates the polynomial for a single feature space sample or array of samples. </span>
 

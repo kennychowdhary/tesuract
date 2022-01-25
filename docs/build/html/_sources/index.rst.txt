@@ -71,6 +71,13 @@ That's it! [#]_ You've fit your first polynomial chaos expansion (PCE) using tes
    tutorials/Model_comparison
    tutorials/Hyperparameter_tuning
    tutorials/Feature_importances
+   tutorials/Tensor_surrogates
+
+.. .. toctree::
+..    :caption: Tutorials
+
+..    guide1
+..    guide2
 
 
 .. toctree::
@@ -90,8 +97,8 @@ Indices and tables
 * :ref:`search`
 
 
-.. [#] Python 3+ is required and tesuract has only been tested for 
-         3.7.6 so far. 
+.. [#] Python 3+ is required and tesuract has been tested for 
+         3.7.6 and 3.8.10 so far. 
 
 .. [#] In short, a :math:`4^{th}` order polynomial means that the
        terms are no higher than an :math:`x_i^4` for each dimension. 

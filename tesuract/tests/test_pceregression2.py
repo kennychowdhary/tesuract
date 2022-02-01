@@ -178,6 +178,71 @@ class TestMRegressionWrapper(unittest.TestCase):
 		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 		print("total time is ", T.time() - start)	
+	def test_simplified_model_fit_with_uninstantiated_PCA_target_transform(self):
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(1,3)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = ['pce']
+		param_list = [pce_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		# target_transform = tesuract.preprocessing.target_pipeline_custom(log=False,scale=False,pca=True,n_components='auto',whiten=True,cutoff=.5)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=PCA,
+							target_transform_params={'n_components':4},
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
+		regmodel._fit_target_transform(Y)
+	def test_target_transform_has_certain_attributes_without_target_instantiation(self):
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(1,3)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = ['pce']
+		param_list = [pce_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		# FactorAnalysis which has no inverse transform
+		from sklearn.decomposition import FactorAnalysis
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=FactorAnalysis,
+							target_transform_params={'n_components':8},
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
+		with self.assertRaises(Exception):
+			regmodel._fit_target_transform(Y)
+	def test_target_transform_has_certain_attributes_w_target_instantiation(self):
+		X,Y = self.X, self.Y
+		pce_grid = [{'order': list(range(1,3)),
+					'mindex_type': ['total_order'],
+					'fit_type': ['LassoCV']}]
+		regressors = ['pce']
+		param_list = [pce_grid]
+		def my_scorer(ytrue,ypred):
+			mse = np.mean((ytrue - ypred)**2)/np.mean(ytrue**2)
+			return -mse	
+		custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+		# FactorAnalysis which has no inverse transform
+		from sklearn.decomposition import FactorAnalysis
+		FA = FactorAnalysis(n_components=4)
+		regmodel = tesuract.MRegressionWrapperCV(
+							regressor=regressors,
+							reg_params=param_list,
+							target_transform=FA,
+							target_transform_params=None,
+							n_jobs=-1,scorer=custom_scorer,
+							verbose=0)
+		with self.assertRaises(Exception):
+			regmodel._fit_target_transform(Y)
 	def test_simplified_model_fit_with_instantiated_PCA_target_transform(self):
 		X,Y = self.X, self.Y
 		pce_grid = [{'order': list(range(1,3)),

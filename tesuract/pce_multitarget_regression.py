@@ -20,7 +20,8 @@ from sklearn.kernel_ridge import KernelRidge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 
-from alive_progress import alive_bar
+# from alive_progress import alive_bar
+from tqdm import tqdm
 		
 class RegressionWrapperCV(BaseEstimator):
 	def __init__(self,regressor='pce',reg_params={},scorer='neg_root_mean_squared_error',n_jobs=1,verbose=1,cv=None):
@@ -151,12 +152,21 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 			if isinstance(self.target_transform,Pipeline):
 				# print("Target Transform is a pipeline object. Cannot set internal parameters just yet.")
 				self.TT = self.target_transform
-			elif isinstance(self.target_transform,PCA):
-				# if instantiated PCA object, ok to set to target transform
-				self.TT = self.target_transform
+			# elif isinstance(self.target_transform,PCA):
+			# 	# if instantiated PCA object, ok to set to target transform
+			# 	self.TT = self.target_transform
 			else:
-				# for uninstantiated input to target transform
-				self.TT = self.target_transform(**self.target_transform_params) 
+				if isinstance(self.target_transform,type): 
+					# Allow user to pass uninstantiated class
+					# for uninstantiated input to target transform
+					self.TT = self.target_transform(**self.target_transform_params)
+				else:
+					# Allow user to pass an instantiated class
+					self.TT = self.target_transform 
+				assert hasattr(self.target_transform,'fit'), "transform object is instantiated and must have a fit method."
+				assert hasattr(self.target_transform,'transform'),"transform object is instantiated and must have a transform method."
+				assert hasattr(self.target_transform,'inverse_transform'),"transform object is instantiated and must have an inverse_transform method."
+
 		self.TT.fit(Y)
 		return self
 	def fit(self,X,Y):
@@ -198,40 +208,40 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 		# 	reg_params = [reg_params for i in range(len(regressor))]
 		# 	print(reg_params, regressor)
 		res = defaultdict(list)
-		with alive_bar(self.ntargets) as bar:
-			for i in range(self.ntargets): #tqdm(range(self.ntargets)):
-				if self.custom_params:
-					# fit a single regressor to each target
-					assert len(regressor) == len(reg_params)
-					assert len(regressor) == self.ntargets
-					reg = RegressionWrapperCV(
-						regressor=[regressor[i]],reg_params=[reg_params[i]],
-						n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
-					reg.fit(X, Y[:, i])
-					res['best_estimators_'].append(reg.best_estimator_)
-					res['best_params_'].append(reg.best_params_)
-					res['best_scores_'].append(reg.best_score_)
-					dict_scores_ = {regressor[i]:reg.best_scores_}
-					res['best_scores_all_'].append(dict_scores_)
-					res['best_overfit_error_'].append(reg.best_overfit_error_)
-					res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
-					res['best_index_'].append(reg.best_index_) # index of best score
-					# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
-				else:
-					reg = RegressionWrapperCV(
-						regressor=regressor,reg_params=reg_params,
-						n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
-					reg.fit(X, Y[:, i])
-					res['best_estimators_'].append(reg.best_estimator_)
-					res['best_params_'].append(reg.best_params_)
-					res['best_scores_'].append(reg.best_score_)
-					dict_scores_ = {regressor[j]:reg.best_scores_[j] for j in range(len(regressor))}
-					res['best_scores_all_'].append(dict_scores_)
-					res['best_overfit_error_'].append(reg.best_overfit_error_)
-					res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
-					res['best_index_'].append(reg.best_index_) # index of best score
-					# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
-				bar()
+		# with alive_bar(self.ntargets) as bar:
+		for i in tqdm(range(self.ntargets)):
+			if self.custom_params:
+				# fit a single regressor to each target
+				assert len(regressor) == len(reg_params)
+				assert len(regressor) == self.ntargets
+				reg = RegressionWrapperCV(
+					regressor=[regressor[i]],reg_params=[reg_params[i]],
+					n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
+				reg.fit(X, Y[:, i])
+				res['best_estimators_'].append(reg.best_estimator_)
+				res['best_params_'].append(reg.best_params_)
+				res['best_scores_'].append(reg.best_score_)
+				dict_scores_ = {regressor[i]:reg.best_scores_}
+				res['best_scores_all_'].append(dict_scores_)
+				res['best_overfit_error_'].append(reg.best_overfit_error_)
+				res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
+				res['best_index_'].append(reg.best_index_) # index of best score
+				# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
+			else:
+				reg = RegressionWrapperCV(
+					regressor=regressor,reg_params=reg_params,
+					n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
+				reg.fit(X, Y[:, i])
+				res['best_estimators_'].append(reg.best_estimator_)
+				res['best_params_'].append(reg.best_params_)
+				res['best_scores_'].append(reg.best_score_)
+				dict_scores_ = {regressor[j]:reg.best_scores_[j] for j in range(len(regressor))}
+				res['best_scores_all_'].append(dict_scores_)
+				res['best_overfit_error_'].append(reg.best_overfit_error_)
+				res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
+				res['best_index_'].append(reg.best_index_) # index of best score
+				# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
+			# bar()
 		self.__dict__.update(res)
 		return res
 	def fit_multiple_reg(self, X, Y):
@@ -361,20 +371,20 @@ class MPCEReg(BaseEstimator, RegressorMixin):
 			regressor = [regressor for i in range(self.ntargets)]
 			reg_params = [reg_params for i in range(self.ntargets)]
 		res = defaultdict(list)
-		with alive_bar(self.ntargets) as bar:
-			for i in range(self.ntargets):
-				reg = RegressionWrapperCV(
-					regressor=[regressor[i]],reg_params=[reg_params[i]],
-					n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
-				reg.fit(X, Y[:, i])
-				res['best_estimators_'].append(reg.best_estimator_)
-				res['best_params_'].append(reg.best_params_)
-				res['best_scores_'].append(reg.best_score_)
-				res['best_overfit_error_'].append(reg.best_overfit_error_)
-				res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
-				res['best_index_'].append(reg.best_index_) # index of best score
-				# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
-				bar()
+		# with alive_bar(self.ntargets) as bar:
+		for i in tqdm(range(self.ntargets)):
+			reg = RegressionWrapperCV(
+				regressor=[regressor[i]],reg_params=[reg_params[i]],
+				n_jobs=self.n_jobs, scorer=self.scorer, cv=self.cv, verbose=self.verbose)
+			reg.fit(X, Y[:, i])
+			res['best_estimators_'].append(reg.best_estimator_)
+			res['best_params_'].append(reg.best_params_)
+			res['best_scores_'].append(reg.best_score_)
+			res['best_overfit_error_'].append(reg.best_overfit_error_)
+			res['cv_results_'].append(reg.cv_results_) # cv results from best regressor in list
+			res['best_index_'].append(reg.best_index_) # index of best score
+			# res['all_cv_results_'].append(reg.all_cv_results_) # all cv results from all regressor in list
+			# bar()
 		self.__dict__.update(res)
 		return res
 	def fit_multiple_reg(self, X, Y):

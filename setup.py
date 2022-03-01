@@ -5,7 +5,7 @@ def readme():
         return f.read()
 
 setup(name='tesuract',
-      version='1.0',
+      version='1.0.1',
       description='Tensor surrogate construction methods',
       long_description='UQ and ML tools for surrogate construction',
       url='https://github.com/kennychowdhary/tesuract',
@@ -18,8 +18,7 @@ setup(name='tesuract',
       install_requires=[
           'numpy',
           'sklearn',
-          'tqdm',
-          'alive-progress'
+          'tqdm'
       ],
       include_package_data=True,
       zip_safe=False)

@@ -1,0 +1,695 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tensor or field surrogates &#8212; tesuract 1.0 documentation</title>
+    
+  <link href="../_static/css/theme.css" rel="stylesheet">
+  <link href="../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+
+    
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-book-theme.css?digest=84ace793992934648b4de8eed757e5a2" />
+    <link rel="stylesheet" href="../_static/style.css" type="text/css" />
+    
+  <link rel="preload" as="script" href="../_static/js/index.be7d3bbb2ef33a8344ce.js">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/sphinx-book-theme.9d8b4a8b9bb19db25eeaddc40d639ba2.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="PCE Base Class" href="../api.html" />
+    <link rel="prev" title="Feature Importances" href="Feature_importances.html" />
+    <link href="../_static/style.css" rel="stylesheet" type="text/css">
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+<!-- Checkboxes to toggle the left sidebar -->
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle navigation sidebar">
+<label class="overlay" for="__navigation">
+    <div class="visually-hidden">Toggle navigation sidebar</div>
+</label>
+<div class="col-12 col-md-3 bd-sidebar site-navigation " id="site-navigation">
+    
+        <div class="navbar-brand-box">
+    <a class="navbar-brand text-wrap" href="../index.html">
+      
+      
+      
+      <h1 class="site-logo" id="site-title">tesuract 1.0 documentation</h1>
+      
+    </a>
+</div><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item active">
+        <p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  Introduction
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../introduction.html">
+   Main features
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../install.html">
+   Installation
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  User Guide
+ </span>
+</p>
+<ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="Polynomial_fitting.html">
+   Fitting with sklearn’s API
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Model_comparison.html">
+   Model comparison
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Hyperparameter_tuning.html">
+   Hyper-parameter tuning
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="Feature_importances.html">
+   Feature Importances
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Tensor or field surrogates
+  </a>
+ </li>
+</ul>
+<p aria-level="2" class="caption" role="heading">
+ <span class="caption-text">
+  API
+ </span>
+</p>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="../api.html">
+   PCE Base Class
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="../api2.html">
+   PCE Regression Class
+  </a>
+ </li>
+</ul>
+
+    </div>
+</nav> <!-- To handle the deprecated key -->
+
+<div class="navbar_extra_footer">
+  Theme by the <a href="https://ebp.jupyterbook.org">Executable Book Project</a>
+</div>
+
+</div>
+
+
+          
+
+
+          
+<!-- This is an invisible pixel that we watch to see if we've scrolled. -->
+<div class="sbt-scroll-pixel-helper"></div>
+<main class="col py-md-3 pl-md-4 bd-content overflow-auto" role="main">
+    
+    <div class="topbar container-xl fixed-top">
+    <div class="topbar-contents row">
+        <div class="col-12 col-md-3 bd-topbar-whitespace site-navigation show"></div>
+        <div class="col pl-md-4 topbar-main">
+            <div class="topbar-left">
+                
+                <label class="nav-toggle-button" for="__navigation">
+                    <div class="visually-hidden">Toggle navigation</div>
+                    <i class="fas fa-bars"></i>
+                </label>
+                
+            </div>
+            
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn" aria-label="Download this page"><i
+            class="fas fa-download"></i></button>
+
+    <div class="dropdown-buttons">
+        <!-- ipynb file if we had a myst markdown file -->
+        
+        <!-- Download raw file -->
+        <a class="dropdown-buttons" href="../_sources/tutorials/Tensor_surrogates.rst.txt"><button type="button"
+                class="btn btn-secondary topbarbtn" title="Download source file" data-toggle="tooltip"
+                data-placement="left">.rst</button></a>
+        <!-- Download PDF via print -->
+        <button type="button" id="download-print" class="btn btn-secondary topbarbtn" title="Print to PDF"
+                onclick="printPdf(this)" data-toggle="tooltip" data-placement="left">.pdf</button>
+    </div>
+</div>
+
+            <!-- Source interaction buttons -->
+
+<div class="dropdown-buttons-trigger">
+    <button id="dropdown-buttons-trigger" class="btn btn-secondary topbarbtn"
+        aria-label="Connect with source repository"><i class="fab fa-github"></i></button>
+    <div class="dropdown-buttons sourcebuttons">
+        <a class="repository-button"
+            href="https://github.com/kennychowdhary/tesuract"><button type="button" class="btn btn-secondary topbarbtn"
+                data-toggle="tooltip" data-placement="left" title="Source repository"><i
+                    class="fab fa-github"></i>repository</button></a>
+        
+        
+    </div>
+</div>
+
+            <!-- Full screen (wrap in <a> to have style consistency -->
+
+<a class="full-screen-button"><button type="button" class="btn btn-secondary topbarbtn" data-toggle="tooltip"
+        data-placement="bottom" onclick="toggleFullScreen()" aria-label="Fullscreen mode"
+        title="Fullscreen mode"><i
+            class="fas fa-expand"></i></button></a>
+
+            <!-- Launch buttons -->
+
+        </div>
+
+        <!-- Table of contents -->
+        <div class="d-none d-md-block col-md-2 bd-toc show noprint">
+            
+            <div class="tocsection onthispage pt-5 pb-3">
+                <i class="fas fa-list"></i> Contents
+            </div>
+            <nav id="bd-toc-nav" aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#pca-target-transform">
+   PCA target transform
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#scoring-tensor-surrogate-estimators">
+   Scoring tensor surrogate estimators
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#custom-scorer-for-field-functions">
+   Custom scorer for field functions
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#more-advanced-hyper-parameter-tuning">
+   More advanced hyper-parameter tuning
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#mixed-regression-models">
+     Mixed regression models
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+            </nav>
+        </div>
+    </div>
+</div>
+    <div id="main-content" class="row">
+        <div class="col-12 col-md-9 pl-md-3 pr-md-0">
+            <!-- Table of contents that is only displayed when printing the page -->
+            <div id="jb-print-docs-body" class="onlyprint">
+                <h1>Tensor or field surrogates</h1>
+                <!-- Table of contents -->
+                <div id="print-main-content">
+                    <div id="jb-print-toc">
+                        
+                        <div>
+                            <h2> Contents </h2>
+                        </div>
+                        <nav aria-label="Page">
+                            <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#pca-target-transform">
+   PCA target transform
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#scoring-tensor-surrogate-estimators">
+   Scoring tensor surrogate estimators
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#custom-scorer-for-field-functions">
+   Custom scorer for field functions
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#more-advanced-hyper-parameter-tuning">
+   More advanced hyper-parameter tuning
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#mixed-regression-models">
+     Mixed regression models
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+                        </nav>
+                    </div>
+                </div>
+            </div>
+            
+              <div>
+                
+  <div class="section" id="tensor-or-field-surrogates">
+<h1>Tensor or field surrogates<a class="headerlink" href="#tensor-or-field-surrogates" title="Permalink to this headline">¶</a></h1>
+<p>In order to fit tensors or fields, i.e., a multi-output or multi-target
+machine learning regression, we can utilize the multiple PCE regression
+wrapper which is part of tesuract’s toolbox.</p>
+<p>In a nutshell, tesuract uses sklearn’s Pipeline machinery to (1)
+transform the target into a lower-dimensional latent space, typically
+through PCA, (2) then creates a separately tuned surrogate for each of
+the latent space dimensions, and then (3) projects the solution back
+into the physical space.</p>
+<p>This is summarized in the image below.</p>
+<div class="figure align-default" id="id1">
+<img alt="tesuract_pipeline.png" src="../_images/tesuract_pipeline.png" />
+<p class="caption"><span class="caption-text">tesuract_pipeline.png</span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
+</div>
+<p>Let’s see how to perform this fit using the tools in tesuract. First, we
+will need to import a relevant data set which we have conveniently added
+to the data folder in the tests directory.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tesuract</span>
+<span class="o">%</span><span class="k">matplotlib</span> inline
+
+<span class="c1"># load the relevant data set</span>
+<span class="n">loaddir</span> <span class="o">=</span> <span class="s2">&quot;../../../tesuract/tests/data/&quot;</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;rom_test_X.txt&quot;</span><span class="p">)</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="s2">&quot;rom_test_Y.txt&quot;</span><span class="p">)</span>
+
+<span class="c1"># print out the shapes of the input and output</span>
+<span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">Y</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">288</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>As one can see, the input is a two-dimensional feature space, but the
+output is a 288-dimensional field or tensor.</p>
+<p>Now, we can fit each and every one of the 288 outputs with a ML
+regressor, but if we were to utilize hyper-parameter tuning (and we
+should if we can), this would be extremely expensive and cumbersome.</p>
+<p>Instead, we introduce a target transform which takes the output and
+projects it onto a lower-dimensional latent space, after which, we do
+all our fitting.</p>
+<div class="section" id="pca-target-transform">
+<h2>PCA target transform<a class="headerlink" href="#pca-target-transform" title="Permalink to this headline">¶</a></h2>
+<p>Let’s define a simple target transform using sklearn’s PCA with say 4
+components. In general, we can make the choice of this automatic, but
+for now, let’s define the number of components or latent space
+dimensions. All we need to do is call sklearn’s PCA and feed it in some
+parameter options as a dictionary.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
+</pre></div>
+</div>
+<p>Now, all we do is call <code class="docutils literal notranslate"><span class="pre">tesuract.MRegressionWrapperCV</span></code> which is almost
+identical to <code class="docutils literal notranslate"><span class="pre">tesuract.RegressionWrapperCV</span></code> except that we can feed it
+in a target transform (Note that any sklearn transform will work here,
+even a simple scalar transform, although that doesn’t save you in terms
+of computational cost).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># define pce grid again</span>
+<span class="n">pce_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">)),</span>
+    <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;total_order&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+<span class="n">mpce</span> <span class="o">=</span> <span class="n">tesuract</span><span class="o">.</span><span class="n">MRegressionWrapperCV</span><span class="p">(</span>
+    <span class="n">regressor</span><span class="o">=</span><span class="s1">&#39;pce&#39;</span><span class="p">,</span>
+    <span class="n">reg_params</span><span class="o">=</span><span class="n">pce_grid</span><span class="p">,</span>
+    <span class="n">target_transform</span><span class="o">=</span><span class="n">PCA</span><span class="p">,</span>
+    <span class="n">target_transform_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;n_components&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">})</span>
+</pre></div>
+</div>
+<p>And that’s it! Now we can feed it in our multi-target training data pair
+(X,Y). This will take a little bit of time since we are fitting each of
+the 8 components with a PCE. While this is done in serial, each
+hyper-parameter search is done in parallel.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mpce</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>on 0: Fitting 5 folds for each of 7 candidates, totalling 35 fits
+on 1: Fitting 5 folds for each of 7 candidates, totalling 35 fits
+on 2: Fitting 5 folds for each of 7 candidates, totalling 35 fits
+on 3: Fitting 5 folds for each of 7 candidates, totalling 35 fits
+|████████████████████████████████████████| 4/4 [100%] in 5.8s (0.70/s)
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MRegressionWrapperCV(cv=KFold(n_splits=5, random_state=None, shuffle=False),
+                     reg_params={&#39;fit_type&#39;: [&#39;ElasticNetCV&#39;],
+                                 &#39;mindex_type&#39;: [&#39;total_order&#39;],
+                                 &#39;order&#39;: [1, 2, 3, 4, 5, 6, 7]},
+                     target_transform=&lt;class &#39;sklearn.decomposition._pca.PCA&#39;&gt;,
+                     target_transform_params={&#39;n_components&#39;: 4})
+</pre></div>
+</div>
+<p>Once this is complete, we can view the best estimators for each of the
+components, along with their respective scores and parameters.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># show the parameters of the best fit PCEs for the four components</span>
+<span class="n">mpce</span><span class="o">.</span><span class="n">best_params_</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="s1">&#39;total_order&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="s1">&#39;total_order&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="s1">&#39;total_order&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="s1">&#39;total_order&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}]</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># extract the best estimators for each component</span>
+<span class="n">best_estimators</span> <span class="o">=</span> <span class="n">mpce</span><span class="o">.</span><span class="n">best_estimators_</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># we can also output the best scores, which by default is the</span>
+<span class="c1">#   negative root mean squared error</span>
+<span class="c1"># Note that this can be set to any number of the regression scores</span>
+<span class="c1">#   used in sklearn&#39;s metric library.</span>
+<span class="n">mpce</span><span class="o">.</span><span class="n">best_scores_</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">-</span><span class="mf">49.341166974922444</span><span class="p">,</span>
+ <span class="o">-</span><span class="mf">23.822169033173523</span><span class="p">,</span>
+ <span class="o">-</span><span class="mf">24.2500961913357</span><span class="p">,</span>
+ <span class="o">-</span><span class="mf">14.222838497441805</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To make predictions using the best estimators, one can simply use the
+predict method, which is automatically use the best estimators to make
+the prediction.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mpce</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">5.9192281</span> <span class="p">,</span> <span class="o">-</span><span class="mf">6.29485307</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.29485307</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>
+         <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">5.84729987</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.19757176</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.19757176</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>
+         <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">5.95122359</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.34418361</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.34418361</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>
+         <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">],</span>
+       <span class="o">...</span><span class="p">,</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">5.89743814</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.26569268</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.26569268</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>
+         <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">5.80345682</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.13921674</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.13921674</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>
+         <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">5.94735135</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.39569148</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.39569148</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span>  <span class="mf">0.</span>        <span class="p">,</span>
+         <span class="mf">0.</span>        <span class="p">,</span>  <span class="mf">0.</span>        <span class="p">]])</span>
+</pre></div>
+</div>
+<p>Note that one can define a whole slew of options in the PCE parameter
+grid. For example, when using LassoCV, it might be necessary to increase
+the maximum iteration or the tolerance. In this case, one can easily
+modify the grid to look like the following.</p>
+</div>
+<div class="section" id="scoring-tensor-surrogate-estimators">
+<h2>Scoring tensor surrogate estimators<a class="headerlink" href="#scoring-tensor-surrogate-estimators" title="Permalink to this headline">¶</a></h2>
+<p>Once we obtain a set of best estimators for each component, we have our
+full tensor surrogate model. Moreover, we have a sense of how good it is
+by looking at the cross-validation scores for each latent space fitting.
+However, a more accurate score would be to look at the cross-validation
+values for the full model in the physical space (not the latent space).</p>
+<p>The simplest way to compute this would be to pass the <code class="docutils literal notranslate"><span class="pre">mpce</span></code> object to
+the <code class="docutils literal notranslate"><span class="pre">cross_val_score</span></code> method in sklearn’s toolbox. The draw back here
+is that for each train/ test split, it will perform a completely new
+hyper-parameter grid search over the original parameter grid. This can
+be computationally burdensome. Instead, we can create a surrogate clone
+using the selected set of best parameters from the calculations above.</p>
+<p>In the future, we should make this clone easily extractable from the
+tool box, but for now, we can manually create a cloned surrogate with
+predefined parameter grids corresponding to the optimal findings.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set the number of component to model value</span>
+<span class="n">n_components</span> <span class="o">=</span> <span class="mi">4</span>
+
+<span class="c1"># We will feed MRregressionWrapperCV a list of regressors</span>
+<span class="c1">#     and parameter grid specifying the exact values</span>
+<span class="n">reg_custom_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pce&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_components</span><span class="p">)]</span>
+<span class="n">reg_param_list</span> <span class="o">=</span> <span class="n">mpce</span><span class="o">.</span><span class="n">best_params_</span> <span class="c1"># important step to speed up cv score</span>
+
+<span class="c1"># now we create a clone of the surrogate setting custom_params=True</span>
+<span class="n">clone</span> <span class="o">=</span> <span class="n">tesuract</span><span class="o">.</span><span class="n">MRegressionWrapperCV</span><span class="p">(</span>
+    <span class="n">regressor</span><span class="o">=</span><span class="n">reg_custom_list</span><span class="p">,</span>
+    <span class="n">reg_params</span><span class="o">=</span><span class="n">reg_param_list</span><span class="p">,</span>
+    <span class="n">custom_params</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">target_transform</span><span class="o">=</span><span class="n">PCA</span><span class="p">(</span><span class="n">n_components</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+    <span class="n">target_transform_params</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">n_jobs</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, we can feed the clone function into sklearn’s cross validation
+score.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">cross_val_score</span>
+<span class="n">mpce_score</span> <span class="o">=</span> <span class="n">cross_val_score</span><span class="p">(</span><span class="n">clone</span><span class="p">,</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;PCE score is </span><span class="si">{0:.3f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mpce_score</span><span class="o">.</span><span class="n">mean</span><span class="p">()))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>|████████████████████████████████████████| 4/4 [100%] in 0.7s (5.46/s)
+|████████████████████████████████████████| 4/4 [100%] in 0.7s (5.59/s)
+|████████████████████████████████████████| 4/4 [100%] in 0.7s (5.92/s)
+|████████████████████████████████████████| 4/4 [100%] in 0.8s (5.06/s)
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">on</span> <span class="mi">0</span><span class="p">:</span> <span class="o">/</span><span class="n">Users</span><span class="o">/</span><span class="n">kchowdh</span><span class="o">/.</span><span class="n">pyenv</span><span class="o">/</span><span class="n">versions</span><span class="o">/</span><span class="mf">3.8.10</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="mf">.8</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">sklearn</span><span class="o">/</span><span class="n">linear_model</span><span class="o">/</span><span class="n">_coordinate_descent</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">633</span><span class="p">:</span> <span class="n">ConvergenceWarning</span><span class="p">:</span> <span class="n">Objective</span> <span class="n">did</span> <span class="ow">not</span> <span class="n">converge</span><span class="o">.</span> <span class="n">You</span> <span class="n">might</span> <span class="n">want</span> <span class="n">to</span> <span class="n">increase</span> <span class="n">the</span> <span class="n">number</span> <span class="n">of</span> <span class="n">iterations</span><span class="o">.</span> <span class="n">Duality</span> <span class="n">gap</span><span class="p">:</span> <span class="mf">2310.710683199475</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span> <span class="mf">1805.4727026258927</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">cd_fast</span><span class="o">.</span><span class="n">enet_coordinate_descent_gram</span><span class="p">(</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>|████████████████████████████████████████| 4/4 [100%] in 0.7s (5.52/s)
+PCE score is -0.007
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># default score is a negative relative error but can be modified with any</span>
+<span class="c1">#    custom scorer</span>
+<span class="n">mpce_score</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mf">0.00857342</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00740425</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00610879</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00652324</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.00651267</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="custom-scorer-for-field-functions">
+<h2>Custom scorer for field functions<a class="headerlink" href="#custom-scorer-for-field-functions" title="Permalink to this headline">¶</a></h2>
+<p>Here is a simple example of a custom relative error scorer for field
+functions. One can also use something as simple as an R-squared score,
+which compute the traditional scalar R-squared score for each target and
+then averages them together.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># example custom scorer</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">make_scorer</span>
+<span class="k">def</span> <span class="nf">my_scorer</span><span class="p">(</span><span class="n">ytrue</span><span class="p">,</span><span class="n">ypred</span><span class="p">):</span>
+    <span class="c1"># (negative) relative mean square error score</span>
+    <span class="n">mse</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">ytrue</span> <span class="o">-</span> <span class="n">ypred</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">ytrue</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="n">mse</span>
+<span class="n">custom_scorer</span> <span class="o">=</span> <span class="n">make_scorer</span><span class="p">(</span><span class="n">my_scorer</span><span class="p">,</span> <span class="n">greater_is_better</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="more-advanced-hyper-parameter-tuning">
+<h2>More advanced hyper-parameter tuning<a class="headerlink" href="#more-advanced-hyper-parameter-tuning" title="Permalink to this headline">¶</a></h2>
+<p>In some cases, it may be useful to more explicity with the parameter
+grid. In this case, we will define a different parameter grid for
+LassoCV than for ElasticNet. Moreover, we will utilize a different
+constructor for the parameter grid where we input a list instead of a
+string. The neat thing with this approach is that we can feed our
+resuract regressor a bunch of different machine learning regressors and
+it will return the best among them. Moreso, for the multi-target tensor
+fits, it can possibly return a mixed model where some component may be a
+different type of ML model!</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># PCE grid with different parameters for ElasticNetCV vs LassoCV</span>
+<span class="n">pce_grid</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)),</span>
+    <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;total_order&#39;</span><span class="p">,</span><span class="s1">&#39;hyperbolic&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;fit_params&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;alphas&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span><span class="s1">&#39;max_iter&#39;</span><span class="p">:</span><span class="mi">100000</span><span class="p">,</span><span class="s1">&#39;tol&#39;</span><span class="p">:</span><span class="mf">5e-2</span><span class="p">}]</span>
+    <span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)),</span>
+    <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;total_order&#39;</span><span class="p">,</span><span class="s1">&#39;hyperbolic&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;LassoCV&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;fit_params&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;alphas&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">15</span><span class="p">),</span><span class="s1">&#39;max_iter&#39;</span><span class="p">:</span><span class="mi">500000</span><span class="p">,</span><span class="s1">&#39;tol&#39;</span><span class="p">:</span><span class="mf">1.5e-1</span><span class="p">}]}</span>
+     <span class="p">]</span>
+
+<span class="c1"># Construct a surrogate by feeding in a list of regressors and grids</span>
+<span class="n">mpce2</span> <span class="o">=</span> <span class="n">tesuract</span><span class="o">.</span><span class="n">MRegressionWrapperCV</span><span class="p">(</span>
+    <span class="n">regressor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pce&#39;</span><span class="p">],</span>
+    <span class="n">reg_params</span><span class="o">=</span><span class="p">[</span><span class="n">pce_grid</span><span class="p">],</span>
+    <span class="n">target_transform</span><span class="o">=</span><span class="n">PCA</span><span class="p">,</span>
+    <span class="n">target_transform_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;n_components&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">})</span>
+
+<span class="c1"># mpce2.fit(X,Y)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mpce</span><span class="o">.</span><span class="n">best_params_</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="s1">&#39;total_order&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="s1">&#39;total_order&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="s1">&#39;total_order&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="s1">&#39;total_order&#39;</span><span class="p">,</span> <span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}]</span>
+</pre></div>
+</div>
+<div class="section" id="mixed-regression-models">
+<h3>Mixed regression models<a class="headerlink" href="#mixed-regression-models" title="Permalink to this headline">¶</a></h3>
+<p>Let’s take the above and also compare to random forests!</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+
+<span class="n">pce_grid</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;order&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">)),</span>
+    <span class="s1">&#39;mindex_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;total_order&#39;</span><span class="p">,</span><span class="s1">&#39;hyperbolic&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;fit_type&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span><span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;fit_params&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;alphas&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="o">-</span><span class="mi">8</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">20</span><span class="p">),</span><span class="s1">&#39;max_iter&#39;</span><span class="p">:</span><span class="mi">100000</span><span class="p">,</span><span class="s1">&#39;tol&#39;</span><span class="p">:</span><span class="mf">5e-2</span><span class="p">}]</span>
+    <span class="p">}]</span>
+
+<span class="n">rf_grid</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;n_estimators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">200</span><span class="p">,</span><span class="mi">500</span><span class="p">],</span>
+    <span class="s1">&#39;max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">10</span><span class="p">]</span>
+    <span class="p">}</span>
+
+<span class="c1"># Construct a surrogate by feeding in a list of regressors and grids</span>
+<span class="n">mpce_mixed</span> <span class="o">=</span> <span class="n">tesuract</span><span class="o">.</span><span class="n">MRegressionWrapperCV</span><span class="p">(</span>
+    <span class="n">regressor</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;pce&#39;</span><span class="p">,</span><span class="s1">&#39;rf&#39;</span><span class="p">],</span>
+    <span class="n">reg_params</span><span class="o">=</span><span class="p">[</span><span class="n">pce_grid</span><span class="p">,</span><span class="n">rf_grid</span><span class="p">],</span>
+    <span class="n">target_transform</span><span class="o">=</span><span class="n">PCA</span><span class="p">,</span>
+    <span class="n">target_transform_params</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;n_components&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">})</span>
+
+<span class="n">mpce_mixed</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>on 0: Fitting 5 folds for each of 36 candidates, totalling 180 fits
+on 0: Fitting 5 folds for each of 6 candidates, totalling 30 fits
+on 1: Fitting 5 folds for each of 36 candidates, totalling 180 fits
+on 1: Fitting 5 folds for each of 6 candidates, totalling 30 fits
+on 2: Fitting 5 folds for each of 36 candidates, totalling 180 fits
+on 2: Fitting 5 folds for each of 6 candidates, totalling 30 fits
+on 3: Fitting 5 folds for each of 36 candidates, totalling 180 fits
+on 3: Fitting 5 folds for each of 6 candidates, totalling 30 fits
+|████████████████████████████████████████| 4/4 [100%] in 1:07.5 (0.06/s)
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>MRegressionWrapperCV(cv=KFold(n_splits=5, random_state=None, shuffle=False),
+                     reg_params=[[{&#39;fit_params&#39;: [{&#39;alphas&#39;: array([1.00000000e-08, 4.28133240e-08, 1.83298071e-07, 7.84759970e-07,
+       3.35981829e-06, 1.43844989e-05, 6.15848211e-05, 2.63665090e-04,
+       1.12883789e-03, 4.83293024e-03, 2.06913808e-02, 8.85866790e-02,
+       3.79269019e-01, 1.62377674e+00, 6.95192796e+00, 2.9763...
+       1.27427499e+02, 5.45559478e+02, 2.33572147e+03, 1.00000000e+04]),
+                                                   &#39;max_iter&#39;: 100000,
+                                                   &#39;tol&#39;: 0.05}],
+                                   &#39;fit_type&#39;: [&#39;linear&#39;, &#39;ElasticNetCV&#39;],
+                                   &#39;mindex_type&#39;: [&#39;total_order&#39;, &#39;hyperbolic&#39;],
+                                   &#39;order&#39;: [1, 2, 3, 4, 5, 6, 7, 8, 9]}],
+                                 {&#39;max_depth&#39;: [3, 5, 10],
+                                  &#39;n_estimators&#39;: [200, 500]}],
+                     regressor=[&#39;pce&#39;, &#39;rf&#39;],
+                     target_transform=&lt;class &#39;sklearn.decomposition._pca.PCA&#39;&gt;,
+                     target_transform_params={&#39;n_components&#39;: 4})
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Let&#39;s show which type of estimators came out best: RF vs PCE</span>
+<span class="p">[</span><span class="n">t</span><span class="p">[</span><span class="s1">&#39;fit_type&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">mpce_mixed</span><span class="o">.</span><span class="n">best_params_</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;ElasticNetCV&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;linear&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Furthermore, we can directly compare the CV scores (on the latent space)</span>
+<span class="c1"># (In order to compute the cv score on the full space, we need to</span>
+<span class="c1">#    utilize the clone approach and cross_val_score function)</span>
+<span class="n">mpce_mixed</span><span class="o">.</span><span class="n">best_scores_all_</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[{</span><span class="s1">&#39;pce&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">48.79526937638084</span><span class="p">,</span> <span class="s1">&#39;rf&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">50.3326241206865</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;pce&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">23.436264083681472</span><span class="p">,</span> <span class="s1">&#39;rf&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">26.250466624286872</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;pce&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">23.97095382549876</span><span class="p">,</span> <span class="s1">&#39;rf&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">25.618041933952213</span><span class="p">},</span>
+ <span class="p">{</span><span class="s1">&#39;pce&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.078701355731019</span><span class="p">,</span> <span class="s1">&#39;rf&#39;</span><span class="p">:</span> <span class="o">-</span><span class="mf">14.837793265525113</span><span class="p">}]</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+
+
+              </div>
+              
+            
+                <!-- Previous / next buttons -->
+<div class='prev-next-area'> 
+    <a class='left-prev' id="prev-link" href="Feature_importances.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Feature Importances</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="../api.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">PCE Base Class</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+            
+        </div>
+    </div>
+    <footer class="footer">
+  <p>
+    
+      By K. Chowdhary<br/>
+    
+        &copy; Copyright 2020, K. Chowdhary.<br/>
+  </p>
+</footer>
+</main>
+
+
+      </div>
+    </div>
+  
+  <script src="../_static/js/index.be7d3bbb2ef33a8344ce.js"></script>
+
+  </body>
+</html>

@@ -145,9 +145,7 @@ class PCEBuilder(BaseEstimator):
 
         \sum_{i=1}^N c_i \Phi_i(\mathbf{x})
 
-    where :math:`N` is the number of polynomial terms, and
-    :math:`\Phi_i:\mathbf{x} \in \mathbb{R}^d \mapsto \mathbb{R}` is the
-    multivariate basis function which takes the form 
+    where :math:`N` is the number of polynomial terms, and :math:`\Phi_i:\mathbf{x} \in \mathbb{R}^d \mapsto \mathbb{R}` is the multivariate basis function which takes the form 
 
     .. math::
 
@@ -166,9 +164,7 @@ class PCEBuilder(BaseEstimator):
     ----------
     order : int, default=1 
 
-        Description of the order of the polynomials in the
-        expansion. For total order, the order is the maximum polynomial order
-        for each basis function per dimension.
+        Description of the order of the polynomials in the expansion. For total order, the order is the maximum polynomial order for each basis function per dimension.
 
     customM : numpy.ndarray, default=None 
 
@@ -216,6 +212,14 @@ class PCEBuilder(BaseEstimator):
     coef    : ndarray of shape (nbasis,)
 
         Coefficient array
+
+    Methods
+    -------
+    compile:
+        pre-processing for fit, e.g., multiindex generation
+    computeMoments:
+        compute means and variances using PCE coefficients
+
 
     Notes
     -----
@@ -667,8 +671,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
     This class fits the coefficients of a a multivariate polynomial object, aka
     as a polynomial chaos model, using different linear regression algorithms
     from sklearn. Given labeled data pairs :math:`(x_j,y_j)` for
-    :math:`j=1,\dots,n`, where :math:`x_j \in \mathbb{R}^d` and :math:`y_j \in
-    \mathbb{R}`, we look for 
+    :math:`j=1,\dots,n`, where :math:`x_j \in \mathbb{R}^d` and :math:`y_j \in \mathbb{R}`, we look for 
 
     .. math::
 
@@ -752,6 +755,11 @@ class PCEReg(PCEBuilder,RegressorMixin):
     coef    : ndarray of shape (nbasis,)
 
         coefficient array of polynomial function. It can be fed into the constructor, but for most cases it will be computed after self.fit is called. 
+
+    Methods
+    -------
+    feature_importances:
+        compute Sobol total order indices, normalized to sum to 1
 
     Notes
     -----
@@ -867,7 +875,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
 
         self    : self object
 
-                sets the internal coefficient array self.coef_
+                sets the internal coefficient array self.coef\_
 
         '''
         X,y = check_X_y(X,y)
@@ -984,7 +992,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
 
         X       : numpy.ndarray of shape (nsamples, dim)
 
-                Samples to evaluate the fit polynomial. Must have self.coef_ set or defined already. Can take 1d or 2d array of samples. 
+                Samples to evaluate the fit polynomial. Must have self.coef\_ set or defined already. Can take 1d or 2d array of samples. 
 
         Returns
         -------

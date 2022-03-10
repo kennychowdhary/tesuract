@@ -154,11 +154,11 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		regmodel.fit(X,Y)
 		start = T.time()
-		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 		print("total time is ", T.time() - start)
 
@@ -172,10 +172,10 @@ class TestMRegressionWrapper(unittest.TestCase):
 			custom_params = True,
 			target_transform=target_transform,
 			target_transform_params={},
-			n_jobs=-1,scorer=custom_scorer,
+			n_jobs=1,scorer=custom_scorer,
 			verbose=0)
 		start = T.time()
-		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 		print("total time is ", T.time() - start)	
 	def test_simplified_model_fit_with_uninstantiated_PCA_target_transform(self):
@@ -195,7 +195,7 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=PCA,
 							target_transform_params={'n_components':4},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		regmodel._fit_target_transform(Y)
 	def test_target_transform_has_certain_attributes_without_target_instantiation(self):
@@ -216,7 +216,7 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=FactorAnalysis,
 							target_transform_params={'n_components':8},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		with self.assertRaises(Exception):
 			regmodel._fit_target_transform(Y)
@@ -239,7 +239,7 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=FA,
 							target_transform_params=None,
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		with self.assertRaises(Exception):
 			regmodel._fit_target_transform(Y)
@@ -261,11 +261,11 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		regmodel.fit(X,Y)
 		start = T.time()
-		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 		print("total time is ", T.time() - start)
 
@@ -279,10 +279,10 @@ class TestMRegressionWrapper(unittest.TestCase):
 			custom_params = True,
 			target_transform=target_transform,
 			target_transform_params={},
-			n_jobs=-1,scorer=custom_scorer,
+			n_jobs=1,scorer=custom_scorer,
 			verbose=0)
 		start = T.time()
-		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 		print("total time is ", T.time() - start)	
 	def test_multi_target_init_with_custom_param_list(self):
@@ -304,11 +304,11 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		regmodel.fit(X,Y)
 		start = T.time()
-		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		cvscore = cross_val_score(regmodel, X, Y, cv=5, scoring='r2',n_jobs=1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 		print("total time is ", T.time() - start)
 
@@ -319,10 +319,10 @@ class TestMRegressionWrapper(unittest.TestCase):
 						reg_params=new_params,
 						target_transform=target_transform,
 						target_transform_params={},
-						n_jobs=-1,scorer=custom_scorer,
+						n_jobs=1,scorer=custom_scorer,
 						verbose=0)
 		start = T.time()
-		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=-1)
+		cvscore = cross_val_score(regmodel_opt, X, Y, cv=5, scoring='r2',n_jobs=1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 		print("total time is ", T.time() - start)
 	def test_rom_w_single_regressor_as_list(self):
@@ -342,10 +342,10 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		regmodel.fit(X,Y)
-		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=-1)
+		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 	def test_rom_w_single_regressor_as_list_wo_pca(self):
 		X,Y = self.X, self.Y[:,::75] # shorten output
@@ -364,10 +364,10 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=None,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		regmodel.fit(X,Y)
-		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=-1)
+		cvscore = cross_val_score(regmodel, X, Y, cv=2, scoring='r2',n_jobs=1)
 		print("cv r2 score: {0}%".format(-100*np.round(cvscore.mean(),4)))
 		# get feature importances and weighted versions
 		fi = regmodel.feature_importances_
@@ -394,7 +394,7 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		regmodel.fit(X,Y)
 		# test feature importance and explained var ratio for pca
@@ -427,7 +427,7 @@ class TestMRegressionWrapper(unittest.TestCase):
 							reg_params=param_list,
 							target_transform=target_transform,
 							target_transform_params={},
-							n_jobs=-1,scorer=custom_scorer,
+							n_jobs=1,scorer=custom_scorer,
 							verbose=0)
 		regmodel.fit(X,Y)
 

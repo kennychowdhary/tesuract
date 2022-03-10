@@ -665,6 +665,10 @@ class PCEBuilder(BaseEstimator):
             self.var = prob_weight * np.sum(coef_[1:]**2)
         return self.mu, self.var
 
+from warnings import simplefilter
+from sklearn.exceptions import ConvergenceWarning
+simplefilter("ignore", category=ConvergenceWarning)
+
 class PCEReg(PCEBuilder,RegressorMixin):
     ''' Class for performing multivariate polynomial regression 
 
@@ -892,7 +896,7 @@ class PCEReg(PCEBuilder,RegressorMixin):
         Xhat,y = check_X_y(self.Xhat,y)
             # assert len(self.coef) == self.multiindex.shape[0],"length of coefficient vector is not the same shape as the multindex!"
         # run quadrature fit if weights are specified:
-        sample_weights = 1./np.abs(y)
+        sample_weights = 1./(np.abs(y)+1e-8)
         sample_weights /= np.sum(sample_weights)
         if self.fit_type == "quadrature":
             self._quad_fit(X,y)
@@ -902,7 +906,6 @@ class PCEReg(PCEBuilder,RegressorMixin):
         if self.fit_type == 'LassoCV':
             if not self.fit_params: # if empty dictionary
                 self.fit_params={'alphas':np.logspace(-12,2,25),'max_iter':2500,'tol':1e-2}
-                # self.fit_params={}
             regmodel = linear_model.LassoCV(fit_intercept=False,**self.fit_params)
             regmodel.fit(Xhat,y)
             self.alpha_ = regmodel.alpha_

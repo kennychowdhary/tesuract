@@ -188,7 +188,8 @@ class GPReg:
     n_restarts_optimizer: int, default = 0
         How many times to solve the optimization of the log marginal likelihood. If using ElasticNetCV or LassoCV, might want to use the default otherwise it could be very slow. Also, since we are using multiprocessing, it is important to
 
-
+    random_state: int, default=None
+        Random state 
 
     """
 

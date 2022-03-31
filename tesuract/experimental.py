@@ -164,7 +164,7 @@ def check_array_within_bounds(x, bounds):
 
 
 # import emcee
-class GPReg:
+class GaussianProcessPCERegression:
     """Gaussian process regression with polynomial mean function
 
     This class wraps sklearn's GP regressor class to include a polynomial mean function using the PCEReg from tesuract.

@@ -1,3 +1,4 @@
+s
 import numpy as np
 import warnings, pdb
 
@@ -177,9 +178,11 @@ class MinMaxTargetScaler:
 
 
 class PCATargetTransform(BaseEstimator, TransformerMixin):
-    def __init__(self, n_components=2, cutoff=1e-2, svd_solver="arpack", whiten=False):
+    def __init__(
+        self, n_components=2, exp_var_cutoff=0.99, svd_solver="arpack", whiten=False
+    ):
         self.n_components = n_components
-        self.cutoff = cutoff
+        self.exp_var_cutoff = exp_var_cutoff
         self.svd_solver = svd_solver
         self.K = None
         self.whiten = whiten  # return scaled projections w var=1
@@ -229,10 +232,12 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         self.cumulative_error_full = np.cumsum(skpca.explained_variance_ratio_)
         # print(cumulative_error)
         # need to check whether to use + 1 or not
-        loc = np.where(1 - self.cumulative_error_full <= self.cutoff)[0] + 1
+        loc = np.where(1 - self.cumulative_error_full <= 1 - self.exp_var_cutoff)[0] + 1
         if loc.size == 0:
-            warnings.warn("Cutoff may be too big. Setting K = 16")
-            self.K = 16
+            warnings.warn(
+                "Exp var cutoff may be too strict. Setting K to at most 50 components"
+            )
+            self.K = max_n_components
         elif loc.size > 0:
             self.K = loc[0]
 
@@ -300,7 +305,7 @@ def target_pipeline_custom(log=False, scale=False, pca=True, **kwargs):
     n_components = kwargs.get("n_components", 4)
     svd_solver = kwargs.get("svd_solver", "arpack")
     whiten = kwargs.get("whiten", False)
-    cutoff = kwargs.get("cutoff", 1e-1)
+    exp_var_cutoff = kwargs.get("exp_var_cutoff", 0.9)
     estimators = []
     if log:
         estimators.append(("log", LogTransform()))
@@ -314,7 +319,7 @@ def target_pipeline_custom(log=False, scale=False, pca=True, **kwargs):
                     n_components=n_components,
                     svd_solver=svd_solver,
                     whiten=whiten,
-                    cutoff=cutoff,
+                    exp_var_cutoff=exp_var_cutoff,
                 ),
             )
         )

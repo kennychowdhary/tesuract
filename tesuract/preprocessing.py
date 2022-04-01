@@ -212,10 +212,6 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         self.explained_variance_ratio_ = self.pca.explained_variance_ratio_
         return self
 
-    def fit_transform(self, Y):
-        self.fit(Y)
-        return self.pca.transform(Y)
-
     def transform(self, Y):
         assert hasattr(self, "pca"), "Perform fit first."
         return self.pca.transform(Y)

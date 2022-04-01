@@ -213,8 +213,7 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         return self
 
     def fit_transform(self, Y):
-        self.fit(Y)
-        return self.pca.transform(Y)
+        return self.pca.fit_transform(Y)
 
     def transform(self, Y):
         assert hasattr(self, "pca"), "Perform fit first."

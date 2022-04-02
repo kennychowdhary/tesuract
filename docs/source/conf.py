@@ -5,20 +5,21 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
 import sys, os
-sys.path.append(os.path.abspath('.'))
+
+sys.path.append(os.path.abspath("."))
 import doc
 
 # -- Project information -----------------------------------------------------
 
-project = 'tesuract'
-copyright = '2020, K. Chowdhary'
-author = 'K. Chowdhary'
+project = "tesuract"
+copyright = "2020, K. Chowdhary"
+author = "K. Chowdhary"
 
 # The full version, including alpha/beta/rc tags
-release = '1.0'
+release = "0.1.2"
 
 # add path
-sys.path.append(os.path.abspath('../../'))
+sys.path.append(os.path.abspath("../../"))
 
 # -- General configuration ---------------------------------------------------
 
@@ -28,19 +29,20 @@ sys.path.append(os.path.abspath('../../'))
 # extensions = ['sphinx.ext.autodoc', 'sphinx.ext.autosummary',
 #               'sphinx.ext.doctest',
 #               'sphinx.ext.mathjax',
-#               'sphinx.ext.viewcode', 
+#               'sphinx.ext.viewcode',
 #               'sphinx_rtd_theme',
 #               'sphinx.ext.todo',
 #               'numpydoc'
 # ]
 extensions = [
-    'sphinx.ext.autodoc', 'sphinx.ext.autosummary',
-    'numpydoc',
-	'sphinx.ext.doctest',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.imgconverter',
-    'sphinx.ext.mathjax',
-    'sphinx.ext.viewcode'
+    "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
+    "numpydoc",
+    "sphinx.ext.doctest",
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.imgconverter",
+    "sphinx.ext.mathjax",
+    "sphinx.ext.viewcode",
 ]
 
 # napoleon_google_docstring = False
@@ -54,13 +56,13 @@ todo_include_todos = True
 numpydoc_class_members_toctree = True
 
 autodoc_default_options = {
-    'members': True,
-    'inherited-members': True,
-    'member-order': 'bysource'
+    "members": True,
+    "inherited-members": True,
+    "member-order": "bysource",
 }
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -76,10 +78,10 @@ exclude_patterns = []
 # html_theme = 'sphinx_rtd_theme'
 
 # book theme
-html_theme = 'sphinx_book_theme'
+html_theme = "sphinx_book_theme"
 
 html_theme_options = {
-    'collapse_navigation': False,
+    "collapse_navigation": False,
     "repository_url": "https://github.com/kennychowdhary/tesuract",
     "use_repository_button": True,
 }
@@ -87,6 +89,6 @@ html_theme_options = {
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 
-html_short_title = 'tesuract'
+html_short_title = "tesuract"

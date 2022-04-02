@@ -37,7 +37,7 @@ class RegressionWrapperCV(BaseEstimator):
         reg_params={},
         scorer="neg_root_mean_squared_error",
         n_jobs=1,
-        verbose=1,
+        verbose=0,
         cv=None,
     ):
         self.regressor = regressor
@@ -160,10 +160,6 @@ class RegressionWrapperCV(BaseEstimator):
         mean_train_score = GridSCV.cv_results_["mean_train_score"]
         mean_test_score = GridSCV.cv_results_["mean_test_score"]
         return mean_train_score[best_index_] - mean_test_score[best_index_]
-
-
-from tqdm import tqdm
-
 
 class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
     def __init__(

@@ -161,6 +161,7 @@ class RegressionWrapperCV(BaseEstimator):
         mean_test_score = GridSCV.cv_results_["mean_test_score"]
         return mean_train_score[best_index_] - mean_test_score[best_index_]
 
+
 class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
     def __init__(
         self,
@@ -399,6 +400,35 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
         return -1 * np.mean(MSPREs)
 
     # add def for fitting multiple for each component for faster fitting
+
+    def compute_cv_score(
+        self, X, y, regressor="pce", target_transform=None, scoring="r2"
+    ):
+
+        # First clone the surrogate using the best hyper parameters
+        n_components = len(self.best_params_)
+        reg_custom_list = [regressor for i in range(n_components)]
+        reg_param_list = self.best_params_
+
+        if target_transform is None:
+            # only works if n_comp is set to exact value
+            # will not work if using "auto"
+            target_transform = self.TT
+
+        surrogate_clone = MRegressionWrapperCV(
+            regressor=reg_custom_list,
+            reg_params=reg_param_list,
+            custom_params=True,
+            target_transform=target_transform,
+            target_transform_params={},
+            n_jobs=-1,
+            verbose=0,
+        )
+
+        scores = cross_val_score(surrogate_clone, X, y, scoring=scoring, n_jobs=-1)
+        # print("Mean CV score:", scores.mean())
+
+        return scores.mean(), surrogate_clone
 
 
 class MPCEReg(BaseEstimator, RegressorMixin):

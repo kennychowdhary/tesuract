@@ -29,6 +29,9 @@ from sklearn.svm import SVR
 # from alive_progress import alive_bar
 from tqdm import tqdm
 
+from warnings import simplefilter
+from sklearn.exceptions import ConvergenceWarning
+
 
 class RegressionWrapperCV(BaseEstimator):
     def __init__(

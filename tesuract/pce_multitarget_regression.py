@@ -29,6 +29,9 @@ from sklearn.svm import SVR
 # from alive_progress import alive_bar
 from tqdm import tqdm
 
+from warnings import simplefilter
+from sklearn.exceptions import ConvergenceWarning
+
 
 class RegressionWrapperCV(BaseEstimator):
     def __init__(
@@ -401,34 +404,34 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 
     # add def for fitting multiple for each component for faster fitting
 
-    def compute_cv_score(
-        self, X, y, regressor="pce", target_transform=None, scoring="r2"
-    ):
+    # def compute_cv_score(
+    #     self, X, y, regressor="pce", target_transform=None, scoring="r2"
+    # ):
 
-        # First clone the surrogate using the best hyper parameters
-        n_components = len(self.best_params_)
-        reg_custom_list = [regressor for i in range(n_components)]
-        reg_param_list = self.best_params_
+    #     # First clone the surrogate using the best hyper parameters
+    #     n_components = len(self.best_params_)
+    #     reg_custom_list = [regressor for i in range(n_components)]
+    #     reg_param_list = self.best_params_
 
-        if target_transform is None:
-            # only works if n_comp is set to exact value
-            # will not work if using "auto"
-            target_transform = self.TT
+    #     if target_transform is None:
+    #         # only works if n_comp is set to exact value
+    #         # will not work if using "auto"
+    #         target_transform = self.TT
 
-        surrogate_clone = MRegressionWrapperCV(
-            regressor=reg_custom_list,
-            reg_params=reg_param_list,
-            custom_params=True,
-            target_transform=target_transform,
-            target_transform_params={},
-            n_jobs=-1,
-            verbose=0,
-        )
+    #     surrogate_clone = MRegressionWrapperCV(
+    #         regressor=reg_custom_list,
+    #         reg_params=reg_param_list,
+    #         custom_params=True,
+    #         target_transform=target_transform,
+    #         target_transform_params={},
+    #         n_jobs=-1,
+    #         verbose=0,
+    #     )
 
-        scores = cross_val_score(surrogate_clone, X, y, scoring=scoring, n_jobs=-1)
-        # print("Mean CV score:", scores.mean())
+    #     scores = cross_val_score(surrogate_clone, X, y, scoring=scoring, n_jobs=-1)
+    #     # print("Mean CV score:", scores.mean())
 
-        return scores.mean(), surrogate_clone
+    #     return scores.mean(), surrogate_clone
 
 
 class MPCEReg(BaseEstimator, RegressorMixin):

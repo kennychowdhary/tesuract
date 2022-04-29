@@ -178,7 +178,7 @@ class MinMaxTargetScaler:
 
 class PCATargetTransform(BaseEstimator, TransformerMixin):
     def __init__(
-        self, n_components=2, exp_var_cutoff=0.99, svd_solver="arpack", whiten=False
+        self, n_components=2, exp_var_cutoff=0.90, svd_solver="arpack", whiten=False
     ):
         self.n_components = n_components
         self.exp_var_cutoff = exp_var_cutoff
@@ -211,10 +211,6 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         self.cumulative_error = self.cumulative_error_full[: self.K]
         self.explained_variance_ratio_ = self.pca.explained_variance_ratio_
         return self
-
-    def fit_transform(self, Y):
-        self.fit(Y)
-        return self.pca.transform(Y)
 
     def transform(self, Y):
         assert hasattr(self, "pca"), "Perform fit first."

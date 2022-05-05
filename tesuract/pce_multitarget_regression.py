@@ -32,6 +32,8 @@ from tqdm import tqdm
 from warnings import simplefilter
 from sklearn.exceptions import ConvergenceWarning
 
+import multiprocessing as mp
+
 
 class RegressionWrapperCV(BaseEstimator):
     def __init__(
@@ -57,6 +59,7 @@ class RegressionWrapperCV(BaseEstimator):
 
     def _reformat_grid(self, params):
         if isinstance(self.regressor, str):
+            # make regressor a single element list
             self.regressor = [self.regressor]
         try:
             # if parameter grid is in the form of grid search cv
@@ -101,12 +104,15 @@ class RegressionWrapperCV(BaseEstimator):
                 return_train_score=True,
             )
             GridSCV.fit(X, y)
+            print("done")
             self.best_estimator_ = GridSCV.best_estimator_
             self.best_params_ = GridSCV.best_params_
             self.best_score_ = GridSCV.best_score_
             self.best_overfit_error_ = self.overfit_score(GridSCV)
             self.cv_results_ = GridSCV.cv_results_
         if isinstance(self.regressor, list):
+            # if len(self.regressor) > 1:
+            # print("running multiple models...")
             self.fit_multiple_reg(X, y)
         return self
 

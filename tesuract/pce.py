@@ -1038,6 +1038,7 @@ class PCEReg(PCEBuilder, RegressorMixin):
                     "l1_ratio": [0.001, 0.5, 0.75, 0.95, 0.999, 1],
                     "n_alphas": 25,
                     "tol": 1e-2,
+                    "n_jobs": 1,
                 }
             regmodel = linear_model.ElasticNetCV(fit_intercept=False, **self.fit_params)
             regmodel.fit(Xhat, y)

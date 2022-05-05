@@ -229,9 +229,10 @@ class PCATargetTransform(BaseEstimator, TransformerMixin):
         # need to check whether to use + 1 or not
         loc = np.where(1 - self.cumulative_error_full <= 1 - self.exp_var_cutoff)[0] + 1
         if loc.size == 0:
-            warnings.warn(
-                "Exp var cutoff may be too strict. Setting K to at most 50 components"
-            )
+            if self.n_components == "auto":
+                warnings.warn(
+                    "Exp var cutoff may be too strict. Setting K to at most 50 components"
+                )
             self.K = max_n_components
         elif loc.size > 0:
             self.K = loc[0]

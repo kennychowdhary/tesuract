@@ -1,4 +1,6 @@
-![PyPI](https://img.shields.io/github/license/kennychowdhary/tesuract)
+![License](https://img.shields.io/github/license/kennychowdhary/tesuract)
+![PyPI](https://img.shields.io/pypi/v/tesuract)
+
 
 # tesuract
 

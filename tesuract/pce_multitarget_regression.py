@@ -104,10 +104,10 @@ class RegressionWrapperCV(BaseEstimator):
         # assert isinstance(self.reg_params,list), "parameters must also be a list"
         if isinstance(self.reg_params, list) is False:
             self.reg_params = [self.reg_params]
-        # print(len(self.reg_params), n_regressors)
-        assert (
-            len(self.reg_params) == n_regressors
-        ), "length of parameters and regressors must match."
+        # Note: length of regressors does not need to match length of grid params since grid params can be a list of different combinations
+        # assert (
+        #     len(self.reg_params) == n_regressors
+        # ), "length of parameters and regressors must match."
         for i, R in enumerate(self.regressor):
             # print("Fitting regressor ", R)
             model = self._model_factory(regressor=R)

@@ -5,6 +5,7 @@ import warnings, pdb
 import time as T
 
 from sklearn.model_selection import RepeatedKFold
+import pytest
 
 relpath = tesuract.__file__[:-11]  # ignore the __init__.py specification
 print(relpath)
@@ -44,6 +45,7 @@ svr_param_grid = {
 }
 
 
+@pytest.mark.regression
 class TestPCERegression(unittest.TestCase):
     def test_pce_cv_regression(self):
         pceCV = tesuract.RegressionWrapperCV(

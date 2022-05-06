@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 import warnings, pdb
 import time as T
+import pytest
 from sklearn.metrics import mean_squared_error
 from sklearn.datasets import make_friedman1
 from sklearn.model_selection import train_test_split
@@ -22,6 +23,7 @@ def mse(a, b):
     return mean_squared_error(a, b, squared=False)
 
 
+@pytest.mark.regression
 class TestPCERegression(unittest.TestCase):
     def test_checking_predict_does_recompute_mindex(self):
         # this test will ensure the model selector selector works
@@ -61,7 +63,7 @@ class TestPCERegression(unittest.TestCase):
             X_train, X_test = X[train_index], X[test_index]
             y_train, y_test = y[train_index], y[test_index]
             p.fit(X_train, y_train)
-            score = np.sum(1 - p.predict(X_test) ** 2 / y_test ** 2)
+            score = np.sum(1 - p.predict(X_test) ** 2 / y_test**2)
             # print(score)
         print("# times mindex is computed: ", p._mindex_compute_count_)
         assert (
@@ -101,7 +103,7 @@ class TestPCERegression(unittest.TestCase):
         fi_index = 3
         x = X[:, 3]
         # y = (1./8)*(35.*x**4 - 30*x**4 + 3)
-        y = (1.0 / 2) * (5 * x ** 3 - 3 * x)
+        y = (1.0 / 2) * (5 * x**3 - 3 * x)
         params = {"order": [1, 2, 3, 4]}
         estimator = tesuract.PCEReg(fit_type="LassoCV")
         start = T.time()
@@ -126,7 +128,7 @@ class TestPCERegression(unittest.TestCase):
         X = 2 * rn.rand(50, 5) - 1
         fi_index = 1
         x = X[:, fi_index]
-        y = (1.0 / 8) * (35.0 * x ** 4 - 30 * x ** 4 + 3)
+        y = (1.0 / 8) * (35.0 * x**4 - 30 * x**4 + 3)
         # y = (1./2)*(5*x**3 - 3*x)
         params = {"order": [1, 2, 3, 4]}
         estimator = tesuract.PCEReg(fit_type="LassoCV")
@@ -154,6 +156,7 @@ from sklearn.exceptions import ConvergenceWarning
 simplefilter("ignore", category=ConvergenceWarning)
 
 # regression test for multi output pca regressor
+@pytest.mark.regression
 class TestMRegressionWrapper(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -178,7 +181,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -239,7 +242,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -268,7 +271,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -300,7 +303,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -333,7 +336,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -390,7 +393,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -444,11 +447,11 @@ class TestMRegressionWrapper(unittest.TestCase):
                 "fit_type": ["LassoCV"],
             }
         ]
-        regressors = "pce" # will be a list automaticall if string
+        regressors = "pce"  # will be a list automaticall if string
         param_list = pce_grid
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -467,10 +470,9 @@ class TestMRegressionWrapper(unittest.TestCase):
             scorer=custom_scorer,
             verbose=0,
         )
-        print("custom params:", regmodel.custom_params) # should be
+        print("custom params:", regmodel.custom_params)  # should be
         regmodel.fit(X, Y)
-        
-    
+
     def test_rom_w_single_regressor_as_list(self):
         X, Y = self.X, self.Y
         pce_grid = [
@@ -484,7 +486,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -517,7 +519,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -558,7 +560,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = pce_grid
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)
@@ -607,7 +609,7 @@ class TestMRegressionWrapper(unittest.TestCase):
         param_list = [pce_grid, rf_grid]
 
         def my_scorer(ytrue, ypred):
-            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue**2)
             return -mse
 
         custom_scorer = make_scorer(my_scorer, greater_is_better=True)

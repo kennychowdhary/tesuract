@@ -41,7 +41,7 @@ class RecursiveHypMultiIndex:
         # new for hyperbolic multiindex
         self.nugget = 1e-5
         q = 0.5
-        maxNormPow = self.maxOrder ** q + self.nugget
+        maxNormPow = self.maxOrder**q + self.nugget
         output = self.RecHype(maxNormPow, output, currDim, base, q)
         return np.array(output, dtype=int)
 
@@ -50,7 +50,7 @@ class RecursiveHypMultiIndex:
         mindex = total_order.getIndex()
         mindex_new = mindex[
             [
-                np.sum(m ** q) ** (1.0 / q) < (self.maxOrder + self.nugget)
+                np.sum(m**q) ** (1.0 / q) < (self.maxOrder + self.nugget)
                 for m in mindex
             ]
         ]
@@ -105,7 +105,7 @@ class MultiIndex:
             enume *= self.order + self.dim - k
             denom *= k + 1
         nPCTerms = enume / denom
-        return np.int(nPCTerms)
+        return int(nPCTerms)
 
     def computeIndex(self):
         index = np.array(multiindex2(self.dim, self.order), dtype=int)

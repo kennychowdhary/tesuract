@@ -433,6 +433,44 @@ class TestMRegressionWrapper(unittest.TestCase):
         print("cv r2 score: {0}%".format(-100 * np.round(cvscore.mean(), 4)))
         print("total time is ", T.time() - start)
 
+    def test_multi_target_init_with_custom_param_list2(self):
+        # uses the best params as the new set of param grid space
+        # not efficient but can be faster than original space
+        X, Y = self.X, self.Y
+        pce_grid = [
+            {
+                "order": list(range(1, 3)),
+                "mindex_type": ["total_order"],
+                "fit_type": ["LassoCV"],
+            }
+        ]
+        regressors = "pce" # will be a list automaticall if string
+        param_list = pce_grid
+
+        def my_scorer(ytrue, ypred):
+            mse = np.mean((ytrue - ypred) ** 2) / np.mean(ytrue ** 2)
+            return -mse
+
+        custom_scorer = make_scorer(my_scorer, greater_is_better=True)
+        target_transform = tesuract.preprocessing.PCATargetTransform(
+            n_components="auto",
+            whiten=True,
+            exp_var_cutoff=0.5,
+        )
+        print(target_transform.fit_transform(Y).shape)
+        regmodel = tesuract.MRegressionWrapperCV(
+            regressor=regressors,
+            reg_params=param_list,
+            target_transform=target_transform,
+            target_transform_params={},
+            n_jobs=1,
+            scorer=custom_scorer,
+            verbose=0,
+        )
+        print("custom params:", regmodel.custom_params) # should be
+        regmodel.fit(X, Y)
+        
+    
     def test_rom_w_single_regressor_as_list(self):
         X, Y = self.X, self.Y
         pce_grid = [

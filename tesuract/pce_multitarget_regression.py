@@ -32,8 +32,6 @@ from tqdm import tqdm
 from warnings import simplefilter
 from sklearn.exceptions import ConvergenceWarning
 
-import multiprocessing as mp
-
 
 class RegressionWrapperCV(BaseEstimator):
     def __init__(
@@ -59,7 +57,6 @@ class RegressionWrapperCV(BaseEstimator):
 
     def _reformat_grid(self, params):
         if isinstance(self.regressor, str):
-            # make regressor a single element list
             self.regressor = [self.regressor]
         try:
             # if parameter grid is in the form of grid search cv
@@ -92,8 +89,29 @@ class RegressionWrapperCV(BaseEstimator):
     def fit(self, X, y):
         self._setup_cv()
         if isinstance(self.regressor, str):
-            model = self._model_factory(regressor=self.regressor)
-            reg_params_cv = self._reformat_grid(self.reg_params)
+            self.regressor = [self.regressor]
+        self.fit_multiple_reg(X, y)
+        return self
+
+    def fit_multiple_reg(self, X, y):
+        n_regressors = len(self.regressor)
+        self.best_estimators_ = [None] * n_regressors
+        self.all_best_params_ = [None] * n_regressors
+        self.best_scores_ = np.zeros(n_regressors)
+        self.best_overfit_errors_ = [None] * n_regressors
+        self.all_cv_results_ = [None] * n_regressors
+        # potentially depricated
+        # assert isinstance(self.reg_params,list), "parameters must also be a list"
+        if isinstance(self.reg_params, list) is False:
+            self.reg_params = [self.reg_params]
+        # print(len(self.reg_params), n_regressors)
+        assert (
+            len(self.reg_params) == n_regressors
+        ), "length of parameters and regressors must match."
+        for i, R in enumerate(self.regressor):
+            # print("Fitting regressor ", R)
+            model = self._model_factory(regressor=R)
+            reg_params_cv = self._reformat_grid(self.reg_params[i])
             GridSCV = GridSearchCV(
                 model,
                 reg_params_cv,
@@ -104,59 +122,17 @@ class RegressionWrapperCV(BaseEstimator):
                 return_train_score=True,
             )
             GridSCV.fit(X, y)
-            print("done")
-            self.best_estimator_ = GridSCV.best_estimator_
-            self.best_params_ = GridSCV.best_params_
-            self.best_score_ = GridSCV.best_score_
-            self.best_overfit_error_ = self.overfit_score(GridSCV)
-            self.cv_results_ = GridSCV.cv_results_
-        if isinstance(self.regressor, list):
-            # if len(self.regressor) > 1:
-            # print("running multiple models...")
-            self.fit_multiple_reg(X, y)
-        return self
-
-    def fit_multiple_reg(self, X, y):
-        if isinstance(self.regressor, list):
-            n_regressors = len(self.regressor)
-            self.best_estimators_ = [None] * n_regressors
-            self.all_best_params_ = [None] * n_regressors
-            self.best_scores_ = np.zeros(n_regressors)
-            self.best_overfit_errors_ = [None] * n_regressors
-            self.all_cv_results_ = [None] * n_regressors
-            # potentially depricated
-            # assert isinstance(self.reg_params,list), "parameters must also be a list"
-            if isinstance(self.reg_params, list) is False:
-                self.reg_params = [self.reg_params]
-            # print(len(self.reg_params), n_regressors)
-            assert (
-                len(self.reg_params) == n_regressors
-            ), "length of parameters and regressors must match."
-            for i, R in enumerate(self.regressor):
-                # print("Fitting regressor ", R)
-                model = self._model_factory(regressor=R)
-                reg_params_cv = self._reformat_grid(self.reg_params[i])
-                GridSCV = GridSearchCV(
-                    model,
-                    reg_params_cv,
-                    scoring=self.scorer,
-                    n_jobs=self.n_jobs,
-                    cv=self.cv,
-                    verbose=self.verbose,
-                    return_train_score=True,
-                )
-                GridSCV.fit(X, y)
-                self.best_estimators_[i] = GridSCV.best_estimator_
-                self.all_best_params_[i] = GridSCV.best_params_
-                self.best_scores_[i] = GridSCV.best_score_
-                self.best_overfit_errors_[i] = self.overfit_score(GridSCV)
-                self.all_cv_results_[i] = GridSCV.cv_results_
-            self.best_index_ = np.argmax(self.best_scores_)
-            self.best_estimator_ = self.best_estimators_[self.best_index_]
-            self.best_params_ = self.all_best_params_[self.best_index_]
-            self.best_score_ = self.best_scores_[self.best_index_]
-            self.best_overfit_error_ = self.best_overfit_errors_[self.best_index_]
-            self.cv_results_ = self.all_cv_results_[self.best_index_]
+            self.best_estimators_[i] = GridSCV.best_estimator_
+            self.all_best_params_[i] = GridSCV.best_params_
+            self.best_scores_[i] = GridSCV.best_score_
+            self.best_overfit_errors_[i] = self.overfit_score(GridSCV)
+            self.all_cv_results_[i] = GridSCV.cv_results_
+        self.best_index_ = np.argmax(self.best_scores_)
+        self.best_estimator_ = self.best_estimators_[self.best_index_]
+        self.best_params_ = self.all_best_params_[self.best_index_]
+        self.best_score_ = self.best_scores_[self.best_index_]
+        self.best_overfit_error_ = self.best_overfit_errors_[self.best_index_]
+        self.cv_results_ = self.all_cv_results_[self.best_index_]
         return self
 
     def predict(self, X):

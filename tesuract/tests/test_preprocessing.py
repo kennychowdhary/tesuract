@@ -9,6 +9,7 @@ relpath = tesuract.__file__[:-11]  # ignore the __init__.py specification
 print(relpath)
 
 
+@pytest.mark.unit
 class Test_Target_Scaler(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -59,6 +60,7 @@ class Test_Target_Scaler(unittest.TestCase):
         assert np.mean(Yt[1]) == 1.0, "transform out of range"
 
 
+@pytest.mark.unit
 class Test_Domain_Scaler(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -105,6 +107,7 @@ class Test_Domain_Scaler(unittest.TestCase):
         assert error <= 1e-15, "inverse transform not working"
 
 
+@pytest.mark.unit
 class Test_Log_Scaler(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -135,6 +138,7 @@ class Test_Log_Scaler(unittest.TestCase):
             self.LT.transform(Y)
 
 
+@pytest.mark.unit
 class Test_Pipeline(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -177,12 +181,13 @@ class Test_Pipeline(unittest.TestCase):
             Yhat.shape[1] == ncomp
         ), "new dimensions do not match n_components. Check PCA."
         assert Yr.shape == Y.shape, "original and reconstructed shapes do no match. "
-        rmse = np.mean((Yr - Y) ** 2, axis=1) / np.mean(Y ** 2, axis=1)
+        rmse = np.mean((Yr - Y) ** 2, axis=1) / np.mean(Y**2, axis=1)
         assert (
             rmse.mean() < 1e-16
         ), "PCA should be exact, but isn't. Something is wrong."
 
 
+@pytest.mark.unit
 class Test_PCA_Target_Transform(unittest.TestCase):
     @classmethod
     def setUpClass(self):

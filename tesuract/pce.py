@@ -5,6 +5,7 @@ import pdb, warnings, pickle, time
 from sklearn.decomposition import PCA
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import PolynomialFeatures
 
 from .multiindex import RecursiveHypMultiIndex
 from .multiindex import MultiIndex
@@ -47,15 +48,15 @@ def Leg1dPoly(order, x):
     elif order == 1:
         y = x
     elif order == 2:
-        y = 0.5 * (3.0 * x ** 2 - 1)
+        y = 0.5 * (3.0 * x**2 - 1)
     elif order == 3:
-        y = 0.5 * (5.0 * x ** 3 - 3 * x)
+        y = 0.5 * (5.0 * x**3 - 3 * x)
     elif order == 4:
-        y = (1.0 / 8) * (35.0 * x ** 4 - 30.0 * x ** 2 + 3.0)
+        y = (1.0 / 8) * (35.0 * x**4 - 30.0 * x**2 + 3.0)
     elif order == 5:
-        y = (1.0 / 8) * (63.0 * x ** 5 - 70.0 * x ** 3 + 15.0 * x)
+        y = (1.0 / 8) * (63.0 * x**5 - 70.0 * x**3 + 15.0 * x)
     elif order == 6:
-        y = (1.0 / 16) * (231.0 * x ** 6 - 31.0 * x ** 4 + 105.0 * x ** 2 - 5.0)
+        y = (1.0 / 16) * (231.0 * x**6 - 31.0 * x**4 + 105.0 * x**2 - 5.0)
     return y
 
 
@@ -162,7 +163,7 @@ class PolyFactory:
         return L
 
 
-class PCEBuilder(BaseEstimator):
+class PCEBuilder(BaseEstimator, TransformerMixin):
     """Base class for building a multivariate polynomial basis.
 
     This class creates a multi-variate polynomial object, aka as a polynomial
@@ -280,6 +281,7 @@ class PCEBuilder(BaseEstimator):
         normalized=False,
         store_phi=False,
         input_range=None,
+        use_sklearn_poly_features=False,
     ):
         # self.dim = dim # no need to initialize with dim
         self.order = order
@@ -298,6 +300,7 @@ class PCEBuilder(BaseEstimator):
         self.normalized = normalized
         self._mindex_compute_count_ = 0
         self.store_phi = store_phi
+        self.use_sklearn_poly_features = use_sklearn_poly_features
 
     def compile(self, dim):
         """Setup for instantiating the basis class
@@ -375,6 +378,14 @@ class PCEBuilder(BaseEstimator):
         #     assert len(self.coef) == self.mindex.shape[0], "coefficient array is not the same size as the multindex array."
         self.compile_flag = True
 
+    def _fit_transform_sklearn_poly_features(self, X):
+        """
+        Compile the polynomial feature matrix using the sklearn.PolynomialFeatures class.
+        """
+        if not hasattr(self, "polyT"):
+            self.polyT = PolynomialFeatures(self.order, include_bias=True)
+        return self.polyT.fit_transform(X)
+
     def computeNormSq(self):
         """Separate method to compute norms, in order to bypass construct basis. For use when computing the feature importance/ Sobol sensitivity indices."""
         mindex = self.mindex  # use internal mindex array
@@ -400,6 +411,114 @@ class PCEBuilder(BaseEstimator):
         )
         self.norm = np.sqrt(normsq)
         return self.normsq
+
+    def fit(self, X):
+        X = np.atleast_2d(X)
+        if self.mindex is None:
+            self.compile(dim=X.shape[1])  # only compiles once
+        else:
+            pass
+
+        return self
+
+    def transform(self, X):
+        """Transform the given :math:`X` coordinates to the polynomial
+        space.
+
+        This method essentially performs a high dimensional kernel mapping onto
+        a polynomial space spanned by the Legendre polynomials. This is similar
+        to sklearn's PolynomialFeatures, except here the features are
+        multi-variate Legendre; the big difference being that the features are
+        uncorrelated.
+
+        Alternatively, the resulting
+
+        Parameters
+        ----------
+
+        X   :  numpy.ndarray of shape (nsamples, dim)
+
+            feature matrix where each row is a sample of the feature space.
+
+        Returns
+        -------
+
+        Phi :  numpy.ndarray of shape (nsamples, nPCTerms)
+
+            returns the polynomial feature map that transforms each sample in :math:`X` of dimension :math:`d` to dimension :math:`nPCTerms`.
+
+        """
+        # Scale X if input range to (-1,1) if range is specified
+        if self.input_range is not None:
+            scaler = DomainScaler(
+                dim=X.shape[1], input_range=self.input_range, output_range=(-1, 1)
+            )
+            X_scaled = scaler.fit_transform(X)
+            X = X_scaled.copy()
+
+        # only works for [-1,1] for far
+        # compute multindex
+        assert (
+            np.amin(X) >= -1 and np.amax(X) <= 1
+        ), "range for X must be between -1 and 1 for now. scale inputs accordingly. "
+
+        # if sklearn poly selected then use sklearn
+        if self.use_sklearn_poly_features is False:
+
+            Max = np.amax(self.mindex, axis=0)
+            # construct and evaluate each basis using mindex
+            L = []
+            NormSq = []
+            self.output_type = None
+            if X.ndim == 1:
+                X = np.atleast_2d(X)
+                self.output_type = "scalar"
+            for i in range(self.dim):
+                # Compute Legendre objects and eval 1d basis
+                if self.normalized == False:
+                    Leg = LegPoly()
+                elif self.normalized == True:
+                    Leg = LegPolyNorm()
+                Li_max = Leg.Eval1dBasis(x=X[:, i], K=Max[i])
+                L.append(Li_max)  # list of size dim of Legendre polys
+                NormSq.append(Leg.normsq(Max[i]))  # norms up to K order
+
+            # start computing products
+            Phi = 1.0
+            normsq = 1.0
+            L_array = np.array(L)
+
+            # # method 2 looping over number of samples
+            # start = time.time()
+            # I = self.mindex.T
+            # I0 = np.ones_like(I)*np.arange(self.dim)[:,np.newaxis]
+            # Lbig = L_array[I0.ravel(),I.ravel(),:]
+            # # Phi = np.prod(Lbig,axis=0)
+            # # self.Phi = Phi.T
+            # print(time.time() - start)
+
+            # method 2 - looping over dimensions
+            # start = time.time()
+            for di in range(self.dim):
+                # if di%2 == 0: print("main prod loop...", di)
+                Phi = L_array[di][self.mindex[:, di]] * Phi
+                normsq = NormSq[di][self.mindex[:, di]] * normsq
+            if self.store_phi is True:
+                self.Phi = Phi.T
+            else:
+                pass
+            self.normsq = normsq  # norm squared
+            # print(time.time() - start)
+
+            # if self.normalized:
+            #     return self.Phi/np.sqrt(normsq)
+            # else:
+            #     return self.Phi
+            # pdb.set_trace()
+            return Phi.T
+        elif self.use_sklearn_poly_features is True:
+            Vander = self._fit_transform_sklearn_poly_features(X)
+            return Vander
 
     def fit_transform(self, X):
         """Fit and transform the given :math:`X` coordinates to the polynomial
@@ -448,57 +567,63 @@ class PCEBuilder(BaseEstimator):
             pass
         # or recompute if dimensions change?
 
-        Max = np.amax(self.mindex, axis=0)
-        # construct and evaluate each basis using mindex
-        L = []
-        NormSq = []
-        self.output_type = None
-        if X.ndim == 1:
-            X = np.atleast_2d(X)
-            self.output_type = "scalar"
-        for i in range(self.dim):
-            # Compute Legendre objects and eval 1d basis
-            if self.normalized == False:
-                Leg = LegPoly()
-            elif self.normalized == True:
-                Leg = LegPolyNorm()
-            Li_max = Leg.Eval1dBasis(x=X[:, i], K=Max[i])
-            L.append(Li_max)  # list of size dim of Legendre polys
-            NormSq.append(Leg.normsq(Max[i]))  # norms up to K order
+        # if sklearn poly selected then use sklearn
+        if self.use_sklearn_poly_features is False:
 
-        # start computing products
-        Phi = 1.0
-        normsq = 1.0
-        L_array = np.array(L)
+            Max = np.amax(self.mindex, axis=0)
+            # construct and evaluate each basis using mindex
+            L = []
+            NormSq = []
+            self.output_type = None
+            if X.ndim == 1:
+                X = np.atleast_2d(X)
+                self.output_type = "scalar"
+            for i in range(self.dim):
+                # Compute Legendre objects and eval 1d basis
+                if self.normalized == False:
+                    Leg = LegPoly()
+                elif self.normalized == True:
+                    Leg = LegPolyNorm()
+                Li_max = Leg.Eval1dBasis(x=X[:, i], K=Max[i])
+                L.append(Li_max)  # list of size dim of Legendre polys
+                NormSq.append(Leg.normsq(Max[i]))  # norms up to K order
 
-        # # method 2 looping over number of samples
-        # start = time.time()
-        # I = self.mindex.T
-        # I0 = np.ones_like(I)*np.arange(self.dim)[:,np.newaxis]
-        # Lbig = L_array[I0.ravel(),I.ravel(),:]
-        # # Phi = np.prod(Lbig,axis=0)
-        # # self.Phi = Phi.T
-        # print(time.time() - start)
+            # start computing products
+            Phi = 1.0
+            normsq = 1.0
+            L_array = np.array(L)
 
-        # method 2 - looping over dimensions
-        # start = time.time()
-        for di in range(self.dim):
-            # if di%2 == 0: print("main prod loop...", di)
-            Phi = L_array[di][self.mindex[:, di]] * Phi
-            normsq = NormSq[di][self.mindex[:, di]] * normsq
-        if self.store_phi is True:
-            self.Phi = Phi.T
-        else:
-            pass
-        self.normsq = normsq  # norm squared
-        # print(time.time() - start)
+            # # method 2 looping over number of samples
+            # start = time.time()
+            # I = self.mindex.T
+            # I0 = np.ones_like(I)*np.arange(self.dim)[:,np.newaxis]
+            # Lbig = L_array[I0.ravel(),I.ravel(),:]
+            # # Phi = np.prod(Lbig,axis=0)
+            # # self.Phi = Phi.T
+            # print(time.time() - start)
 
-        # if self.normalized:
-        #     return self.Phi/np.sqrt(normsq)
-        # else:
-        #     return self.Phi
-        # pdb.set_trace()
-        return Phi.T
+            # method 2 - looping over dimensions
+            # start = time.time()
+            for di in range(self.dim):
+                # if di%2 == 0: print("main prod loop...", di)
+                Phi = L_array[di][self.mindex[:, di]] * Phi
+                normsq = NormSq[di][self.mindex[:, di]] * normsq
+            if self.store_phi is True:
+                self.Phi = Phi.T
+            else:
+                pass
+            self.normsq = normsq  # norm squared
+            # print(time.time() - start)
+
+            # if self.normalized:
+            #     return self.Phi/np.sqrt(normsq)
+            # else:
+            #     return self.Phi
+            # pdb.set_trace()
+            return Phi.T
+        elif self.use_sklearn_poly_features is True:
+            Vander = self._fit_transform_sklearn_poly_features(X)
+            return Vander
 
     def polyeval(self, X=None, c=None):
         """Method to evaluate the polynomial.
@@ -611,10 +736,10 @@ class PCEBuilder(BaseEstimator):
         )  # boolean array that doesn't include mean mindex
         if self.normalized:
             totvar_vec = coef_[new_index] ** 2
-            self.coefsq = coef_ ** 2
+            self.coefsq = coef_**2
         else:
             totvar_vec = normsq[new_index] * coef_[new_index] ** 2
-            self.coefsq = normsq * coef_ ** 2
+            self.coefsq = normsq * coef_**2
         totvar = np.sum(totvar_vec)
         # assert totvar > 0, "Coefficients are all zero!"
         S = []
@@ -655,11 +780,11 @@ class PCEBuilder(BaseEstimator):
 
         # new_index = (np.sum(self.mindex,1)!=0) # boolean array that doesn't include mean mindex
         if self.normalized:
-            totvar_vec = coef_ ** 2
-            self.coefsq = coef_ ** 2
+            totvar_vec = coef_**2
+            self.coefsq = coef_**2
         else:
-            totvar_vec = normsq * coef_ ** 2
-            self.coefsq = normsq * coef_ ** 2
+            totvar_vec = normsq * coef_**2
+            self.coefsq = normsq * coef_**2
         totvar_vec[0] = 0.0
         totvar = np.sum(totvar_vec)
 
@@ -874,6 +999,7 @@ class PCEReg(PCEBuilder, RegressorMixin):
         normalized=False,
         store_phi=False,
         input_range=None,
+        use_sklearn_poly_features=False,
     ):
         # alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2
         self.order = order
@@ -893,6 +1019,7 @@ class PCEReg(PCEBuilder, RegressorMixin):
         self.store_phi = store_phi
         self.input_range = input_range
         self.normalized = normalized
+        self.use_sklearn_poly_features = use_sklearn_poly_features
         super().__init__(
             order=self.order,
             customM=self.customM,
@@ -904,6 +1031,7 @@ class PCEReg(PCEBuilder, RegressorMixin):
             normalized=self.normalized,
             store_phi=self.store_phi,
             input_range=self.input_range,
+            use_sklearn_poly_features=self.use_sklearn_poly_features,
         )
 
     def _compile(self, X):
@@ -958,7 +1086,7 @@ class PCEReg(PCEBuilder, RegressorMixin):
         assert (
             np.abs(np.sum(w) - 1) <= 1e-15
         ), "quadrature weights must be scaled to integrate over [-1,1] with unit weight"
-        int_fact = 2 ** self._dim
+        int_fact = 2**self._dim
         if self.normalized == True:
             self.coef = int_fact * np.dot(w * y, self.Xhat) / np.sqrt(normsq)
         else:

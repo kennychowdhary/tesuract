@@ -393,4 +393,4 @@ class TestJointSobol(unittest.TestCase):
                 if (np.sum(pce.mindex[i, :]) > 0)
             ]
         )
-        assert var_temp == var_tot, "dimensions don't match"
+        assert (var_temp - var_tot)**2 < 1e-10, "total variance does not match"

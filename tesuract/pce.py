@@ -163,7 +163,7 @@ class PolyFactory:
         return L
 
 
-class PCEBuilder(BaseEstimator, TransformerMixin):
+class PCEBuilder(TransformerMixin):
     """Base class for building a multivariate polynomial basis.
 
     This class creates a multi-variate polynomial object, aka as a polynomial
@@ -412,7 +412,8 @@ class PCEBuilder(BaseEstimator, TransformerMixin):
         self.norm = np.sqrt(normsq)
         return self.normsq
 
-    def fit(self, X):
+    def setup(self, X):
+        # cannot name it self.fit() otherwise PCEReg would overwrite it
         X = np.atleast_2d(X)
         if self.mindex is None:
             self.compile(dim=X.shape[1])  # only compiles once
@@ -547,83 +548,7 @@ class PCEBuilder(BaseEstimator, TransformerMixin):
             returns the polynomial feature map that transforms each sample in :math:`X` of dimension :math:`d` to dimension :math:`nPCTerms`.
 
         """
-        # Scale X if input range to (-1,1) if range is specified
-        if self.input_range is not None:
-            scaler = DomainScaler(
-                dim=X.shape[1], input_range=self.input_range, output_range=(-1, 1)
-            )
-            X_scaled = scaler.fit_transform(X)
-            X = X_scaled.copy()
-
-        # only works for [-1,1] for far
-        # compute multindex
-        assert (
-            np.amin(X) >= -1 and np.amax(X) <= 1
-        ), "range for X must be between -1 and 1 for now. scale inputs accordingly. "
-        X = np.atleast_2d(X)
-        if self.mindex is None:
-            self.compile(dim=X.shape[1])  # only compiles once
-        else:
-            pass
-        # or recompute if dimensions change?
-
-        # if sklearn poly selected then use sklearn
-        if self.use_sklearn_poly_features is False:
-
-            Max = np.amax(self.mindex, axis=0)
-            # construct and evaluate each basis using mindex
-            L = []
-            NormSq = []
-            self.output_type = None
-            if X.ndim == 1:
-                X = np.atleast_2d(X)
-                self.output_type = "scalar"
-            for i in range(self.dim):
-                # Compute Legendre objects and eval 1d basis
-                if self.normalized == False:
-                    Leg = LegPoly()
-                elif self.normalized == True:
-                    Leg = LegPolyNorm()
-                Li_max = Leg.Eval1dBasis(x=X[:, i], K=Max[i])
-                L.append(Li_max)  # list of size dim of Legendre polys
-                NormSq.append(Leg.normsq(Max[i]))  # norms up to K order
-
-            # start computing products
-            Phi = 1.0
-            normsq = 1.0
-            L_array = np.array(L)
-
-            # # method 2 looping over number of samples
-            # start = time.time()
-            # I = self.mindex.T
-            # I0 = np.ones_like(I)*np.arange(self.dim)[:,np.newaxis]
-            # Lbig = L_array[I0.ravel(),I.ravel(),:]
-            # # Phi = np.prod(Lbig,axis=0)
-            # # self.Phi = Phi.T
-            # print(time.time() - start)
-
-            # method 2 - looping over dimensions
-            # start = time.time()
-            for di in range(self.dim):
-                # if di%2 == 0: print("main prod loop...", di)
-                Phi = L_array[di][self.mindex[:, di]] * Phi
-                normsq = NormSq[di][self.mindex[:, di]] * normsq
-            if self.store_phi is True:
-                self.Phi = Phi.T
-            else:
-                pass
-            self.normsq = normsq  # norm squared
-            # print(time.time() - start)
-
-            # if self.normalized:
-            #     return self.Phi/np.sqrt(normsq)
-            # else:
-            #     return self.Phi
-            # pdb.set_trace()
-            return Phi.T
-        elif self.use_sklearn_poly_features is True:
-            Vander = self._fit_transform_sklearn_poly_features(X)
-            return Vander
+        return self.setup(X).transform(X)
 
     def polyeval(self, X=None, c=None):
         """Method to evaluate the polynomial.
@@ -868,8 +793,8 @@ from sklearn.exceptions import ConvergenceWarning
 
 simplefilter("ignore", category=ConvergenceWarning)
 
-
-class PCEReg(PCEBuilder, RegressorMixin):
+# regressor mixin is to add scoring, and baseestimator is to add fit, predict
+class PCEReg(PCEBuilder, BaseEstimator, RegressorMixin):
     """Class for performing multivariate polynomial regression
 
     This class fits the coefficients of a a multivariate polynomial object, aka

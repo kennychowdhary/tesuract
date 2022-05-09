@@ -17,3 +17,5 @@ dist/
 
 # Jupyter NB Checkpoints
 .ipynb_checkpoints/
+
+*.coverage*

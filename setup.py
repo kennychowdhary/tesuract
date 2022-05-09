@@ -18,7 +18,7 @@ setup(
     packages=["tesuract"],
     test_suite="nose.collector",
     tests_required=["nose"],
-    install_requires=["numpy", "sklearn", "tqdm"],
+    install_requires=["numpy", "sklearn", "scipy", "tqdm"],
     include_package_data=True,
     zip_safe=False,
 )

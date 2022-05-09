@@ -1,8 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as mpl
 import pdb, warnings, pickle
-from tqdm import tqdm
-
 
 def get_tuples(length, total):
     if length == 1:

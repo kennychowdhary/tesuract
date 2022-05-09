@@ -2,7 +2,6 @@ import numpy as np
 import tesuract
 from collections import defaultdict
 import time as T
-import matplotlib.pyplot as mpl
 import warnings, pdb
 
 from sklearn.base import BaseEstimator, RegressorMixin, TransformerMixin

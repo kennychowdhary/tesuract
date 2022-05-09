@@ -8,7 +8,7 @@ def readme():
 
 setup(
     name="tesuract",
-    version="0.1.2",
+    version="0.2.0",
     description="Tensor surrogate construction methods",
     long_description="UQ and ML tools for surrogate construction",
     url="https://github.com/kennychowdhary/tesuract",

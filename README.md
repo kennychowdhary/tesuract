@@ -2,8 +2,11 @@
 ![PyPI](https://img.shields.io/pypi/v/tesuract)
 
 
+<!-- ![image](docs/source/_static/tesuract_logo.png) -->
 
-# **tesuract**
+# <img src="docs/source/_static/tesuract_logo.png" alt="drawing" width="250"/> 
+
+<!-- **tesuract** -->
 
 **tesuract**, which stands for **te**nsor **sur**rogate **a**utomation
 and **c**ompu**t**ation, is a software library to perform automated

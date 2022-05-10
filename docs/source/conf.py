@@ -12,11 +12,11 @@ import doc
 # -- Project information -----------------------------------------------------
 
 project = "tesuract"
-copyright = "2020, K. Chowdhary"
+copyright = "2021, K. Chowdhary"
 author = "K. Chowdhary"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.2"
+release = "0.2.0"
 
 # add path
 sys.path.append(os.path.abspath("../../"))

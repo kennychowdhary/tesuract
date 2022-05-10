@@ -1,7 +1,7 @@
 |Generic badge|
 
-.. |Generic badge| image:: https://img.shields.io/github/license/kennychowdhary/tesuract
-   :target:
+.. |Generic badge| image:: 
+   :target: https://img.shields.io/github/license/kennychowdhary/tesuract
 
 .. https://img.shields.io/pypi/v/tesuract
 

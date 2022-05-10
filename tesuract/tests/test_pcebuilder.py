@@ -6,6 +6,7 @@ from sklearn.metrics import mean_squared_error
 import os
 from joblib import dump, load
 import time
+import pytest
 
 relpath = tesuract.__file__[:-11]  # ignore the __init__.py specification
 print("relpath:", relpath)
@@ -15,6 +16,7 @@ def mse(a, b):
     return mean_squared_error(a, b, squared=False)
 
 
+@pytest.mark.unit
 class TestPCEBuilderOnArbDomain(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -73,6 +75,7 @@ class TestPCEBuilderOnArbDomain(unittest.TestCase):
         self.assertRaises(AssertionError, pce.polyeval, X, coef)
 
 
+@pytest.mark.unit
 class TestPCEBuilder(unittest.TestCase):
     @classmethod
     def setUpClass(self):
@@ -355,6 +358,7 @@ class TestPCEBuilder(unittest.TestCase):
 
 
 # code to test the joint Sobol function in PCEBuilder
+@pytest.mark.unit
 class TestJointSobol(unittest.TestCase):
     def test_initialize_joint_sensitivity(self):
         p = tesuract.PCEBuilder(order=2)
@@ -393,4 +397,4 @@ class TestJointSobol(unittest.TestCase):
                 if (np.sum(pce.mindex[i, :]) > 0)
             ]
         )
-        assert var_temp == var_tot, "dimensions don't match"
+        assert (var_temp - var_tot) ** 2 < 1e-10, "total variance does not match"

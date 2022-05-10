@@ -5,6 +5,6 @@ from .pce import PCEReg
 from .quadrature import QuadGen
 import tesuract.preprocessing
 import tesuract.utils
-import tesuract.mpce
+# import tesuract.mpce
 from .pce_multitarget_regression import RegressionWrapperCV, MRegressionWrapperCV, MPCEReg
 import tesuract.experimental

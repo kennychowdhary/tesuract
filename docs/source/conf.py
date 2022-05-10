@@ -79,7 +79,7 @@ exclude_patterns = []
 
 # book theme
 html_theme = "sphinx_book_theme"
-
+html_logo = "_static/tesuract_logo.png"
 html_theme_options = {
     "collapse_navigation": False,
     "repository_url": "https://github.com/kennychowdhary/tesuract",

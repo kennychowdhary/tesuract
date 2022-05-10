@@ -1,6 +1,8 @@
 ![License](https://img.shields.io/github/license/kennychowdhary/tesuract)
 ![PyPI](https://img.shields.io/pypi/v/tesuract)
 
+
+
 # **tesuract**
 
 **tesuract**, which stands for **te**nsor **sur**rogate **a**utomation
@@ -12,6 +14,10 @@ scikit-learn\'s API, e.g., their *set, fit, predict* functionality,
 allowing flexibility and modularity. It also contains tools to quickly
 and easily implement multi-variate Legendre polynomial (the original
 universal approximator!) regression models.
+
+## Documentation
+
+Please see the full documentation [here](https://kennychowdhary.github.io/tesuract/build/html/index.html).
 
 ## Installation
 

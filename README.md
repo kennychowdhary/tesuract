@@ -1,9 +1,5 @@
-|Generic badge|
-
-.. |Generic badge| image:: 
-   :target: https://img.shields.io/github/license/kennychowdhary/tesuract
-
-.. https://img.shields.io/pypi/v/tesuract
+![License](https://img.shields.io/github/license/kennychowdhary/tesuract)
+![PyPI](https://img.shields.io/pypi/v/tesuract)
 
 **tesuract**
 ============

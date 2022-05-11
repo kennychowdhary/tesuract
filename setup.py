@@ -1,16 +1,14 @@
 from setuptools import setup
 
 
-def readme():
-    with open("README.rst") as f:
-        return f.read()
-
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 setup(
     name="tesuract",
     version="0.2.0",
     description="Tensor surrogate construction methods",
-    long_description="UQ and ML tools for surrogate construction",
+    long_description=long_description,
     url="https://github.com/kennychowdhary/tesuract",
     author="Kenny Chowdhary",
     author_email="kchowdh@sandia.gov",

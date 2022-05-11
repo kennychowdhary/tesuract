@@ -249,6 +249,7 @@ title="Source repository"
 <span class="kn">from</span> <span class="nn">sklearn.decomposition</span> <span class="kn">import</span> <span class="n">PCA</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">RegressorMixin</span><span class="p">,</span> <span class="n">TransformerMixin</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">MinMaxScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">PolynomialFeatures</span>
 
 <span class="kn">from</span> <span class="nn">.multiindex</span> <span class="kn">import</span> <span class="n">RecursiveHypMultiIndex</span>
 <span class="kn">from</span> <span class="nn">.multiindex</span> <span class="kn">import</span> <span class="n">MultiIndex</span>
@@ -291,15 +292,15 @@ title="Source repository"
     <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">x</span>
     <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">3.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="mf">5.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">35.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">-</span> <span class="mf">30.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">3.0</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">35.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span> <span class="o">-</span> <span class="mf">30.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">3.0</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">5</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">63.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">5</span> <span class="o">-</span> <span class="mf">70.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">+</span> <span class="mf">15.0</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">8</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">63.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">5</span> <span class="o">-</span> <span class="mf">70.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span> <span class="o">+</span> <span class="mf">15.0</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">231.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">6</span> <span class="o">-</span> <span class="mf">31.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">+</span> <span class="mf">105.0</span> <span class="o">*</span> <span class="n">x</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="mf">5.0</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">231.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">6</span> <span class="o">-</span> <span class="mf">31.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">4</span> <span class="o">+</span> <span class="mf">105.0</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="mf">5.0</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">y</span>
 
 
@@ -406,7 +407,7 @@ title="Source repository"
         <span class="k">return</span> <span class="n">L</span>
 
 
-<div class="viewcode-block" id="PCEBuilder"><a class="viewcode-back" href="../../api.html#tesuract.PCEBuilder">[docs]</a><span class="k">class</span> <span class="nc">PCEBuilder</span><span class="p">(</span><span class="n">BaseEstimator</span><span class="p">):</span>
+<div class="viewcode-block" id="PCEBuilder"><a class="viewcode-back" href="../../api.html#tesuract.PCEBuilder">[docs]</a><span class="k">class</span> <span class="nc">PCEBuilder</span><span class="p">(</span><span class="n">TransformerMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class for building a multivariate polynomial basis.</span>
 
 <span class="sd">    This class creates a multi-variate polynomial object, aka as a polynomial</span>
@@ -524,6 +525,7 @@ title="Source repository"
         <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">store_phi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">input_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_sklearn_poly_features</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># self.dim = dim # no need to initialize with dim</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="n">order</span>
@@ -542,6 +544,7 @@ title="Source repository"
         <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">=</span> <span class="n">normalized</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_mindex_compute_count_</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">store_phi</span> <span class="o">=</span> <span class="n">store_phi</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_sklearn_poly_features</span> <span class="o">=</span> <span class="n">use_sklearn_poly_features</span>
 
 <div class="viewcode-block" id="PCEBuilder.compile"><a class="viewcode-back" href="../../api.html#tesuract.PCEBuilder.compile">[docs]</a>    <span class="k">def</span> <span class="nf">compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Setup for instantiating the basis class</span>
@@ -619,6 +622,14 @@ title="Source repository"
         <span class="c1">#     assert len(self.coef) == self.mindex.shape[0], &quot;coefficient array is not the same size as the multindex array.&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compile_flag</span> <span class="o">=</span> <span class="kc">True</span></div>
 
+    <span class="k">def</span> <span class="nf">_fit_transform_sklearn_poly_features</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compile the polynomial feature matrix using the sklearn.PolynomialFeatures class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;polyT&quot;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">polyT</span> <span class="o">=</span> <span class="n">PolynomialFeatures</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="n">include_bias</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">polyT</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">computeNormSq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Separate method to compute norms, in order to bypass construct basis. For use when computing the feature importance/ Sobol sensitivity indices.&quot;&quot;&quot;</span>
         <span class="n">mindex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mindex</span>  <span class="c1"># use internal mindex array</span>
@@ -645,8 +656,18 @@ title="Source repository"
         <span class="bp">self</span><span class="o">.</span><span class="n">norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">normsq</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">normsq</span>
 
-<div class="viewcode-block" id="PCEBuilder.fit_transform"><a class="viewcode-back" href="../../api.html#tesuract.PCEBuilder.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Fit and transform the given :math:`X` coordinates to the polynomial</span>
+    <span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="c1"># cannot name it self.fit() otherwise PCEReg would overwrite it</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mindex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># only compiles once</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="bp">self</span>
+
+<div class="viewcode-block" id="PCEBuilder.transform"><a class="viewcode-back" href="../../api.html#tesuract.PCEBuilder.transform">[docs]</a>    <span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Transform the given :math:`X` coordinates to the polynomial</span>
 <span class="sd">        space.</span>
 
 <span class="sd">        This method essentially performs a high dimensional kernel mapping onto</span>
@@ -685,64 +706,93 @@ title="Source repository"
         <span class="k">assert</span> <span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">amin</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span>
         <span class="p">),</span> <span class="s2">&quot;range for X must be between -1 and 1 for now. scale inputs accordingly. &quot;</span>
-        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mindex</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>  <span class="c1"># only compiles once</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">pass</span>
-        <span class="c1"># or recompute if dimensions change?</span>
 
-        <span class="n">Max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-        <span class="c1"># construct and evaluate each basis using mindex</span>
-        <span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">NormSq</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s2">&quot;scalar&quot;</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
-            <span class="c1"># Compute Legendre objects and eval 1d basis</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="n">Leg</span> <span class="o">=</span> <span class="n">LegPoly</span><span class="p">()</span>
-            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-                <span class="n">Leg</span> <span class="o">=</span> <span class="n">LegPolyNorm</span><span class="p">()</span>
-            <span class="n">Li_max</span> <span class="o">=</span> <span class="n">Leg</span><span class="o">.</span><span class="n">Eval1dBasis</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">K</span><span class="o">=</span><span class="n">Max</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-            <span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Li_max</span><span class="p">)</span>  <span class="c1"># list of size dim of Legendre polys</span>
-            <span class="n">NormSq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Leg</span><span class="o">.</span><span class="n">normsq</span><span class="p">(</span><span class="n">Max</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>  <span class="c1"># norms up to K order</span>
+        <span class="c1"># if sklearn poly selected then use sklearn</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_sklearn_poly_features</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
 
-        <span class="c1"># start computing products</span>
-        <span class="n">Phi</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="n">normsq</span> <span class="o">=</span> <span class="mf">1.0</span>
-        <span class="n">L_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
+            <span class="n">Max</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">amax</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mindex</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># construct and evaluate each basis using mindex</span>
+            <span class="n">L</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">NormSq</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">X</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_type</span> <span class="o">=</span> <span class="s2">&quot;scalar&quot;</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+                <span class="c1"># Compute Legendre objects and eval 1d basis</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="n">Leg</span> <span class="o">=</span> <span class="n">LegPoly</span><span class="p">()</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">Leg</span> <span class="o">=</span> <span class="n">LegPolyNorm</span><span class="p">()</span>
+                <span class="n">Li_max</span> <span class="o">=</span> <span class="n">Leg</span><span class="o">.</span><span class="n">Eval1dBasis</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">X</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="n">K</span><span class="o">=</span><span class="n">Max</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">L</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Li_max</span><span class="p">)</span>  <span class="c1"># list of size dim of Legendre polys</span>
+                <span class="n">NormSq</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Leg</span><span class="o">.</span><span class="n">normsq</span><span class="p">(</span><span class="n">Max</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>  <span class="c1"># norms up to K order</span>
 
-        <span class="c1"># # method 2 looping over number of samples</span>
-        <span class="c1"># start = time.time()</span>
-        <span class="c1"># I = self.mindex.T</span>
-        <span class="c1"># I0 = np.ones_like(I)*np.arange(self.dim)[:,np.newaxis]</span>
-        <span class="c1"># Lbig = L_array[I0.ravel(),I.ravel(),:]</span>
-        <span class="c1"># # Phi = np.prod(Lbig,axis=0)</span>
-        <span class="c1"># # self.Phi = Phi.T</span>
-        <span class="c1"># print(time.time() - start)</span>
+            <span class="c1"># start computing products</span>
+            <span class="n">Phi</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">normsq</span> <span class="o">=</span> <span class="mf">1.0</span>
+            <span class="n">L_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">L</span><span class="p">)</span>
 
-        <span class="c1"># method 2 - looping over dimensions</span>
-        <span class="c1"># start = time.time()</span>
-        <span class="k">for</span> <span class="n">di</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
-            <span class="c1"># if di%2 == 0: print(&quot;main prod loop...&quot;, di)</span>
-            <span class="n">Phi</span> <span class="o">=</span> <span class="n">L_array</span><span class="p">[</span><span class="n">di</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">mindex</span><span class="p">[:,</span> <span class="n">di</span><span class="p">]]</span> <span class="o">*</span> <span class="n">Phi</span>
-            <span class="n">normsq</span> <span class="o">=</span> <span class="n">NormSq</span><span class="p">[</span><span class="n">di</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">mindex</span><span class="p">[:,</span> <span class="n">di</span><span class="p">]]</span> <span class="o">*</span> <span class="n">normsq</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_phi</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="n">Phi</span><span class="o">.</span><span class="n">T</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">pass</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">normsq</span> <span class="o">=</span> <span class="n">normsq</span>  <span class="c1"># norm squared</span>
-        <span class="c1"># print(time.time() - start)</span>
+            <span class="c1"># # method 2 looping over number of samples</span>
+            <span class="c1"># start = time.time()</span>
+            <span class="c1"># I = self.mindex.T</span>
+            <span class="c1"># I0 = np.ones_like(I)*np.arange(self.dim)[:,np.newaxis]</span>
+            <span class="c1"># Lbig = L_array[I0.ravel(),I.ravel(),:]</span>
+            <span class="c1"># # Phi = np.prod(Lbig,axis=0)</span>
+            <span class="c1"># # self.Phi = Phi.T</span>
+            <span class="c1"># print(time.time() - start)</span>
 
-        <span class="c1"># if self.normalized:</span>
-        <span class="c1">#     return self.Phi/np.sqrt(normsq)</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     return self.Phi</span>
-        <span class="c1"># pdb.set_trace()</span>
-        <span class="k">return</span> <span class="n">Phi</span><span class="o">.</span><span class="n">T</span></div>
+            <span class="c1"># method 2 - looping over dimensions</span>
+            <span class="c1"># start = time.time()</span>
+            <span class="k">for</span> <span class="n">di</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">):</span>
+                <span class="c1"># if di%2 == 0: print(&quot;main prod loop...&quot;, di)</span>
+                <span class="n">Phi</span> <span class="o">=</span> <span class="n">L_array</span><span class="p">[</span><span class="n">di</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">mindex</span><span class="p">[:,</span> <span class="n">di</span><span class="p">]]</span> <span class="o">*</span> <span class="n">Phi</span>
+                <span class="n">normsq</span> <span class="o">=</span> <span class="n">NormSq</span><span class="p">[</span><span class="n">di</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">mindex</span><span class="p">[:,</span> <span class="n">di</span><span class="p">]]</span> <span class="o">*</span> <span class="n">normsq</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_phi</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Phi</span> <span class="o">=</span> <span class="n">Phi</span><span class="o">.</span><span class="n">T</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">normsq</span> <span class="o">=</span> <span class="n">normsq</span>  <span class="c1"># norm squared</span>
+            <span class="c1"># print(time.time() - start)</span>
+
+            <span class="c1"># if self.normalized:</span>
+            <span class="c1">#     return self.Phi/np.sqrt(normsq)</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     return self.Phi</span>
+            <span class="c1"># pdb.set_trace()</span>
+            <span class="k">return</span> <span class="n">Phi</span><span class="o">.</span><span class="n">T</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_sklearn_poly_features</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">Vander</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fit_transform_sklearn_poly_features</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Vander</span></div>
+
+<div class="viewcode-block" id="PCEBuilder.fit_transform"><a class="viewcode-back" href="../../api.html#tesuract.PCEBuilder.fit_transform">[docs]</a>    <span class="k">def</span> <span class="nf">fit_transform</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fit and transform the given :math:`X` coordinates to the polynomial</span>
+<span class="sd">        space.</span>
+
+<span class="sd">        This method essentially performs a high dimensional kernel mapping onto</span>
+<span class="sd">        a polynomial space spanned by the Legendre polynomials. This is similar</span>
+<span class="sd">        to sklearn&#39;s PolynomialFeatures, except here the features are</span>
+<span class="sd">        multi-variate Legendre; the big difference being that the features are</span>
+<span class="sd">        uncorrelated.</span>
+
+<span class="sd">        Alternatively, the resulting</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+
+<span class="sd">        X   :  numpy.ndarray of shape (nsamples, dim)</span>
+
+<span class="sd">            feature matrix where each row is a sample of the feature space.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+
+<span class="sd">        Phi :  numpy.ndarray of shape (nsamples, nPCTerms)</span>
+
+<span class="sd">            returns the polynomial feature map that transforms each sample in :math:`X` of dimension :math:`d` to dimension :math:`nPCTerms`.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup</span><span class="p">(</span><span class="n">X</span><span class="p">)</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="PCEBuilder.polyeval"><a class="viewcode-back" href="../../api.html#tesuract.PCEBuilder.polyeval">[docs]</a>    <span class="k">def</span> <span class="nf">polyeval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to evaluate the polynomial.</span>
@@ -855,10 +905,10 @@ title="Source repository"
         <span class="p">)</span>  <span class="c1"># boolean array that doesn&#39;t include mean mindex</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">:</span>
             <span class="n">totvar_vec</span> <span class="o">=</span> <span class="n">coef_</span><span class="p">[</span><span class="n">new_index</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coefsq</span> <span class="o">=</span> <span class="n">coef_</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coefsq</span> <span class="o">=</span> <span class="n">coef_</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">totvar_vec</span> <span class="o">=</span> <span class="n">normsq</span><span class="p">[</span><span class="n">new_index</span><span class="p">]</span> <span class="o">*</span> <span class="n">coef_</span><span class="p">[</span><span class="n">new_index</span><span class="p">]</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coefsq</span> <span class="o">=</span> <span class="n">normsq</span> <span class="o">*</span> <span class="n">coef_</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coefsq</span> <span class="o">=</span> <span class="n">normsq</span> <span class="o">*</span> <span class="n">coef_</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">totvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">totvar_vec</span><span class="p">)</span>
         <span class="c1"># assert totvar &gt; 0, &quot;Coefficients are all zero!&quot;</span>
         <span class="n">S</span> <span class="o">=</span> <span class="p">[]</span>
@@ -899,11 +949,11 @@ title="Source repository"
 
         <span class="c1"># new_index = (np.sum(self.mindex,1)!=0) # boolean array that doesn&#39;t include mean mindex</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">:</span>
-            <span class="n">totvar_vec</span> <span class="o">=</span> <span class="n">coef_</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coefsq</span> <span class="o">=</span> <span class="n">coef_</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">totvar_vec</span> <span class="o">=</span> <span class="n">coef_</span><span class="o">**</span><span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coefsq</span> <span class="o">=</span> <span class="n">coef_</span><span class="o">**</span><span class="mi">2</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">totvar_vec</span> <span class="o">=</span> <span class="n">normsq</span> <span class="o">*</span> <span class="n">coef_</span> <span class="o">**</span> <span class="mi">2</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">coefsq</span> <span class="o">=</span> <span class="n">normsq</span> <span class="o">*</span> <span class="n">coef_</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">totvar_vec</span> <span class="o">=</span> <span class="n">normsq</span> <span class="o">*</span> <span class="n">coef_</span><span class="o">**</span><span class="mi">2</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coefsq</span> <span class="o">=</span> <span class="n">normsq</span> <span class="o">*</span> <span class="n">coef_</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">totvar_vec</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="n">totvar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">totvar_vec</span><span class="p">)</span>
 
@@ -987,8 +1037,8 @@ title="Source repository"
 
 <span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">ConvergenceWarning</span><span class="p">)</span>
 
-
-<div class="viewcode-block" id="PCEReg"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg">[docs]</a><span class="k">class</span> <span class="nc">PCEReg</span><span class="p">(</span><span class="n">PCEBuilder</span><span class="p">,</span> <span class="n">RegressorMixin</span><span class="p">):</span>
+<span class="c1"># regressor mixin is to add scoring, and baseestimator is to add fit, predict</span>
+<div class="viewcode-block" id="PCEReg"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg">[docs]</a><span class="k">class</span> <span class="nc">PCEReg</span><span class="p">(</span><span class="n">PCEBuilder</span><span class="p">,</span> <span class="n">BaseEstimator</span><span class="p">,</span> <span class="n">RegressorMixin</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class for performing multivariate polynomial regression</span>
 
 <span class="sd">    This class fits the coefficients of a a multivariate polynomial object, aka</span>
@@ -1118,6 +1168,7 @@ title="Source repository"
         <span class="n">normalized</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">store_phi</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">input_range</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">use_sklearn_poly_features</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># alphas=np.logspace(-12,1,20),l1_ratio=[.001,.5,.75,.95,.999,1],lasso_tol=1e-2</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">order</span> <span class="o">=</span> <span class="n">order</span>
@@ -1137,6 +1188,7 @@ title="Source repository"
         <span class="bp">self</span><span class="o">.</span><span class="n">store_phi</span> <span class="o">=</span> <span class="n">store_phi</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">input_range</span> <span class="o">=</span> <span class="n">input_range</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">=</span> <span class="n">normalized</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_sklearn_poly_features</span> <span class="o">=</span> <span class="n">use_sklearn_poly_features</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">order</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">order</span><span class="p">,</span>
             <span class="n">customM</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">customM</span><span class="p">,</span>
@@ -1148,6 +1200,7 @@ title="Source repository"
             <span class="n">normalized</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">normalized</span><span class="p">,</span>
             <span class="n">store_phi</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">store_phi</span><span class="p">,</span>
             <span class="n">input_range</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_range</span><span class="p">,</span>
+            <span class="n">use_sklearn_poly_features</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">use_sklearn_poly_features</span><span class="p">,</span>
         <span class="p">)</span>
 
 <div class="viewcode-block" id="PCEReg._compile"><a class="viewcode-back" href="../../api2.html#tesuract.PCEReg._compile">[docs]</a>    <span class="k">def</span> <span class="nf">_compile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
@@ -1202,7 +1255,7 @@ title="Source repository"
         <span class="k">assert</span> <span class="p">(</span>
             <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">1e-15</span>
         <span class="p">),</span> <span class="s2">&quot;quadrature weights must be scaled to integrate over [-1,1] with unit weight&quot;</span>
-        <span class="n">int_fact</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dim</span>
+        <span class="n">int_fact</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">_dim</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalized</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">coef</span> <span class="o">=</span> <span class="n">int_fact</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">w</span> <span class="o">*</span> <span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Xhat</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">normsq</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1282,6 +1335,7 @@ title="Source repository"
                     <span class="s2">&quot;l1_ratio&quot;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.999</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                     <span class="s2">&quot;n_alphas&quot;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
                     <span class="s2">&quot;tol&quot;</span><span class="p">:</span> <span class="mf">1e-2</span><span class="p">,</span>
+                    <span class="s2">&quot;n_jobs&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
                 <span class="p">}</span>
             <span class="n">regmodel</span> <span class="o">=</span> <span class="n">linear_model</span><span class="o">.</span><span class="n">ElasticNetCV</span><span class="p">(</span><span class="n">fit_intercept</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">fit_params</span><span class="p">)</span>
             <span class="n">regmodel</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">Xhat</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>

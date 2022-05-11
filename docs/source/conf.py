@@ -12,11 +12,11 @@ import doc
 # -- Project information -----------------------------------------------------
 
 project = "tesuract"
-copyright = "2020, K. Chowdhary"
+copyright = "2021, K. Chowdhary"
 author = "K. Chowdhary"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.2"
+release = "0.2.0"
 
 # add path
 sys.path.append(os.path.abspath("../../"))
@@ -79,7 +79,7 @@ exclude_patterns = []
 
 # book theme
 html_theme = "sphinx_book_theme"
-
+html_logo = "_static/tesuract_logo.png"
 html_theme_options = {
     "collapse_navigation": False,
     "repository_url": "https://github.com/kennychowdhary/tesuract",

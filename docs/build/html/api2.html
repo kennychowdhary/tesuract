@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>PCE Regression Class &#8212; tesuract 0.1.2 documentation</title>
+    <title>PCE Regression Class &#8212; tesuract 0.2.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -68,9 +68,14 @@
         <div class="bd-sidebar__top"><div class="navbar-brand-box">
     <a class="navbar-brand text-wrap" href="index.html">
       
+        <!-- `logo` is deprecated in Sphinx 4.0, so remove this when we stop supporting 3 -->
+        
       
       
-      <h1 class="site-logo" id="site-title">tesuract 0.1.2 documentation</h1>
+      <img src="_static/tesuract_logo.png" class="logo" alt="logo">
+      
+      
+      <h1 class="site-logo" id="site-title">tesuract 0.2.0 documentation</h1>
       
     </a>
 </div><form class="bd-search d-flex align-items-center" action="search.html" method="get">
@@ -294,7 +299,7 @@ title="Print to PDF"
 <span id="api-pce-reg"></span><h1>PCE Regression Class<a class="headerlink" href="#pce-regression-class" title="Permalink to this headline">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="tesuract.PCEReg">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tesuract.</span></span><span class="sig-name descname"><span class="pre">PCEReg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">customM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mindex_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'total_order'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polytype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Legendre'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalized</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_phi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesuract.PCEReg" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tesuract.</span></span><span class="sig-name descname"><span class="pre">PCEReg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">customM</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mindex_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'total_order'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">polytype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Legendre'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'linear'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fit_params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalized</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_phi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_sklearn_poly_features</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tesuract/pce.html#PCEReg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tesuract.PCEReg" title="Permalink to this definition">#</a></dt>
 <dd><p>Class for performing multivariate polynomial regression</p>
 <p>This class fits the coefficients of a a multivariate polynomial object, aka
 as a polynomial chaos model, using different linear regression algorithms
@@ -495,6 +500,33 @@ an option in the this class.</p>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="tesuract.PCEReg.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#tesuract.PCEReg.transform" title="Permalink to this definition">#</a></dt>
+<dd><p>Transform the given <span class="math notranslate nohighlight">\(X\)</span> coordinates to the polynomial
+space.</p>
+<p>This method essentially performs a high dimensional kernel mapping onto
+a polynomial space spanned by the Legendre polynomials. This is similar
+to sklearn’s PolynomialFeatures, except here the features are
+multi-variate Legendre; the big difference being that the features are
+uncorrelated.</p>
+<p>Alternatively, the resulting</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>X</strong><span class="classifier">numpy.ndarray of shape (nsamples, dim)</span></dt><dd><p>feature matrix where each row is a sample of the feature space.</p>
+</dd>
+</dl>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><dl class="simple">
+<dt><strong>Phi</strong><span class="classifier">numpy.ndarray of shape (nsamples, nPCTerms)</span></dt><dd><p>returns the polynomial feature map that transforms each sample in <span class="math notranslate nohighlight">\(X\)</span> of dimension <span class="math notranslate nohighlight">\(d\)</span> to dimension <span class="math notranslate nohighlight">\(nPCTerms\)</span>.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -523,7 +555,7 @@ an option in the this class.</p>
   
     By K. Chowdhary<br/>
   
-      &copy; Copyright 2020, K. Chowdhary.<br/>
+      &copy; Copyright 2021, K. Chowdhary.<br/>
 </p>
         </footer>
     </div>

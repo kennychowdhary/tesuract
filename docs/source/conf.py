@@ -7,6 +7,7 @@
 import sys, os
 
 sys.path.append(os.path.abspath("."))
+sys.path.append(os.path.abspath("../../"))
 import doc
 
 # -- Project information -----------------------------------------------------
@@ -16,7 +17,11 @@ copyright = "2021, K. Chowdhary"
 author = "K. Chowdhary"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.0"
+try:
+    release = __import__("tesuract").__version__
+except:
+    print("No version number given.")
+    release = ""
 
 # add path
 sys.path.append(os.path.abspath("../../"))

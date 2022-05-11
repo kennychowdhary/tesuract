@@ -791,7 +791,7 @@ class PCEBuilder(TransformerMixin):
 from warnings import simplefilter
 from sklearn.exceptions import ConvergenceWarning
 
-simplefilter("ignore", category=ConvergenceWarning)
+# simplefilter("ignore", category=ConvergenceWarning)
 
 # regressor mixin is to add scoring, and baseestimator is to add fit, predict
 class PCEReg(PCEBuilder, BaseEstimator, RegressorMixin):

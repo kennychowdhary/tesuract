@@ -9,6 +9,7 @@ setup(
     version="0.2.0",
     description="Tensor surrogate construction methods",
     long_description=long_description,
+    long_description_content_type="text/markdown",
     url="https://github.com/kennychowdhary/tesuract",
     author="Kenny Chowdhary",
     author_email="kchowdh@sandia.gov",

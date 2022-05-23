@@ -159,6 +159,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
         cv=None,
         mixed=True,
         verbose=0,
+        show_progress=True,
     ):
         self.regressor = regressor
         self.reg_params = reg_params
@@ -170,6 +171,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
         self.target_transform_params = target_transform_params
         self.mixed = mixed  # to control whether mixed surrogate for each target TBD
         self.verbose = verbose
+        self.show_progress = show_progress
 
     def _setupCV(self, shuffle=False, randstate=13):
         if self.cv == None:
@@ -254,7 +256,11 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
         # 	print(reg_params, regressor)
         res = defaultdict(list)
         # with alive_bar(self.ntargets) as bar:
-        for i in tqdm(range(self.ntargets)):
+        if self.show_progress:
+            iterator = tqdm(range(self.ntargets))
+        else:
+            iterator = range(self.ntargets)
+        for i in iterator:
             if self.custom_params:
                 # fit a single regressor to each target
                 assert len(regressor) == len(reg_params)
@@ -407,6 +413,7 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
             target_transform_params={},
             n_jobs=-1,
             verbose=0,
+            show_progress=False,
         )
 
         scores = cross_val_score(surrogate_clone, X, y, scoring=scoring, n_jobs=-1)

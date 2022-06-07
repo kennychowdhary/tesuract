@@ -391,6 +391,31 @@ class MRegressionWrapperCV(BaseEstimator, RegressorMixin):
 
     # add def for fitting multiple for each component for faster fitting
 
+    def clone(self, target_transform=None):
+
+        # First clone the surrogate using the best hyper parameters
+        n_components = len(self.best_params_)
+        reg_custom_list = [regressor for i in range(n_components)]
+        reg_param_list = self.best_params_
+
+        if target_transform is None:
+            # only works if n_comp is set to exact value
+            # will not work if using "auto"
+            target_transform = self.TT
+
+        surrogate_clone = MRegressionWrapperCV(
+            regressor=reg_custom_list,
+            reg_params=reg_param_list,
+            custom_params=True,
+            target_transform=target_transform,
+            target_transform_params={},
+            n_jobs=-1,
+            verbose=0,
+            show_progress=False,
+        )
+
+        return surrogate_clone
+
     def compute_cv_score(
         self, X, y, regressor="pce", target_transform=None, scoring="r2"
     ):

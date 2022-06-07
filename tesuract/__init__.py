@@ -5,10 +5,18 @@ from .pce import PCEReg
 from .quadrature import QuadGen
 import tesuract.preprocessing
 import tesuract.utils
+
 # import tesuract.mpce
-from .pce_multitarget_regression import RegressionWrapperCV, MRegressionWrapperCV, MPCEReg
+from .pce_multitarget_regression import (
+    RegressionWrapperCV,
+    MRegressionWrapperCV,
+    MPCEReg,
+)
 import tesuract.experimental
 
 from pkg_resources import get_distribution
 
-__version__ = get_distribution('tesuract').version
+try:
+    __version__ = get_distribution("tesuract").version
+except:
+    print("Install package then run.")
